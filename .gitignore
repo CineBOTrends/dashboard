@@ -1,0 +1,6 @@
+# data/ is pushed by the collector's GitHub Action (do not commit here)
+data/
+data-public/
+__pycache__/
+*.pyc
+.DS_Store
