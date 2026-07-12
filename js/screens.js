@@ -1794,10 +1794,20 @@
     btn.disabled = true;
     if (label) label.textContent = "Saving…";
 
-    const card = buildExportCard(section, sectionTitle);
-    document.body.appendChild(card);
+    // EVERYTHING goes inside the try. Building the card outside it meant a throw
+    // there skipped the catch entirely: the sheet just sat on "Preparing image…"
+    // forever with the rejection swallowed.
+    let card = null;
+    // hard watchdog: no matter what happens below, the sheet never hangs
+    const watchdog = setTimeout(() => {
+      if (prog) prog.fail("timed out with no response from the renderer");
+    }, 35000);
+
     try {
-      await withTimeout(ensureLib(), 15000, "loading the renderer");
+      card = buildExportCard(section, sectionTitle);
+      document.body.appendChild(card);
+
+      await withTimeout(ensureLib(), 10000, "loading the renderer");
 
       const bg = (
         getComputedStyle(document.body).getPropertyValue("--bg") || "#0E0C09"
@@ -1826,7 +1836,7 @@
           // the whole render.
           imagePlaceholder: TRANSPARENT_PX,
         }),
-        45000,
+        25000,
         "rendering",
       );
       if (!dataUrl || dataUrl.length < 2000)
@@ -1855,7 +1865,8 @@
         if (label) label.textContent = was;
       }, 2200);
     } finally {
-      card.remove();
+      clearTimeout(watchdog);
+      if (card) card.remove();
       btn.disabled = false;
     }
   }
@@ -1871,7 +1882,12 @@
         onclick: (e) => {
           const btn = e.currentTarget;
           const node = btn.closest(".block, .bd-panel");
-          if (node) downloadSection(node, section, name, btn);
+          if (node)
+            downloadSection(node, section, name, btn).catch((err) => {
+              console.error(err);
+              errSheet((err && err.message) || String(err));
+              btn.disabled = false;
+            });
         },
       },
       icon("download"),
