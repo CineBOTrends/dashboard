@@ -1036,7 +1036,8 @@
       const metaDate =
         date || latest(mode === "advance" ? c.advDates : c.dayDates);
       let movie = null,
-        hist = null;
+        hist = null,
+        staleDate = null;
       if (tab === "historical") {
         try {
           hist = await Data.history(mode, slug);
@@ -1061,11 +1062,25 @@
           }
         }
       } else if (dates.length) {
-        try {
-          movie = await Data.movie(mode, date, slug);
-        } catch (e) {
-          movie = null;
+        // `dates` is the GLOBAL list for the mode. A movie may not appear in the
+        // newest file yet (today's run hasn't picked it up, or tracking stopped),
+        // which used to render "Not tracked" even though earlier days exist.
+        // Walk backwards to the most recent date this movie is actually in.
+        const wanted = date;
+        const from = Math.max(dates.indexOf(wanted), 0);
+        for (let i = from; i >= 0 && !movie; i--) {
+          try {
+            const mv = await Data.movie(mode, dates[i], slug);
+            if (mv) {
+              movie = mv;
+              date = dates[i];
+            }
+          } catch (e) {
+            /* not in this day's file — keep walking back */
+          }
         }
+        // flag it so the UI can say "today isn't in yet, showing <date>"
+        if (movie && date !== wanted) staleDate = wanted;
       } else {
         try {
           movie = await Data.movie(
@@ -1089,6 +1104,7 @@
         cityName,
         movie,
         hist,
+        staleDate,
       });
     } catch (e) {
       console.error(e);
@@ -1300,8 +1316,26 @@
 
   /* ---- Advance / Daily tab ---- */
   function renderTrackTab(body, s, movie) {
-    const { slug, tab, date, dates, stateName, cityName } = s;
+    const { slug, tab, date, dates, stateName, cityName, staleDate } = s;
     const parts = [];
+
+    // showing an older day because the newest one has no data for this movie yet
+    if (staleDate && !stateName)
+      parts.push(
+        h(
+          "div",
+          { class: "stale-note" },
+          icon("time-past"),
+          h(
+            "span",
+            null,
+            (tab === "daily" ? "Today" : fmtDate(staleDate)) +
+              " hasn't been tracked yet — showing the last tracked day, " +
+              fmtDate(date) +
+              ".",
+          ),
+        ),
+      );
 
     // ---- day / advance chips (Day 1 · 10 Jul · FRI) ----
     if (dates.length) parts.push(dayChips(s, movie));
@@ -1652,18 +1686,11 @@
     return svg;
   }
 
-  function summaryChip(kind, label, val) {
-    return h(
-      "span",
-      { class: "exp-chip" },
-      expIcon(kind),
-      h(
-        "span",
-        { class: "exp-chip-t" },
-        h("i", null, label),
-        h("b", null, val),
-      ),
-    );
+  // Now that the uicons face is served same-origin, dom-to-image can inline it,
+  // so the export uses the SAME icons as the live UI. (expIcon() below is kept
+  // as a font-free fallback.)
+  function summaryChip(kind, val) {
+    return h("span", { class: "exp-chip" }, icon(kind), h("b", null, val));
   }
 
   // dom-to-image fetches <img> src itself and swaps in the placeholder when that
@@ -1734,9 +1761,9 @@
           ? h(
               "div",
               { class: "exp-chips" },
-              summaryChip("gross", "Gross", inr(k.gross)),
-              summaryChip("tickets", "Tickets", num(k.sold)),
-              summaryChip("shows", "Shows", num(k.shows)),
+              summaryChip("money-bill-wave", inr(k.gross)),
+              summaryChip("ticket", num(k.sold)),
+              summaryChip("clapperboard-play", num(k.shows)),
             )
           : null,
         h("div", { class: "exp-body" }, clone),
@@ -2072,9 +2099,15 @@
             ),
         },
         h("td", { class: "rank" + (i < 3 ? " top" : "") }, i + 1),
-        h("td", null, h("div", { class: "city-nm" }, ct.city)),
-        showState !== false ? h("td", { class: "sub-cell" }, ct.state) : null,
+        h(
+          "td",
+          null,
+          h("div", { class: "city-nm" }, ct.city),
+          // state sits under the city name, not in its own column
+          showState !== false ? h("div", { class: "sub" }, ct.state) : null,
+        ),
         h("td", { class: "gross-cell gold" }, inr(ct.gross)),
+        h("td", { class: "num" }, num(ct.shows)),
         h("td", { class: "occ-cell" }, occMeter(ct.occupancy)),
         h("td", { class: "num" }, num(ct.sold)),
       ),
@@ -2084,7 +2117,7 @@
       { class: "table-wrap" },
       h(
         "table",
-        { class: "bo" },
+        { class: "bo cities" },
         h(
           "thead",
           null,
@@ -2093,8 +2126,8 @@
             null,
             h("th", null, "#"),
             h("th", null, "City"),
-            showState !== false ? h("th", null, "State") : null,
             h("th", { class: "gross-cell" }, "Gross"),
+            h("th", { class: "num" }, "Shows"),
             h("th", { class: "occ-cell" }, "Occupancy"),
             h("th", { class: "num" }, "Sold"),
           ),
@@ -2182,7 +2215,7 @@
       block(
         "Top Cities",
         "Tap a city for theatre-level detail",
-        citiesTable(cities, slug, tab, date, false),
+        citiesTable(cities, slug, tab, date, true),
       ),
     );
   }
@@ -2496,6 +2529,51 @@
     );
   }
 
+  // Mirrors citiesTable() (# / city + state beneath / gross / shows / occ / sold)
+  // but static — history rows have no single date to drill into.
+  function histCitiesTable(cities) {
+    const rows = (cities || []).map((c, i) =>
+      h(
+        "tr",
+        null,
+        h("td", { class: "rank" + (i < 3 ? " top" : "") }, i + 1),
+        h(
+          "td",
+          null,
+          h("div", { class: "city-nm" }, c.city),
+          c.state ? h("div", { class: "sub" }, c.state) : null,
+        ),
+        h("td", { class: "gross-cell gold" }, inr(c.gross)),
+        h("td", { class: "num" }, num(c.shows)),
+        h("td", { class: "occ-cell" }, occMeter(c.occupancy)),
+        h("td", { class: "num" }, num(c.sold)),
+      ),
+    );
+    return h(
+      "div",
+      { class: "table-wrap" },
+      h(
+        "table",
+        { class: "bo cities" },
+        h(
+          "thead",
+          null,
+          h(
+            "tr",
+            null,
+            h("th", null, "#"),
+            h("th", null, "City"),
+            h("th", { class: "gross-cell" }, "Gross"),
+            h("th", { class: "num" }, "Shows"),
+            h("th", { class: "occ-cell" }, "Occupancy"),
+            h("th", { class: "num" }, "Sold"),
+          ),
+        ),
+        h("tbody", null, ...rows),
+      ),
+    );
+  }
+
   function renderHistorical(body, hist, title) {
     if (!hist)
       return body.replaceChildren(
@@ -2597,23 +2675,12 @@
       : "Live snapshot" +
         (t.live ? " · day " + t.live.day + " in progress" : "");
 
-    // Table 2 — city-wise
+    // Table 2 — city-wise (same shape as Top 20 Cities: state under the city name)
     parts.push(
       block(
         "City-wise Performance",
         scope + " · top cities by gross",
-        simpleTable(
-          ["City", "State", "Gross", "Tickets", "Shows", "Avg Occupancy"],
-          hist.cities.map((c) => [
-            c.city,
-            c.state,
-            inr(c.gross),
-            num(c.sold),
-            num(c.shows),
-            occMeter(c.occupancy),
-          ]),
-          [0, 0, 1, 1, 1, 2],
-        ),
+        histCitiesTable(hist.cities),
       ),
     );
 

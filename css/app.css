@@ -804,12 +804,17 @@ table.bo tbody tr:has(.totcell) {
 }
 .exp-meta { margin-top: 8px; font-family: var(--mono); font-size: 13px; color: var(--muted); }
 
-.exp-chips { display: flex; align-items: center; gap: 26px; margin: 20px 0 6px; }
-.exp-chip { display: inline-flex; align-items: center; gap: 9px; }
-.exp-chip i { font-size: 16px; color: var(--brand); line-height: 1; }
-.exp-chip b {
-  font-family: var(--mono); font-weight: 700; font-size: 20px; color: var(--ink);
+.exp-chips { display: flex; align-items: center; gap: 32px; margin: 22px 0 6px; }
+.exp-chip { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.exp-chip > svg, .exp-chip > i.fi {
+  flex: 0 0 auto; color: var(--brand); font-size: 20px; line-height: 1;
 }
+.exp-chip b {
+  font-family: var(--mono); font-weight: 700; font-size: 21px; color: var(--ink);
+  white-space: nowrap;              /* "₹1.87 Cr" must never wrap onto two lines */
+  line-height: 1.15;
+}
+.exp-chip:first-child b { color: var(--brand); }
 
 /* the cloned section inside the card */
 .exp-body { margin-top: 18px; }
@@ -887,9 +892,9 @@ table.bo td.sub-cell { color: var(--ink-2); white-space: nowrap; }
 table.bo .gross-cell {
   text-align: left; white-space: nowrap;
   font-family: var(--mono); font-variant-numeric: tabular-nums;
-  width: 14%;                       /* shrink-to-fit, no trailing gap */
+  width: 1%;                       /* shrink-to-fit, no trailing gap */
 }
-table.bo .occ-cell { width: 10%; }  /* absorbs the leftover table width */
+table.bo .occ-cell { width: 34%; }  /* absorbs the leftover table width */
 
 /* --- iOS save sheet (only rendered on iPhone/iPad) --- */
 .dlm {
@@ -923,3 +928,50 @@ table.bo .occ-cell { width: 10%; }  /* absorbs the leftover table width */
 }
 .dl-btn.on-head { z-index: 6; }
 .block-hd { position: relative; z-index: 5; }
+
+/* ============================================================
+   Self-hosted uicons face.
+   The CDN stylesheet (still linked) supplies the .fi-rr-* codepoint
+   mappings; this @font-face comes LATER in the cascade and so wins,
+   pointing the same family at a same-origin file.
+   Why it matters: cdn-uicons.flaticon.com serves no CORS headers, so
+   dom-to-image cannot inline the font and every glyph rasterised as
+   tofu in the exported PNG. A local file has no such problem.
+   Uicons by Flaticon - https://www.flaticon.com/uicons (attribution required)
+   ============================================================ */
+@font-face {
+  font-family: "uicons-regular-rounded";
+  src: url("../fonts/uicons-regular-rounded.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+/* "today isn't tracked yet — showing the last tracked day" */
+.stale-note {
+  display: flex; align-items: center; gap: 9px;
+  margin: 0 0 16px; padding: 10px 14px;
+  background: var(--brand-soft); border: 1px solid var(--brand-line);
+  border-radius: var(--r-sm);
+  font-size: 13px; color: var(--ink-2);
+}
+.stale-note i { color: var(--brand); font-size: 14px; line-height: 1; }
+
+/* --- cities tables: fixed columns so City can't hog the free width --- */
+table.bo.cities { table-layout: fixed; }
+table.bo.cities th:nth-child(1), table.bo.cities td:nth-child(1) { width: 54px; }   /* # */
+table.bo.cities th:nth-child(2), table.bo.cities td:nth-child(2) { width: 26%; }    /* city + state */
+table.bo.cities th:nth-child(3), table.bo.cities td:nth-child(3) { width: 15%; }    /* gross */
+table.bo.cities th:nth-child(4), table.bo.cities td:nth-child(4) { width: 11%; }    /* shows */
+table.bo.cities th:nth-child(5), table.bo.cities td:nth-child(5) { width: 28%; }    /* occupancy */
+table.bo.cities th:nth-child(6), table.bo.cities td:nth-child(6) { width: 14%; }    /* sold */
+table.bo.cities .city-nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+table.bo.cities .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* fixed layout ignores width:1%, so restate gross as a normal left cell */
+table.bo.cities .gross-cell { width: 15%; }
+
+/* breathing room between the right-aligned Shows figure and the occupancy bar */
+table.bo.cities th:nth-child(5),
+table.bo.cities td:nth-child(5) { padding-left: 100px; }
+table.bo.cities th:nth-child(4),
+table.bo.cities td:nth-child(4) { padding-right: 4px; }
