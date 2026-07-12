@@ -237,36 +237,21 @@
     );
 
     // ---- Live tracking strip ----
-    // Unreleased titles on advance sale lead the strip (Advance Tracking badge).
-    // Once a title's release date arrives it is live: its Advance badge is
-    // dropped and it appears once under the daily feed with the Live Tracking
-    // badge. Films already running show the Live Tracking badge.
-    const liveSlugs = new Set(
-      (daily && daily.movies ? daily.movies : []).map((mv) => mv.slug),
-    );
-    const advTop =
-      advNat && advNat.movies && advNat.movies.length
-        ? advNat.movies
-            .filter((mv) => isPreRelease(mv) && !liveSlugs.has(mv.slug))
-            .slice()
-            .sort((a, b) => b.gross - a.gross)
-            .slice(0, 3)
-        : [];
-    const advSlugs = new Set(advTop.map((mv) => mv.slug));
+    // LIVE = what is actually playing and being tracked today (daily feed only).
+    // Advance / pre-sale titles are deliberately NOT shown here: an advance
+    // number is a forward-looking booking snapshot for a future date, not live
+    // box office, so mixing it in would misrepresent what is "live".
     const dayTop =
       daily && daily.movies && daily.movies.length
         ? daily.movies
-            .filter((mv) => !advSlugs.has(mv.slug))
             .slice()
             .sort((a, b) => b.gross - a.gross)
-            .slice(0, 5)
+            .slice(0, 8)
         : [];
     let liveSection = null;
-    if (advTop.length || dayTop.length) {
+    if (dayTop.length) {
       const updated =
-        (daily && daily.last_updated) ||
-        (advNat && advNat.last_updated) ||
-        fmtDate(dailyDate || advDate);
+        (daily && daily.last_updated) || fmtDate(dailyDate);
       liveSection = h(
         "section",
         { class: "section", id: "live" },
@@ -291,9 +276,6 @@
           h(
             "div",
             { class: "movie-grid" },
-            ...advTop.map((mv) =>
-              movieCard(mv, "advance", advDate, { live: true, advance: true }),
-            ),
             ...dayTop.map((mv) =>
               movieCard(mv, "daily", dailyDate, { live: true }),
             ),
