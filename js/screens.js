@@ -33,6 +33,13 @@
   } = CBO;
 
   const S = CBO.Screens;
+
+  // The "daily" feed is presented as TODAY everywhere in the UI. The token
+  // itself stays "daily" (routes, data paths, manifest keys).
+  const modeLabel = (c, mode) =>
+    mode === "daily"
+      ? "Today"
+      : (c && c.m && c.m.modes[mode] && c.m.modes[mode].label) || "Advance";
   const FORMAT_ORDER = [
     "2D",
     "3D",
@@ -498,8 +505,8 @@
                 (advNat && daily
                   ? "Advance + Live"
                   : daily
-                    ? c.m.modes.daily.label
-                    : c.m.modes.advance.label),
+                    ? modeLabel(c, "daily")
+                    : modeLabel(c, "advance")),
             ),
             h("h2", null, "All Movies"),
           ),
@@ -1160,11 +1167,7 @@
       h(
         "div",
         { class: "mh-info" },
-        h(
-          "div",
-          { class: "eyebrow" },
-          c.m.modes[mode] ? c.m.modes[mode].label + " · India" : "India",
-        ),
+        h("div", { class: "eyebrow" }, modeLabel(c, mode) + " · India"),
         h("h1", null, title),
         h(
           "div",
@@ -1221,7 +1224,7 @@
       "div",
       { class: "tabs" },
       mkTab("advance", "Advance"),
-      mkTab("daily", "Daily"),
+      mkTab("daily", "Today"),
       mkTab("historical", "Historical"),
     );
 
@@ -1232,7 +1235,7 @@
         : !date
           ? tab === "advance"
             ? "Advance"
-            : "Daily"
+            : "Today"
           : tab === "advance"
             ? "Advance " + ymdShort(date)
             : "Day " + dayNumber(date, dates, movie);
@@ -1276,9 +1279,10 @@
       return body.replaceChildren(
         stateMsg(
           "calendar",
-          (mode === "daily" ? "Daily" : "Advance") + " tracking hasn't started",
+          (mode === "daily" ? "Today's" : "Advance") +
+            " tracking hasn't started",
           mode === "daily"
-            ? "Daily collections appear here once the collector runs in daily mode."
+            ? "Today's collections appear here once the collector runs in daily mode."
             : "No advance data is available yet.",
         ),
       );
@@ -1660,6 +1664,46 @@
     );
   }
 
+  // iOS Safari ignores <a download> for blobs, so the desktop path silently
+  // does nothing on a phone. Prefer the native share sheet (Save Image lives
+  // there), then fall back to the anchor, then to opening the PNG in a tab.
+  async function saveBlob(blob, name) {
+    const file =
+      typeof File === "function"
+        ? new File([blob], name, { type: "image/png" })
+        : null;
+
+    if (
+      file &&
+      navigator.canShare &&
+      navigator.canShare({ files: [file] }) &&
+      navigator.share
+    ) {
+      try {
+        await navigator.share({ files: [file], title: name });
+        return;
+      } catch (e) {
+        if (e && e.name === "AbortError") return; // user dismissed the sheet
+        // otherwise fall through to the download paths
+      }
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const canDownload = "download" in a;
+    if (canDownload) {
+      a.href = url;
+      a.download = name;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } else {
+      window.open(url, "_blank");
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+
   async function downloadSection(section, sectionTitle, name, btn) {
     const label = btn.querySelector(".dl-label");
     const was = label ? label.textContent : "";
@@ -1689,20 +1733,9 @@
         useCORS: true,
         logging: false,
       });
-      await new Promise((res) =>
-        canvas.toBlob((blob) => {
-          if (!blob) return res();
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = name;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          setTimeout(() => URL.revokeObjectURL(url), 4000);
-          res();
-        }, "image/png"),
-      );
+      const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
+      if (!blob) throw new Error("canvas produced no image");
+      await saveBlob(blob, name);
       if (label) label.textContent = was;
     } catch (e) {
       console.error(e);
@@ -1766,16 +1799,11 @@
             ),
         },
         h("td", { class: "rank" + (i < 3 ? " top" : "") }, i + 1),
-        h(
-          "td",
-          null,
-          h("div", { class: "city-nm" }, ct.city),
-          showState !== false ? h("div", { class: "sub" }, ct.state) : null,
-        ),
+        h("td", null, h("div", { class: "city-nm" }, ct.city)),
+        showState !== false ? h("td", { class: "sub-cell" }, ct.state) : null,
+        h("td", { class: "gross-cell gold" }, inr(ct.gross)),
+        h("td", { class: "occ-cell" }, occMeter(ct.occupancy)),
         h("td", { class: "num" }, num(ct.sold)),
-        h("td", { class: "num" }, num(ct.shows)),
-        h("td", { class: "num gold" }, inr(ct.gross)),
-        h("td", null, occMeter(ct.occupancy)),
       ),
     );
     return h(
@@ -1792,10 +1820,10 @@
             null,
             h("th", null, "#"),
             h("th", null, "City"),
+            showState !== false ? h("th", null, "State") : null,
+            h("th", { class: "gross-cell" }, "Gross"),
+            h("th", { class: "occ-cell" }, "Occupancy"),
             h("th", { class: "num" }, "Sold"),
-            h("th", { class: "num" }, "Shows"),
-            h("th", { class: "num" }, "Gross"),
-            h("th", null, "Occupancy"),
           ),
         ),
         h("tbody", null, ...rows),

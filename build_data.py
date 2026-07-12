@@ -31,7 +31,7 @@ from collections import defaultdict
 MODES = {
     "advance": {"label": "Advance", "runsPerDay": 6,
                 "runTimes": ["08:45", "11:45", "14:45", "17:45", "20:45", "23:30"]},
-    "daily":   {"label": "Daily", "runsPerDay": 13,
+    "daily":   {"label": "Today", "runsPerDay": 13,
                 "runTimes": ["03:00", "05:00", "07:00", "08:00", "10:00", "11:00",
                              "13:00", "14:00", "16:00", "17:00", "19:00", "20:00", "22:00"]},
 }

@@ -876,3 +876,14 @@ table.bo td .occ .pct { flex: 0 0 auto; }
 /* the export card is fixed-width — never scroll or clamp there */
 .exp-body .table-wrap { overflow: visible; }
 .exp-body table.bo { min-width: 0; }
+
+/* state as its own column in the cities table */
+table.bo td.sub-cell { color: var(--ink-2); white-space: nowrap; }
+
+/* cities table: gross sits left, next to state; occupancy takes the slack */
+table.bo .gross-cell {
+  text-align: left; white-space: nowrap;
+  font-family: var(--mono); font-variant-numeric: tabular-nums;
+  width: 20%;                       /* shrink-to-fit, no trailing gap */
+}
+table.bo .occ-cell { width: 14%; }  /* absorbs the leftover table width */
