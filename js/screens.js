@@ -1579,6 +1579,9 @@
   // every asset, and on iOS it never resolves ("rendering timed out"). This
   // library serialises into an SVG <foreignObject>, inlines fonts/images itself,
   // and returns a PNG data URL. (Same renderer tracktollywood uses.)
+  const TRANSPARENT_PX =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
   let libLoad = null;
   function ensureLib() {
     if (window.domtoimage) return Promise.resolve();
@@ -1586,7 +1589,7 @@
     libLoad = new Promise((res, rej) => {
       const sc = document.createElement("script");
       sc.src =
-        "https://cdn.jsdelivr.net/npm/dom-to-image-more@3.6.0/dist/dom-to-image-more.min.js";
+        "https://cdn.jsdelivr.net/npm/dom-to-image-more@3.10.0/dist/dom-to-image-more.min.js";
       sc.onload = () => res();
       sc.onerror = () => {
         libLoad = null;
@@ -1817,7 +1820,11 @@
             transform: "scale(" + scale + ")",
             transformOrigin: "top left",
           },
-          cacheBust: true,
+          // NO cacheBust: it appends ?t=… to every URL, which corrupts the
+          // data: URI watermark tile. And a failed image THROWS unless a
+          // placeholder is supplied — a cross-origin icon font must not kill
+          // the whole render.
+          imagePlaceholder: TRANSPARENT_PX,
         }),
         45000,
         "rendering",
