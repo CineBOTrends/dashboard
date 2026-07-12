@@ -764,7 +764,7 @@ table.bo tbody tr:has(.totcell) {
    PNG export card (lives offscreen; never seen in the UI)
    ============================================================ */
 .exp-card {
-  position: fixed; left: -20000px; top: 0; z-index: -1;
+  position: absolute; left: -20000px; top: 0; z-index: -1;
   width: 1180px; padding: 0; overflow: hidden;
   background: var(--bg);
   border: 1px solid var(--line-2); border-radius: var(--r);
@@ -884,9 +884,9 @@ table.bo td.sub-cell { color: var(--ink-2); white-space: nowrap; }
 table.bo .gross-cell {
   text-align: left; white-space: nowrap;
   font-family: var(--mono); font-variant-numeric: tabular-nums;
-  width: 14%;                       /* shrink-to-fit, no trailing gap */
+  width: 1%;                       /* shrink-to-fit, no trailing gap */
 }
-table.bo .occ-cell { width: 10%; }  /* absorbs the leftover table width */
+table.bo .occ-cell { width: 34%; }  /* absorbs the leftover table width */
 
 /* --- iOS save sheet (only rendered on iPhone/iPad) --- */
 .dlm {
@@ -910,3 +910,13 @@ table.bo .occ-cell { width: 10%; }  /* absorbs the leftover table width */
   border: 1px solid var(--line-2); border-radius: 999px;
 }
 .dlm-btn.primary { background: var(--brand); border-color: var(--brand); color: #17130B; }
+
+/* download button must win the tap on touch devices */
+.dl-btn {
+  position: relative; z-index: 5;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(233,176,45,.25);
+  min-height: 40px;                 /* real tap target */
+}
+.dl-btn.on-head { z-index: 6; }
+.block-hd { position: relative; z-index: 5; }

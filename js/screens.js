@@ -1765,6 +1765,34 @@
     document.body.appendChild(sheet);
   }
 
+  // Opens synchronously on tap. Proves the handler fired, and gives a hang
+  // somewhere to show itself instead of looking like a dead button (on mobile
+  // the button's text label is hidden, so it can't report state on its own).
+  function progressSheet() {
+    const msg = h("p", { class: "dlm-hint" }, "Preparing image…");
+    const box = h("div", { class: "dlm-box" }, msg);
+    const sheet = h("div", { class: "dlm" }, box);
+    document.body.appendChild(sheet);
+    return {
+      sheet,
+      fail(text) {
+        msg.textContent = "Couldn't build the image: " + text;
+        box.appendChild(
+          h(
+            "div",
+            { class: "dlm-row", style: "margin-top:12px" },
+            h(
+              "button",
+              { class: "dlm-btn primary", onclick: () => sheet.remove() },
+              "Close",
+            ),
+          ),
+        );
+      },
+      done: () => sheet.remove(),
+    };
+  }
+
   function errSheet(msg) {
     const sheet = h(
       "div",
@@ -1787,32 +1815,47 @@
     document.body.appendChild(sheet);
   }
 
+  const withTimeout = (p, ms, what) =>
+    Promise.race([
+      p,
+      new Promise((_, rej) =>
+        setTimeout(() => rej(new Error(what + " timed out")), ms),
+      ),
+    ]);
+
   async function downloadSection(section, sectionTitle, name, btn) {
     const label = btn.querySelector(".dl-label");
     const was = label ? label.textContent : "";
+    const touch = isIOS() || window.matchMedia("(max-width: 760px)").matches;
+    // on a phone the button label is hidden, so state has to live in a sheet
+    const prog = touch ? progressSheet() : null;
+
     btn.disabled = true;
     if (label) label.textContent = "Saving…";
 
     const card = buildExportCard(section, sectionTitle);
     document.body.appendChild(card);
     try {
-      await ensureH2C();
-      // let the logo decode first, or it rasterises blank
-      await Promise.all(
-        [...card.querySelectorAll("img")].map((im) =>
-          im.complete
-            ? Promise.resolve()
-            : new Promise((r) => {
-                im.onload = im.onerror = r;
-              }),
+      await withTimeout(ensureH2C(), 15000, "loading the renderer");
+
+      await withTimeout(
+        Promise.all(
+          [...card.querySelectorAll("img")].map((im) =>
+            im.complete
+              ? Promise.resolve()
+              : new Promise((r) => {
+                  im.onload = im.onerror = r;
+                }),
+          ),
         ),
+        8000,
+        "loading the logo",
       );
 
-      // iOS caps canvas memory hard; a tall table at scale 2 silently returns a
-      // blank/failed canvas. Clamp so w*h stays well under the limit.
+      // iOS caps canvas memory hard; a tall table at scale 2 comes back blank.
       const w = card.offsetWidth || 1180;
       const hgt = card.offsetHeight || 800;
-      const cap = isIOS() ? 12e6 : 3e7; // px after scaling
+      const cap = isIOS() ? 12e6 : 3e7;
       let scale = isIOS() ? 1.6 : 2;
       if (w * hgt * scale * scale > cap)
         scale = Math.max(1, Math.sqrt(cap / (w * hgt)));
@@ -1820,16 +1863,20 @@
       const bg = (
         getComputedStyle(document.body).getPropertyValue("--bg") || "#0E0C09"
       ).trim();
-      const canvas = await window.html2canvas(card, {
-        backgroundColor: bg,
-        scale,
-        useCORS: true,
-        logging: false,
-      });
+      const canvas = await withTimeout(
+        window.html2canvas(card, {
+          backgroundColor: bg,
+          scale,
+          useCORS: true,
+          logging: false,
+        }),
+        30000,
+        "rendering",
+      );
       if (!canvas || !canvas.width) throw new Error("empty canvas");
 
       if (isIOS()) {
-        // data: URL — iOS will not offer "Save Image" on a blob: URL
+        if (prog) prog.done();
         iosSheet(canvas.toDataURL("image/png"), name);
       } else {
         const blob = await new Promise((res) =>
@@ -1839,12 +1886,15 @@
         const url = URL.createObjectURL(blob);
         anchorDownload(url, name);
         setTimeout(() => URL.revokeObjectURL(url), 60000);
+        if (prog) prog.done();
       }
       if (label) label.textContent = was;
     } catch (e) {
       console.error(e);
+      const msg = (e && e.message) || String(e);
+      if (prog) prog.fail(msg);
+      else errSheet(msg);
       if (label) label.textContent = "Failed";
-      errSheet((e && e.message) || String(e));
       setTimeout(() => {
         if (label) label.textContent = was;
       }, 2200);
