@@ -829,7 +829,10 @@ table.bo tbody tr:has(.totcell) {
    font: site sans (SVG can't inherit, so the stack is spelled out) @ 14px
    ============================================================ */
 :root {
-  --wm-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='230' height='150'%3E%3Ctext x='115' y='75' fill='%23F0ECE4' fill-opacity='0.05' font-family='Hanken Grotesk,ui-sans-serif,system-ui,Helvetica,Arial,sans-serif' font-size='14' font-weight='700' letter-spacing='2' text-anchor='middle' transform='rotate(-22 115 75)'%3ECINEBOTRENDS%3C/text%3E%3C/svg%3E");
+  /* base64, not raw utf8: WebKit will not reliably load an SVG data URI
+     containing unencoded spaces/quotes -- it fires neither load nor error,
+     which hangs html2canvas forever on iOS. */
+  --wm-tile: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMzAnIGhlaWdodD0nMTUwJz48dGV4dCB4PScxMTUnIHk9Jzc1JyBmaWxsPScjRjBFQ0U0JyBmaWxsLW9wYWNpdHk9JzAuMDUnIGZvbnQtZmFtaWx5PSdIYW5rZW4gR3JvdGVzayxIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZicgZm9udC1zaXplPScxNCcgZm9udC13ZWlnaHQ9JzcwMCcgbGV0dGVyLXNwYWNpbmc9JzInIHRleHQtYW5jaG9yPSdtaWRkbGUnIHRyYW5zZm9ybT0ncm90YXRlKC0yMiAxMTUgNzUpJz5DSU5FQk9UUkVORFM8L3RleHQ+PC9zdmc+");
 }
 
 /* every container that carries tracked numbers */
@@ -884,9 +887,9 @@ table.bo td.sub-cell { color: var(--ink-2); white-space: nowrap; }
 table.bo .gross-cell {
   text-align: left; white-space: nowrap;
   font-family: var(--mono); font-variant-numeric: tabular-nums;
-  width: 1%;                       /* shrink-to-fit, no trailing gap */
+  width: 14%;                       /* shrink-to-fit, no trailing gap */
 }
-table.bo .occ-cell { width: 34%; }  /* absorbs the leftover table width */
+table.bo .occ-cell { width: 10%; }  /* absorbs the leftover table width */
 
 /* --- iOS save sheet (only rendered on iPhone/iPad) --- */
 .dlm {

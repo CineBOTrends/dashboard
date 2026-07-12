@@ -1869,6 +1869,8 @@
           scale,
           useCORS: true,
           logging: false,
+          // never block the whole render on one slow/undecodable asset
+          imageTimeout: 5000,
         }),
         30000,
         "rendering",
