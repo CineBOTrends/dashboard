@@ -424,7 +424,12 @@ button { font-family: inherit; }
 .block > .hint { font-size: 12.5px; color: var(--muted); margin: 0 0 16px; }
 
 /* tables */
-.table-wrap { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--panel); }
+.table-wrap {
+  border: 1px solid var(--line); border-radius: var(--r); background: var(--panel);
+  overflow-x: auto; overflow-y: hidden;   /* horizontal scroll on narrow screens */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
 table.bo { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 table.bo thead th {
   text-align: left; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
@@ -812,7 +817,7 @@ table.bo tbody tr:has(.totcell) {
 .exp-body .table-wrap { overflow: visible; max-height: none; }
 .exp-body table.bo { width: 100%; }
 .exp-body .bd-panel { border: 0; background: transparent; }
-.exp-body .bd-body { max-height: none !important; opacity: 0.05 !important; padding: 0; }
+.exp-body .bd-body { max-height: none !important; opacity: 1 !important; padding: 0; }
 
 
 
@@ -824,7 +829,7 @@ table.bo tbody tr:has(.totcell) {
    font: site sans (SVG can't inherit, so the stack is spelled out) @ 14px
    ============================================================ */
 :root {
-  --wm-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='230' height='150'%3E%3Ctext x='115' y='75' fill='%23F0ECE4' fill-opacity='0.04' font-family='inherit' font-size='14' font-weight='700' letter-spacing='2' text-anchor='middle' transform='rotate(-22 115 75)'%3ECINEBOTRENDS%3C/text%3E%3C/svg%3E");
+  --wm-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='230' height='150'%3E%3Ctext x='115' y='75' fill='%23F0ECE4' fill-opacity='0.05' font-family='Hanken Grotesk,ui-sans-serif,system-ui,Helvetica,Arial,sans-serif' font-size='14' font-weight='700' letter-spacing='2' text-anchor='middle' transform='rotate(-22 115 75)'%3ECINEBOTRENDS%3C/text%3E%3C/svg%3E");
 }
 
 /* every container that carries tracked numbers */
@@ -851,3 +856,23 @@ table.bo tbody tr:has(.totcell) {
   color: rgba(240, 236, 228, .38);
 }
 .exp-wm b { color: rgba(233, 176, 45, .62); font-weight: 700; }
+
+/* --- occupancy column: stretch the meter into the trailing gap --- */
+table.bo td .occ { display: flex; width: 100%; align-items: center; gap: 10px; }
+table.bo td .occ .bar { flex: 1 1 auto; width: auto; min-width: 56px; }
+table.bo td .occ .pct { flex: 0 0 auto; }
+
+/* --- mobile: let wide tables scroll sideways instead of crushing --- */
+@media (max-width: 760px) {
+  table.bo { min-width: 660px; }              /* forces the scroll, keeps columns readable */
+  table.bo tbody td, table.bo thead th { padding: 10px 12px; }
+  table.bo td .occ .bar { min-width: 44px; }
+  .table-wrap { scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+  .table-wrap::-webkit-scrollbar { height: 6px; }
+  .table-wrap::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 999px; }
+  .table-wrap::-webkit-scrollbar-track { background: transparent; }
+}
+
+/* the export card is fixed-width — never scroll or clamp there */
+.exp-body .table-wrap { overflow: visible; }
+.exp-body table.bo { min-width: 0; }
