@@ -61,7 +61,12 @@
     const bySlug = new Map();
     if (advNat && advNat.movies)
       for (const mv of advNat.movies)
-        bySlug.set(mv.slug, { mv, mode: "advance", date: advDate, live: false });
+        bySlug.set(mv.slug, {
+          mv,
+          mode: "advance",
+          date: advDate,
+          live: false,
+        });
     if (daily && daily.movies)
       for (const mv of daily.movies)
         bySlug.set(mv.slug, { mv, mode: "daily", date: dailyDate, live: true });
@@ -73,7 +78,8 @@
   // Tracking badge instead. If the release date is unknown we keep the advance
   // treatment (the movie is, after all, still in the advance/pre-sale feed).
   function isPreRelease(mv) {
-    const rd = (mv && (mv.releaseDate || (mv.meta && mv.meta.releaseDate))) || "";
+    const rd =
+      (mv && (mv.releaseDate || (mv.meta && mv.meta.releaseDate))) || "";
     const m = String(rd).match(/(\d{4})-(\d{2})-(\d{2})/);
     if (!m) return true;
     const release = new Date(+m[1], +m[2] - 1, +m[3]);
@@ -250,8 +256,7 @@
         : [];
     let liveSection = null;
     if (dayTop.length) {
-      const updated =
-        (daily && daily.last_updated) || fmtDate(dailyDate);
+      const updated = (daily && daily.last_updated) || fmtDate(dailyDate);
       liveSection = h(
         "section",
         { class: "section", id: "live" },
@@ -417,7 +422,9 @@
         return;
       }
       grid.replaceChildren(
-        ...list.map((e) => movieCard(e.mv, e.mode, e.date, { advance: !e.live })),
+        ...list.map((e) =>
+          movieCard(e.mv, e.mode, e.date, { advance: !e.live }),
+        ),
       );
     }
 
@@ -1245,25 +1252,8 @@
     const { slug, tab, date, dates, stateName, cityName } = s;
     const parts = [];
 
-    // date chips
-    if (dates.length > 1) {
-      parts.push(
-        h(
-          "div",
-          { class: "dates" },
-          ...dates.map((d) =>
-            h(
-              "button",
-              {
-                class: "datechip" + (d === date ? " on" : ""),
-                onclick: () => go(`/movie/${enc(slug)}/${tab}/${d}`),
-              },
-              fmtDate(d),
-            ),
-          ),
-        ),
-      );
-    }
+    // ---- day / advance chips (Day 1 · 10 Jul · FRI) ----
+    if (dates.length) parts.push(dayChips(s, movie));
 
     // drill: city details
     if (stateName && cityName) {
@@ -1278,47 +1268,8 @@
       return;
     }
 
-    // ---- main tab view ----
-    const k = movie.kpi;
-    parts.push(
-      h(
-        "div",
-        { class: "kpi-grid" },
-        kpiCard("Total Cities", num(k.cities), k.states + " states", "marker"),
-        kpiCard(
-          "Booked Gross",
-          inr(k.gross),
-          "max " + inr(maxGross(movie)),
-          "indian-rupee-sign",
-          true,
-        ),
-        kpiCard("Tickets Sold", num(k.sold), num(k.seats) + " seats", "ticket"),
-        kpiCard(
-          "Total Shows",
-          num(k.shows),
-          num(k.theatres) + " theatres",
-          "clapperboard-play",
-        ),
-      ),
-    );
-    parts.push(
-      h(
-        "div",
-        { class: "kpi-grid", style: "margin-top:14px" },
-        kpiCard("Occupancy", pct(k.occupancy), "weighted avg", "chart-pie"),
-        kpiCard("Fast Filling", num(k.fastfilling), "shows 50–98%", "flame"),
-        kpiCard("Houseful", num(k.housefull), "shows ≥ 98%", "trophy", true),
-        kpiCard("Theatres", num(k.theatres), "nationwide", "building"),
-      ),
-    );
-    parts.push(
-      h(
-        "div",
-        { class: "updated" },
-        icon("time-past"),
-        "Updated " + (movie.last_updated || fmtDateLong(date)),
-      ),
-    );
+    // ---- main tab view: collapsible breakdown strip ----
+    parts.push(breakdownPanel(s, movie));
 
     // Top 20 cities
     const cities = flatCities(movie).slice(0, 20);
@@ -1382,6 +1333,154 @@
     );
 
     body.replaceChildren(...parts);
+  }
+
+  /* ---- day chips + breakdown strip (Daily / Advance) ---------------- */
+  let BD_OPEN = true; // collapse state, remembered for the session
+
+  const ymdToDate = (ymd) =>
+    new Date(+ymd.slice(0, 4), +ymd.slice(4, 6) - 1, +ymd.slice(6, 8));
+  const ymdShort = (ymd) =>
+    ymdToDate(ymd).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+    });
+  const ymdDow = (ymd) =>
+    ymdToDate(ymd)
+      .toLocaleDateString("en-IN", { weekday: "short" })
+      .toUpperCase();
+  const ymdLong = (ymd) =>
+    ymdToDate(ymd).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  const todayYMD = () => {
+    const d = new Date();
+    const p2 = (n) => String(n).padStart(2, "0");
+    return "" + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate());
+  };
+
+  // Day number = days since release when we know the release date,
+  // otherwise position in the tracked-dates list.
+  function dayNumber(ymd, dates, movie) {
+    const rel =
+      movie && movie.meta && movie.meta.releaseDate
+        ? String(movie.meta.releaseDate).slice(0, 10)
+        : null;
+    if (rel && /^\d{4}-\d{2}-\d{2}$/.test(rel)) {
+      const r = new Date(
+        +rel.slice(0, 4),
+        +rel.slice(5, 7) - 1,
+        +rel.slice(8, 10),
+      );
+      const diff = Math.round((ymdToDate(ymd) - r) / 86400000);
+      if (diff >= 0) return diff + 1;
+    }
+    const i = dates.indexOf(ymd);
+    return i >= 0 ? i + 1 : 1;
+  }
+
+  function dayChips(s, movie) {
+    const { slug, tab, date, dates } = s;
+    const adv = tab === "advance";
+    return h(
+      "div",
+      { class: "daybar" },
+      ...dates.map((d) =>
+        h(
+          "button",
+          {
+            class: "daychip" + (d === date ? " on" : "") + (adv ? " adv" : ""),
+            onclick: () => go(`/movie/${enc(slug)}/${tab}/${d}`),
+          },
+          h(
+            "span",
+            { class: "dc-t" },
+            adv ? "Advance" : "Day " + dayNumber(d, dates, movie),
+          ),
+          h("span", { class: "dc-d" }, ymdShort(d)),
+          h("span", { class: "dc-w" }, ymdDow(d)),
+        ),
+      ),
+    );
+  }
+
+  function bdMetric(label, value, sub, hot) {
+    return h(
+      "div",
+      { class: "bd-m" + (hot ? " hot" : "") },
+      h("div", { class: "v" }, value),
+      h("div", { class: "l" }, label),
+      sub ? h("div", { class: "s" }, sub) : null,
+    );
+  }
+
+  function breakdownPanel(s, movie) {
+    const { tab, date } = s;
+    const k = movie.kpi;
+    const adv = tab === "advance";
+    const isToday = !adv && date === todayYMD();
+
+    const title = adv
+      ? "Advance for " + ymdLong(date)
+      : isToday
+        ? "Today's Breakdown"
+        : "Day " + dayNumber(date, s.dates, movie) + " · " + ymdLong(date);
+
+    const strip = h(
+      "div",
+      { class: "bd-strip" },
+      bdMetric("Gross", inr(k.gross), "max " + inr(maxGross(movie)), true),
+      bdMetric("Tickets", num(k.sold), num(k.seats) + " seats"),
+      bdMetric("Shows", num(k.shows)),
+      bdMetric("Theatres", num(k.theatres)),
+      bdMetric("Cities", num(k.cities), k.states + " states"),
+      bdMetric("Occupancy", pct(k.occupancy), "weighted avg"),
+      bdMetric("Fast-Filling", num(k.fastfilling), "50–98%"),
+      bdMetric("Housefull", num(k.housefull), "≥ 98%", true),
+    );
+
+    const bodyEl = h(
+      "div",
+      { class: "bd-body" },
+      strip,
+      h(
+        "div",
+        { class: "bd-updated" },
+        "Updated: " +
+          (movie.last_updated
+            ? fmtUpdated(movie.last_updated)
+            : fmtDateLong(date)),
+      ),
+    );
+
+    const chev = icon("angle-down", "bd-chev");
+    const head = h(
+      "button",
+      {
+        class: "bd-head",
+        "aria-expanded": String(BD_OPEN),
+        onclick: (e) => {
+          BD_OPEN = !BD_OPEN;
+          const panel = e.currentTarget.parentNode;
+          panel.classList.toggle("closed", !BD_OPEN);
+          e.currentTarget.setAttribute("aria-expanded", String(BD_OPEN));
+        },
+      },
+      icon(adv ? "ticket" : "marker"),
+      h("span", { class: "bd-title" }, title),
+      chev,
+    );
+
+    return h(
+      "section",
+      {
+        class: "bd-panel" + (adv ? " adv" : "") + (BD_OPEN ? "" : " closed"),
+      },
+      head,
+      bodyEl,
+    );
   }
 
   function maxGross(movie) {
