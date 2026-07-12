@@ -712,3 +712,142 @@ table.bo tbody tr:has(.totcell) {
 .chg.up { color: #46C46A; }
 .chg.dn { color: #E5484D; }
 .chg.flat { color: var(--muted); }
+
+/* --- per-section PNG download --- */
+.block-hd {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 14px; margin-bottom: 10px;
+}
+.block-hd-t { min-width: 0; }
+.block-hd h3, .block-hd .hint { margin: 0; }
+.block-hd .hint { margin-top: 3px; }
+
+.dl-btn {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; cursor: pointer;
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  color: var(--ink-2); background: var(--panel-2);
+  border: 1px solid var(--line-2); border-radius: 999px;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.dl-btn:hover:not(:disabled) {
+  background: var(--brand-soft); color: var(--brand); border-color: var(--brand-line);
+}
+.dl-btn:disabled { opacity: .6; cursor: progress; }
+.dl-btn i { font-size: 13px; line-height: 1; }
+
+/* button that sits on the coloured panel header */
+.bd-panel { position: relative; }
+.dl-btn.on-head {
+  position: absolute; top: 11px; right: 54px; z-index: 2;
+  background: rgba(23,19,11,.14); color: var(--bd-ink);
+  border-color: rgba(23,19,11,.28);
+}
+.dl-btn.on-head:hover:not(:disabled) {
+  background: var(--bd-ink); color: var(--bd-accent); border-color: var(--bd-ink);
+}
+.bd-panel.hist .dl-btn.on-head { right: 14px; }
+
+@media (max-width: 560px) {
+  .dl-btn .dl-label { display: none; }
+  .dl-btn { padding: 8px; }
+  .dl-btn.on-head { right: 48px; top: 9px; }
+  .bd-panel.hist .dl-btn.on-head { right: 12px; }
+}
+
+/* ============================================================
+   PNG export card (lives offscreen; never seen in the UI)
+   ============================================================ */
+.exp-card {
+  position: fixed; left: -20000px; top: 0; z-index: -1;
+  width: 1180px; padding: 0; overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--line-2); border-radius: var(--r);
+  font-family: var(--sans);
+}
+.exp-inner { position: relative; z-index: 1; padding: 30px 34px 34px; }
+
+/* wordmark under the data, low opacity */
+.exp-wm {
+  margin-top: 18px; padding-top: 14px;
+  border-top: 1px solid var(--line);
+  text-align: center; pointer-events: none; user-select: none;
+}
+.exp-wm span {
+  font-family: var(--display); font-size: 30px; letter-spacing: .18em;
+  text-transform: uppercase; white-space: nowrap;
+  /* .14 gold on a near-black card reads as invisible -> lift to a legible
+     but still clearly-secondary weight, and let BO carry the brand colour */
+  color: rgba(240, 236, 228, .38);
+}
+.exp-wm b { color: rgba(233, 176, 45, .62); font-weight: 700; }
+
+/* header */
+.exp-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.exp-brand { display: flex; align-items: center; gap: 10px; }
+.exp-brand img { width: 34px; height: 34px; object-fit: contain; }
+.exp-brand span {
+  font-family: var(--display); font-size: 20px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink);
+}
+.exp-brand b { color: var(--brand); font-weight: 700; }
+.exp-host { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+
+.exp-title {
+  margin: 22px 0 0; font-size: 26px; font-weight: 600; letter-spacing: -.3px;
+  color: var(--ink);
+}
+.exp-meta { margin-top: 8px; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+
+.exp-chips { display: flex; align-items: center; gap: 26px; margin: 20px 0 6px; }
+.exp-chip { display: inline-flex; align-items: center; gap: 9px; }
+.exp-chip i { font-size: 16px; color: var(--brand); line-height: 1; }
+.exp-chip b {
+  font-family: var(--mono); font-weight: 700; font-size: 20px; color: var(--ink);
+}
+
+/* the cloned section inside the card */
+.exp-body { margin-top: 18px; }
+.exp-body .block { margin: 0; }
+.exp-body .table-wrap { overflow: visible; max-height: none; }
+.exp-body table.bo { width: 100%; }
+.exp-body .bd-panel { border: 0; background: transparent; }
+.exp-body .bd-body { max-height: none !important; opacity: 0.05 !important; padding: 0; }
+
+
+
+/* ============================================================
+   Watermark — surface texture on every tracked-data container.
+   Painted on the surfaces themselves (never as an overlay), so it
+   can't bleed into the empty cells of a ragged grid.
+   Live page + PNG export share this one definition.
+   font: site sans (SVG can't inherit, so the stack is spelled out) @ 14px
+   ============================================================ */
+:root {
+  --wm-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='230' height='150'%3E%3Ctext x='115' y='75' fill='%23F0ECE4' fill-opacity='0.04' font-family='inherit' font-size='14' font-weight='700' letter-spacing='2' text-anchor='middle' transform='rotate(-22 115 75)'%3ECINEBOTRENDS%3C/text%3E%3C/svg%3E");
+}
+
+/* every container that carries tracked numbers */
+.table-wrap,
+.state-card,
+.fmt-card,
+.bd-strip,
+.kpi-card,
+.mcard .body,
+.th-body,
+.exp-body .table-wrap,
+.exp-body .state-card,
+.exp-body .fmt-card,
+.exp-body .bd-strip {
+  background-image: var(--wm-tile);
+  background-repeat: repeat;
+}
+
+/* export footer wordmark — single line */
+.exp-wm { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); text-align: center; }
+.exp-wm span {
+  font-family: var(--sans); font-size: 30px; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(240, 236, 228, .38);
+}
+.exp-wm b { color: rgba(233, 176, 45, .62); font-weight: 700; }

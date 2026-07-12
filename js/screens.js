@@ -974,7 +974,7 @@
           h(
             "div",
             { class: "meta-grid", style: "max-width:560px" },
-            mi("Support Email", "support@cinebotrends.example"),
+            mi("Support Email", "info@cinebotrends.com"),
             mi("X / Twitter", "@cinebotrends"),
             mi("Telegram", "t.me/cinebotrends"),
             mi("Instagram", "@cinebotrends"),
@@ -1224,6 +1224,36 @@
       mkTab("daily", "Daily"),
       mkTab("historical", "Historical"),
     );
+
+    // filename + export-card context for section downloads
+    const ctxLabel =
+      tab === "historical"
+        ? "Historical"
+        : !date
+          ? tab === "advance"
+            ? "Advance"
+            : "Daily"
+          : tab === "advance"
+            ? "Advance " + ymdShort(date)
+            : "Day " + dayNumber(date, dates, movie);
+    DL_META = {
+      title,
+      ctxLabel,
+      date,
+      updated:
+        movie && movie.last_updated ? fmtUpdated(movie.last_updated) : "",
+      kpi: movie && movie.kpi ? movie.kpi : null,
+    };
+    DL_CTX =
+      slug +
+      "_" +
+      (tab === "historical"
+        ? "historical"
+        : !date
+          ? tab
+          : tab === "advance"
+            ? "advance_" + ymdShort(date)
+            : "day_" + dayNumber(date, dates, movie));
 
     const body = h("div", { class: "tab-body", id: "tabbody" });
 
@@ -1495,6 +1525,7 @@
       {
         class: "bd-panel" + (adv ? " adv" : "") + (BD_OPEN ? "" : " closed"),
       },
+      dlBtn(adv ? "Advance Summary" : "Breakdown", "on-head"),
       head,
       bodyEl,
     );
@@ -1519,12 +1550,206 @@
   function sk(k, v) {
     return frag(h("span", { class: "k" }, k), h("span", { class: "v" }, v));
   }
+  /* ---- section -> PNG export card -------------------------------------
+     The PNG is NOT a screenshot of the section. We compose a branded card
+     offscreen (logo + title + meta + summary chips + the section's table,
+     over a tiled watermark), rasterise that, then throw it away.
+     Filename: cbt_<slug>_<context>_<section>.png                        */
+  let DL_CTX = ""; // "thandel_day_3" | "thandel_advance_13_jul" | "thandel_historical"
+  let DL_META = {}; // { title, ctxLabel, date, updated, kpi:{gross,sold,shows} }
+
+  const dlSlug = (str) =>
+    String(str)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+
+  const siteHost = () => {
+    const hn = (location.hostname || "").replace(/^www\./, "");
+    return !hn || /^(localhost|127\.|192\.|0\.0\.0\.0)/.test(hn)
+      ? "cinebotrends.com"
+      : hn;
+  };
+
+  let h2cLoad = null;
+  function ensureH2C() {
+    if (window.html2canvas) return Promise.resolve();
+    if (h2cLoad) return h2cLoad;
+    h2cLoad = new Promise((res, rej) => {
+      const sc = document.createElement("script");
+      sc.src =
+        "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+      sc.onload = () => res();
+      sc.onerror = () => {
+        h2cLoad = null;
+        rej(new Error("html2canvas failed to load"));
+      };
+      document.head.appendChild(sc);
+    });
+    return h2cLoad;
+  }
+
+  // Wordmark under the data
+  function watermarkFooter() {
+    return h(
+      "div",
+      { class: "exp-wm" },
+      h("span", null, "CINE", h("b", null, "BO"), "TRENDS"),
+    );
+  }
+
+  function summaryChip(ic, val) {
+    return h("span", { class: "exp-chip" }, icon(ic), h("b", null, val));
+  }
+
+  function buildExportCard(section, sectionTitle) {
+    const m = DL_META || {};
+    const k = m.kpi || {};
+
+    // clone the section, strip the on-page chrome (button + block heading:
+    // the title lives in the card header instead)
+    const clone = section.cloneNode(true);
+    clone.querySelectorAll(".dl-btn").forEach((b) => b.remove());
+    clone.querySelectorAll(".block-hd").forEach((b) => b.remove());
+    clone.classList.remove("closed");
+
+    const heading = [m.title, m.ctxLabel, sectionTitle]
+      .filter(Boolean)
+      .join(" — ");
+
+    return h(
+      "div",
+      { class: "exp-card" },
+      h(
+        "div",
+        { class: "exp-inner" },
+        h(
+          "div",
+          { class: "exp-top" },
+          h(
+            "div",
+            { class: "exp-brand" },
+            h("img", { src: "assets/logo-mark.PNG", alt: "" }),
+            h("span", null, "Cine", h("b", null, "BO"), "Trends"),
+          ),
+          h("div", { class: "exp-host" }, siteHost()),
+        ),
+        h("h2", { class: "exp-title" }, heading),
+        h(
+          "div",
+          { class: "exp-meta" },
+          [
+            m.date ? fmtDate(m.date) : null,
+            m.updated ? "Last Updated: " + m.updated : null,
+          ]
+            .filter(Boolean)
+            .join("  •  "),
+        ),
+        k.gross != null
+          ? h(
+              "div",
+              { class: "exp-chips" },
+              summaryChip("sack-dollar", inr(k.gross)),
+              summaryChip("ticket", num(k.sold)),
+              summaryChip("clapperboard", num(k.shows)),
+            )
+          : null,
+        h("div", { class: "exp-body" }, clone),
+        watermarkFooter(),
+      ),
+    );
+  }
+
+  async function downloadSection(section, sectionTitle, name, btn) {
+    const label = btn.querySelector(".dl-label");
+    const was = label ? label.textContent : "";
+    btn.disabled = true;
+    if (label) label.textContent = "Saving…";
+
+    const card = buildExportCard(section, sectionTitle);
+    document.body.appendChild(card);
+    try {
+      await ensureH2C();
+      // let the logo decode before we rasterise, or it lands blank
+      await Promise.all(
+        [...card.querySelectorAll("img")].map((im) =>
+          im.complete
+            ? Promise.resolve()
+            : new Promise((r) => {
+                im.onload = im.onerror = r;
+              }),
+        ),
+      );
+      const bg = (
+        getComputedStyle(document.body).getPropertyValue("--bg") || "#0E0C09"
+      ).trim();
+      const canvas = await window.html2canvas(card, {
+        backgroundColor: bg,
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+      await new Promise((res) =>
+        canvas.toBlob((blob) => {
+          if (!blob) return res();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = name;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
+          res();
+        }, "image/png"),
+      );
+      if (label) label.textContent = was;
+    } catch (e) {
+      console.error(e);
+      if (label) label.textContent = "Failed";
+      setTimeout(() => {
+        if (label) label.textContent = was;
+      }, 2200);
+    } finally {
+      card.remove();
+      btn.disabled = false;
+    }
+  }
+
+  function dlBtn(section, cls) {
+    const name =
+      dlSlug(["cbt", DL_CTX, section].filter(Boolean).join("_")) + ".png";
+    return h(
+      "button",
+      {
+        class: "dl-btn" + (cls ? " " + cls : ""),
+        title: "Download as PNG",
+        onclick: (e) => {
+          const btn = e.currentTarget;
+          const node = btn.closest(".block, .bd-panel");
+          if (node) downloadSection(node, section, name, btn);
+        },
+      },
+      icon("download"),
+      h("span", { class: "dl-label" }, "Download"),
+    );
+  }
+
   function block(title, hint, content) {
     return h(
       "div",
       { class: "block" },
-      h("h3", null, title),
-      hint && h("p", { class: "hint" }, hint),
+      h(
+        "div",
+        { class: "block-hd" },
+        h(
+          "div",
+          { class: "block-hd-t" },
+          h("h3", null, title),
+          hint && h("p", { class: "hint" }, hint),
+        ),
+        dlBtn(title),
+      ),
       content,
     );
   }
@@ -1940,6 +2165,7 @@
     return h(
       "section",
       { class: "bd-panel hist" },
+      dlBtn("Total Tracked", "on-head"),
       h(
         "div",
         { class: "bd-head static" },
@@ -1980,6 +2206,12 @@
       );
     const parts = [];
     const t = histTotals(hist);
+    DL_META = Object.assign({}, DL_META, {
+      ctxLabel: "Historical · " + t.days + (t.days === 1 ? " Day" : " Days"),
+      date: null,
+      updated: hist.last_updated || (DL_META && DL_META.updated) || "",
+      kpi: t.days ? { gross: t.gross, sold: t.sold, shows: t.shows } : null,
+    });
 
     if (hist.last_updated)
       parts.push(
