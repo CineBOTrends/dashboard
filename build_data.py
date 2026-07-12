@@ -711,18 +711,51 @@ def build_history(mode, per_date, out_dir, pub_dir=None):
         }
         tot["occupancy"] = occ(tot["sold"], tot["seats"])
         latest = entries[-1][1]
-        # city-wise (flatten latest)
-        cities = []
-        for st in latest["states"]:
-            for c in st["cityList"]:
-                cities.append({"city": c["city"], "state": st["state"], "gross": c["gross"],
-                               "sold": c["sold"], "shows": c["shows"], "occupancy": c["occupancy"]})
-        cities.sort(key=lambda x: x["gross"], reverse=True)
-        states = [{"state": s["state"], "gross": s["gross"], "sold": s["sold"],
-                   "shows": s["shows"], "theatres": s["theatres"], "occupancy": s["occupancy"]}
-                  for s in latest["states"]]
-        formats = latest["formatSummary"]
+
+        # City / state / format history used to be a copy of the LATEST day's
+        # snapshot, which made a "historical" table really a "today so far" table.
+        # Accumulate them across the closed days instead; if nothing has closed
+        # yet, fall back to the live snapshot and flag it (cumulative=False).
+        done_entries = [e for e in entries
+                        if str(e[0]).replace("-", "") < today_ymd]
+        src_entries = done_entries or entries
+        cumulative = bool(done_entries)
+
+        SUM = ("gross", "sold", "seats", "shows", "housefull", "fastfilling")
+
+        def _acc(dst, src):
+            for key in SUM:
+                dst[key] = dst.get(key, 0) + (src.get(key) or 0)
+
+        st_acc, ct_acc, fm_acc = {}, {}, {}
+        for _date, mv in src_entries:
+            for st in mv.get("states", []):
+                a = st_acc.setdefault(st["state"],
+                                      {"state": st["state"], "theatres": 0, "cities": 0})
+                _acc(a, st)
+                # venues/cities recur every day -> peak footprint, never a sum
+                a["theatres"] = max(a["theatres"], st.get("theatres") or 0)
+                a["cities"] = max(a["cities"], st.get("cities") or 0)
+                for c in st.get("cityList", []):
+                    b = ct_acc.setdefault((st["state"], c["city"]),
+                                          {"city": c["city"], "state": st["state"],
+                                           "theatres": 0})
+                    _acc(b, c)
+                    b["theatres"] = max(b["theatres"], c.get("theatres") or 0)
+            for f in mv.get("formatSummary", []):
+                g = fm_acc.setdefault(f["format"], {"format": f["format"]})
+                _acc(g, f)
+
+        for rec in list(st_acc.values()) + list(ct_acc.values()) + list(fm_acc.values()):
+            rec["gross"] = round(rec.get("gross", 0), 2)
+            rec["occupancy"] = occ(rec.get("sold", 0), rec.get("seats", 0))
+
+        by_gross = lambda x: x["gross"]
+        states = sorted(st_acc.values(), key=by_gross, reverse=True)
+        cities = sorted(ct_acc.values(), key=by_gross, reverse=True)
+        formats = sorted(fm_acc.values(), key=by_gross, reverse=True)
         hist_obj = {"title": latest["title"], "last_updated": latest.get("last_updated"),
+                    "cumulative": cumulative, "daysCounted": len(done_entries),
                     "totals": tot, "days": days, "cities": cities[:50],
                     "states": states, "formats": formats}
         with open(os.path.join(h_dir, slug + ".json"), "w", encoding="utf-8") as f:

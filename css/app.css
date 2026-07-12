@@ -702,3 +702,13 @@ table.bo tbody tr:has(.totcell) {
   border-top: 2px solid var(--brand-line);
 }
 table.bo tbody tr:has(.totcell) td { color: var(--ink); }
+
+/* --- day-wise: total row pinned at the bottom + change column --- */
+table.bo tbody tr:has(.totcell) {
+  border-top: 2px solid var(--brand-line);
+  border-bottom: none;
+}
+.chg { font-family: var(--mono); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.chg.up { color: #46C46A; }
+.chg.dn { color: #E5484D; }
+.chg.flat { color: var(--muted); }

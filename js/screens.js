@@ -1024,7 +1024,10 @@
         date = latest(dates);
 
       // load movie (need a representative date for hero/meta even on historical)
-      const metaDate = date || latest(hasAdv ? c.advDates : c.dayDates);
+      // NOTE: the date must come from the SAME feed as `mode`, or we ask for
+      // e.g. daily/<an-advance-date>/<slug>, get a 404, and render an empty hero.
+      const metaDate =
+        date || latest(mode === "advance" ? c.advDates : c.dayDates);
       let movie = null,
         hist = null;
       if (tab === "historical") {
@@ -1037,6 +1040,18 @@
           movie = await Data.movie(mode, metaDate, slug);
         } catch (e) {
           movie = null;
+        }
+        // hero/meta is tab-independent -> fall back to the other feed if needed
+        if (!movie) {
+          const alt = mode === "daily" ? "advance" : "daily";
+          const altDate = latest(alt === "advance" ? c.advDates : c.dayDates);
+          if (altDate) {
+            try {
+              movie = await Data.movie(alt, altDate, slug);
+            } catch (e) {
+              movie = null;
+            }
+          }
         }
       } else if (dates.length) {
         try {
@@ -1829,6 +1844,25 @@
     typeof d.complete === "boolean" ? d.complete : dYMD(d) < todayYMD();
   const tc = (v) => h("span", { class: "totcell" }, v);
 
+  // "Sat" from 20260711 / 2026-07-11
+  const dow = (raw) => {
+    const y = String(raw).replace(/-/g, "");
+    if (!/^\d{8}$/.test(y)) return "—";
+    return ymdToDate(y).toLocaleDateString("en-IN", { weekday: "short" });
+  };
+
+  // Day-over-day gross movement. No previous day -> em dash, not a fake 0%.
+  function changeCell(cur, prev) {
+    if (!prev) return h("span", { class: "chg flat" }, "—");
+    const p = ((cur - prev) / prev) * 100;
+    const up = p >= 0;
+    return h(
+      "span",
+      { class: "chg " + (up ? "up" : "dn") },
+      (up ? "▲ +" : "▼ ") + p.toFixed(1) + "%",
+    );
+  }
+
   function histTotals(hist) {
     const days = (hist && hist.days) || [];
     const done = days.filter(isDone);
@@ -1960,24 +1994,46 @@
     // Cumulative total across every CLOSED day of daily tracking
     parts.push(totalTrackedPanel(t));
 
-    // Table 1 — day-wise (live day flagged, totals row pinned at the bottom)
-    const dayRows = hist.days.map((d) => [
-      isDone(d) ? d.day : frag(d.day, h("span", { class: "livetag" }, "LIVE")),
-      fmtDate(d.date),
-      inr(d.gross),
-      num(d.sold),
-      num(d.shows),
-      occMeter(d.occupancy),
-    ]);
+    // Table 1 — day-wise. TOTAL pinned at the bottom, newest day first,
+    // day-over-day change on gross, live day flagged.
+    const asc = hist.days.slice().sort((a, b) => a.day - b.day);
+    const prevGross = new Map();
+    asc.forEach((d, i) => {
+      if (i) prevGross.set(d.day, +asc[i - 1].gross || 0);
+    });
+
+    const dayRows = [];
+    asc
+      .slice()
+      .reverse()
+      .forEach((d) =>
+        dayRows.push([
+          isDone(d)
+            ? "Day " + d.day
+            : frag("Day " + d.day, h("span", { class: "livetag" }, "LIVE")),
+          fmtDate(d.date),
+          dow(d.date),
+          inr(d.gross),
+          changeCell(+d.gross || 0, prevGross.get(d.day)),
+          num(d.sold),
+          num(d.shows),
+          occMeter(d.occupancy),
+        ]),
+      );
+
+    // TOTAL pinned at the bottom
     if (t.days)
       dayRows.push([
-        tc("Total"),
+        tc("TOTAL"),
         tc(t.days + (t.days === 1 ? " day" : " days")),
+        tc("—"),
         tc(inr(t.gross)),
+        tc("—"),
         tc(num(t.sold)),
         tc(num(t.shows)),
         tc(pct(t.occupancy)),
       ]);
+
     parts.push(
       block(
         "Day-wise Performance",
@@ -1985,18 +2041,34 @@
           " day(s) counted" +
           (t.live ? " · day " + t.live.day + " still running" : ""),
         simpleTable(
-          ["Day", "Date", "Gross", "Tickets", "Shows", "Occupancy"],
+          [
+            "Day",
+            "Date",
+            "Weekday",
+            "Gross",
+            "Change",
+            "Tickets",
+            "Shows",
+            "Occupancy",
+          ],
           dayRows,
-          [0, 0, 1, 1, 1, 2],
+          [0, 0, 0, 1, 1, 1, 1, 2],
         ),
       ),
     );
+
+    // Tables 2-4 are cumulative across closed days once the builder has run;
+    // on older history files (or before any day closes) they are a single-day snapshot.
+    const scope = hist.cumulative
+      ? "Cumulative across " + t.days + (t.days === 1 ? " day" : " days")
+      : "Live snapshot" +
+        (t.live ? " · day " + t.live.day + " in progress" : "");
 
     // Table 2 — city-wise
     parts.push(
       block(
         "City-wise Performance",
-        "Top cities by gross",
+        scope + " · top cities by gross",
         simpleTable(
           ["City", "State", "Gross", "Tickets", "Shows", "Avg Occupancy"],
           hist.cities.map((c) => [
@@ -2016,7 +2088,7 @@
     parts.push(
       block(
         "State-wise Performance",
-        "All states",
+        scope + " · all states",
         simpleTable(
           ["State", "Gross", "Tickets", "Shows", "Theatres", "Occupancy"],
           hist.states.map((s) => [
@@ -2036,7 +2108,7 @@
     parts.push(
       block(
         "Format-wise Performance",
-        "By presentation format",
+        scope + " · by presentation format",
         simpleTable(
           ["Format", "Gross", "Tickets", "Shows", "Occupancy"],
           hist.formats.map((f) => [
