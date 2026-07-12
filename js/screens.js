@@ -1016,7 +1016,9 @@
         hasDay = c.dayDates.length;
       if (!tab) tab = hasDay ? "daily" : hasAdv ? "advance" : "historical"; // spec default = Daily
       // resolve mode + date
-      let mode = tab === "historical" ? (hasAdv ? "advance" : "daily") : tab;
+      // Historical = accumulated DAILY tracking, so the hero/info card and the
+      // history file both come from the daily feed (advance only as a fallback).
+      let mode = tab === "historical" ? (hasDay ? "daily" : "advance") : tab;
       let dates = mode === "advance" ? c.advDates : c.dayDates;
       if (tab !== "historical" && (!date || !dates.includes(date)))
         date = latest(dates);
@@ -1819,6 +1821,120 @@
   }
 
   /* ---- Historical tab ---- */
+  /* ---- historical: cumulative tracked totals ------------------------ */
+  const dYMD = (d) => String(d.date || "").replace(/-/g, "");
+  // A day counts only once it has ended. Trust the builder's flag when present,
+  // fall back to a date compare so this still works on pre-existing history.
+  const isDone = (d) =>
+    typeof d.complete === "boolean" ? d.complete : dYMD(d) < todayYMD();
+  const tc = (v) => h("span", { class: "totcell" }, v);
+
+  function histTotals(hist) {
+    const days = (hist && hist.days) || [];
+    const done = days.filter(isDone);
+    const t = {
+      days: done.length,
+      gross: 0,
+      sold: 0,
+      seats: 0,
+      shows: 0,
+      housefull: 0,
+      fastfilling: 0,
+      theatres: 0,
+      cities: 0,
+      live: days.find((d) => !isDone(d)) || null,
+      best: null,
+    };
+    done.forEach((d) => {
+      t.gross += +d.gross || 0;
+      t.sold += +d.sold || 0;
+      t.seats += +d.seats || 0;
+      t.shows += +d.shows || 0;
+      t.housefull += +d.housefull || 0;
+      t.fastfilling += +d.fastfilling || 0;
+      t.theatres = Math.max(t.theatres, +d.theatres || 0); // footprint, not a sum
+      t.cities = Math.max(t.cities, +d.cities || 0);
+      if (!t.best || (+d.gross || 0) > (+t.best.gross || 0)) t.best = d;
+    });
+    // Weighted when we have seats; otherwise fall back to the mean of the days.
+    t.occupancy = t.seats
+      ? (t.sold / t.seats) * 100
+      : done.length
+        ? done.reduce((a, d) => a + (+d.occupancy || 0), 0) / done.length
+        : 0;
+    return t;
+  }
+
+  function totalTrackedPanel(t) {
+    if (!t.days)
+      return stateMsg(
+        "time-past",
+        "No completed days yet",
+        t.live
+          ? "Day " +
+              t.live.day +
+              " is still running. Totals appear once the day closes."
+          : "Totals appear once the first tracked day finishes.",
+      );
+
+    const strip = h(
+      "div",
+      { class: "bd-strip" },
+      bdMetric(
+        "Total Gross",
+        inr(t.gross),
+        t.days + (t.days === 1 ? " day" : " days"),
+        true,
+      ),
+      bdMetric(
+        "Tickets",
+        num(t.sold),
+        t.seats ? num(t.seats) + " seats" : null,
+      ),
+      bdMetric("Shows", num(t.shows)),
+      t.theatres ? bdMetric("Theatres", num(t.theatres), "peak") : null,
+      t.cities ? bdMetric("Cities", num(t.cities), "peak") : null,
+      bdMetric("Occupancy", pct(t.occupancy), t.seats ? "weighted" : "day avg"),
+      t.best
+        ? bdMetric("Best Day", "Day " + t.best.day, fmtDate(t.best.date))
+        : null,
+      t.housefull
+        ? bdMetric("Housefull", num(t.housefull), "shows", true)
+        : null,
+    );
+
+    return h(
+      "section",
+      { class: "bd-panel hist" },
+      h(
+        "div",
+        { class: "bd-head static" },
+        icon("chart-histogram"),
+        h(
+          "span",
+          { class: "bd-title" },
+          "Total Tracked · " + t.days + (t.days === 1 ? " Day" : " Days"),
+        ),
+      ),
+      h(
+        "div",
+        { class: "bd-body" },
+        strip,
+        t.live
+          ? h(
+              "div",
+              { class: "bd-updated" },
+              "Day " +
+                t.live.day +
+                " (" +
+                fmtDate(t.live.date) +
+                ") is still running — excluded until it closes.",
+            )
+          : null,
+      ),
+    );
+  }
+
   function renderHistorical(body, hist, title) {
     if (!hist)
       return body.replaceChildren(
@@ -1829,6 +1945,8 @@
         ),
       );
     const parts = [];
+    const t = histTotals(hist);
+
     if (hist.last_updated)
       parts.push(
         h(
@@ -1839,21 +1957,36 @@
         ),
       );
 
-    // Table 1 — day-wise
+    // Cumulative total across every CLOSED day of daily tracking
+    parts.push(totalTrackedPanel(t));
+
+    // Table 1 — day-wise (live day flagged, totals row pinned at the bottom)
+    const dayRows = hist.days.map((d) => [
+      isDone(d) ? d.day : frag(d.day, h("span", { class: "livetag" }, "LIVE")),
+      fmtDate(d.date),
+      inr(d.gross),
+      num(d.sold),
+      num(d.shows),
+      occMeter(d.occupancy),
+    ]);
+    if (t.days)
+      dayRows.push([
+        tc("Total"),
+        tc(t.days + (t.days === 1 ? " day" : " days")),
+        tc(inr(t.gross)),
+        tc(num(t.sold)),
+        tc(num(t.shows)),
+        tc(pct(t.occupancy)),
+      ]);
     parts.push(
       block(
         "Day-wise Performance",
-        hist.days.length + " day(s) tracked",
+        t.days +
+          " day(s) counted" +
+          (t.live ? " · day " + t.live.day + " still running" : ""),
         simpleTable(
           ["Day", "Date", "Gross", "Tickets", "Shows", "Occupancy"],
-          hist.days.map((d) => [
-            d.day,
-            fmtDate(d.date),
-            inr(d.gross),
-            num(d.sold),
-            num(d.shows),
-            occMeter(d.occupancy),
-          ]),
+          dayRows,
           [0, 0, 1, 1, 1, 2],
         ),
       ),

@@ -686,3 +686,19 @@ table.bo .sub { font-size: 11px; color: var(--muted); }
   .bd-head { font-size: 13px; letter-spacing: .06em; }
   .bd-updated { text-align: left; }
 }
+
+/* --- historical: total-tracked panel + table totals row --- */
+.bd-panel.hist { margin-bottom: 22px; }
+.bd-head.static { cursor: default; }
+.livetag {
+  margin-left: 7px; padding: 1px 6px; border-radius: 999px;
+  font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .09em;
+  background: var(--brand-soft); color: var(--brand); border: 1px solid var(--brand-line);
+  vertical-align: middle;
+}
+.totcell { font-weight: 700; color: var(--ink); }
+table.bo tbody tr:has(.totcell) {
+  background: var(--panel-2);
+  border-top: 2px solid var(--brand-line);
+}
+table.bo tbody tr:has(.totcell) td { color: var(--ink); }

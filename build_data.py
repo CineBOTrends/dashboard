@@ -676,12 +676,40 @@ def build_history(mode, per_date, out_dir, pub_dir=None):
         for slug, movie in d["movies"].items():
             by_slug[slug].append((d["date"], movie))
 
+    # A day only counts toward the tracked TOTAL once it has actually ended.
+    # "Today" is still filling up, so it stays flagged complete=False and is
+    # excluded from totals (the UI shows it as a live/in-progress row).
+    _ist = _dt.timezone(_dt.timedelta(hours=5, minutes=30))
+    today_ymd = _dt.datetime.now(_ist).strftime("%Y%m%d")
+
     for slug, entries in by_slug.items():
         days = []
         for i, (date, movie) in enumerate(entries, 1):
             k = movie["kpi"]
-            days.append({"day": i, "date": date, "gross": k["gross"],
-                         "sold": k["sold"], "shows": k["shows"], "occupancy": k["occupancy"]})
+            days.append({"day": i, "date": date,
+                         "complete": str(date).replace("-", "") < today_ymd,
+                         "gross": k["gross"], "sold": k["sold"],
+                         "seats": k.get("seats", 0), "shows": k["shows"],
+                         "theatres": k.get("theatres", 0), "cities": k.get("cities", 0),
+                         "housefull": k.get("housefull", 0),
+                         "fastfilling": k.get("fastfilling", 0),
+                         "occupancy": k["occupancy"]})
+
+        done = [d for d in days if d["complete"]]
+        tot = {
+            "days": len(done),
+            "gross": round(sum(d["gross"] for d in done), 2),
+            "sold": sum(d["sold"] for d in done),
+            "seats": sum(d["seats"] for d in done),
+            "shows": sum(d["shows"] for d in done),
+            "housefull": sum(d["housefull"] for d in done),
+            "fastfilling": sum(d["fastfilling"] for d in done),
+            # theatres/cities repeat across days -> peak footprint, never a sum
+            "theatres": max([d["theatres"] for d in done], default=0),
+            "cities": max([d["cities"] for d in done], default=0),
+            "bestDay": max(done, key=lambda d: d["gross"])["day"] if done else None,
+        }
+        tot["occupancy"] = occ(tot["sold"], tot["seats"])
         latest = entries[-1][1]
         # city-wise (flatten latest)
         cities = []
@@ -695,7 +723,7 @@ def build_history(mode, per_date, out_dir, pub_dir=None):
                   for s in latest["states"]]
         formats = latest["formatSummary"]
         hist_obj = {"title": latest["title"], "last_updated": latest.get("last_updated"),
-                    "days": days, "cities": cities[:50],
+                    "totals": tot, "days": days, "cities": cities[:50],
                     "states": states, "formats": formats}
         with open(os.path.join(h_dir, slug + ".json"), "w", encoding="utf-8") as f:
             json.dump(hist_obj, f, ensure_ascii=False, separators=(",", ":"))
