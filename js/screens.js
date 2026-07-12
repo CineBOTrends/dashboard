@@ -981,7 +981,7 @@
           h(
             "div",
             { class: "meta-grid", style: "max-width:560px" },
-            mi("Support Email", "info@cinebotrends.com"),
+            mi("Support Email", "support@cinebotrends.example"),
             mi("X / Twitter", "@cinebotrends"),
             mi("Telegram", "t.me/cinebotrends"),
             mi("Instagram", "@cinebotrends"),
@@ -1664,44 +1664,77 @@
     );
   }
 
-  // iOS Safari ignores <a download> for blobs, so the desktop path silently
-  // does nothing on a phone. Prefer the native share sheet (Save Image lives
-  // there), then fall back to the anchor, then to opening the PNG in a tab.
-  async function saveBlob(blob, name) {
-    const file =
-      typeof File === "function"
-        ? new File([blob], name, { type: "image/png" })
-        : null;
+  // iOS Safari is the odd one out: <a download> on a blob URL is a no-op, and
+  // navigator.share() needs *transient* user activation — which our await chain
+  // (CDN load + canvas render) has already spent. So:
+  //   desktop + Android  -> plain <a download>. A real download, never a share sheet.
+  //   iOS                -> present the PNG and let the user save it with a
+  //                         fresh tap (long-press, or a Save button that calls
+  //                         share() inside a live gesture).
+  const isIOS = () =>
+    /iP(hone|ad|od)/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
-    if (
-      file &&
-      navigator.canShare &&
-      navigator.canShare({ files: [file] }) &&
-      navigator.share
-    ) {
-      try {
-        await navigator.share({ files: [file], title: name });
-        return;
-      } catch (e) {
-        if (e && e.name === "AbortError") return; // user dismissed the sheet
-        // otherwise fall through to the download paths
-      }
-    }
-
-    const url = URL.createObjectURL(blob);
+  function anchorDownload(url, name) {
     const a = document.createElement("a");
-    const canDownload = "download" in a;
-    if (canDownload) {
-      a.href = url;
-      a.download = name;
-      a.rel = "noopener";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } else {
-      window.open(url, "_blank");
-    }
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    a.href = url;
+    a.download = name;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  function iosSaveSheet(blob, url, name) {
+    const close = () => sheet.remove();
+
+    const saveBtn = h(
+      "button",
+      {
+        class: "dlm-btn primary",
+        onclick: async () => {
+          // fresh gesture -> activation is valid here
+          try {
+            const file = new File([blob], name, { type: "image/png" });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              await navigator.share({ files: [file], title: name });
+              close();
+              return;
+            }
+          } catch (e) {
+            if (e && e.name === "AbortError") return;
+          }
+          anchorDownload(url, name); // iOS 16+ honours this
+        },
+      },
+      icon("download"),
+      " Save image",
+    );
+
+    const sheet = h(
+      "div",
+      { class: "dlm", onclick: (e) => e.target === sheet && close() },
+      h(
+        "div",
+        { class: "dlm-box" },
+        h("img", { src: url, alt: name }),
+        h("p", { class: "dlm-hint" }, "Long-press the image to save it, or:"),
+        h(
+          "div",
+          { class: "dlm-row" },
+          saveBtn,
+          h("button", { class: "dlm-btn", onclick: close }, "Close"),
+        ),
+      ),
+    );
+    document.body.appendChild(sheet);
+  }
+
+  function saveBlob(blob, name) {
+    const url = URL.createObjectURL(blob);
+    if (isIOS()) iosSaveSheet(blob, url, name);
+    else anchorDownload(url, name);
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
 
   async function downloadSection(section, sectionTitle, name, btn) {
@@ -1735,7 +1768,7 @@
       });
       const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
       if (!blob) throw new Error("canvas produced no image");
-      await saveBlob(blob, name);
+      saveBlob(blob, name);
       if (label) label.textContent = was;
     } catch (e) {
       console.error(e);

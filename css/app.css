@@ -884,6 +884,29 @@ table.bo td.sub-cell { color: var(--ink-2); white-space: nowrap; }
 table.bo .gross-cell {
   text-align: left; white-space: nowrap;
   font-family: var(--mono); font-variant-numeric: tabular-nums;
-  width: 20%;                       /* shrink-to-fit, no trailing gap */
+  width: 14%;                       /* shrink-to-fit, no trailing gap */
 }
-table.bo .occ-cell { width: 14%; }  /* absorbs the leftover table width */
+table.bo .occ-cell { width: 10%; }  /* absorbs the leftover table width */
+
+/* --- iOS save sheet (only rendered on iPhone/iPad) --- */
+.dlm {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px; background: rgba(0,0,0,.72); backdrop-filter: blur(4px);
+}
+.dlm-box {
+  width: 100%; max-width: 560px; max-height: 88vh; overflow: auto;
+  background: var(--panel); border: 1px solid var(--line-2);
+  border-radius: var(--r); padding: 14px;
+}
+.dlm-box img { display: block; width: 100%; height: auto; border-radius: var(--r-sm); }
+.dlm-hint { margin: 12px 0 10px; font-size: 13px; color: var(--muted); text-align: center; }
+.dlm-row { display: flex; gap: 10px; }
+.dlm-btn {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 12px; cursor: pointer;
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  color: var(--ink-2); background: var(--panel-2);
+  border: 1px solid var(--line-2); border-radius: 999px;
+}
+.dlm-btn.primary { background: var(--brand); border-color: var(--brand); color: #17130B; }
