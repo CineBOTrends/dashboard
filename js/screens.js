@@ -981,7 +981,7 @@
           h(
             "div",
             { class: "meta-grid", style: "max-width:560px" },
-            mi("Support Email", "support@cinebotrends.example"),
+            mi("Support Email", "info@cinebotrends.com"),
             mi("X / Twitter", "@cinebotrends"),
             mi("Telegram", "t.me/cinebotrends"),
             mi("Instagram", "@cinebotrends"),
@@ -1696,20 +1696,36 @@
   // dom-to-image fetches <img> src itself and swaps in the placeholder when that
   // fails — which is why the logo came out blank. Inline it up-front instead.
   let LOGO_URL = null;
+
+  // Decode the logo with an <img> and repaint it through a canvas. The image is
+  // same-origin, so the canvas isn't tainted and toDataURL() works. This avoids
+  // fetch()/XHR entirely — the previous version swallowed a failed fetch and
+  // silently returned "", which is why the export card had no logo.
+  function logoViaCanvas() {
+    return new Promise((res) => {
+      const im = new Image();
+      im.onload = () => {
+        try {
+          const c = document.createElement("canvas");
+          c.width = im.naturalWidth || 64;
+          c.height = im.naturalHeight || 64;
+          c.getContext("2d").drawImage(im, 0, 0);
+          res(c.toDataURL("image/png"));
+        } catch (e) {
+          res(""); // tainted canvas — shouldn't happen same-origin
+        }
+      };
+      im.onerror = () => res("");
+      im.src = "assets/logo-mark.PNG";
+    });
+  }
+
   async function logoDataUrl() {
     if (LOGO_URL !== null) return LOGO_URL;
-    try {
-      const r = await fetch("assets/logo-mark.PNG", { cache: "force-cache" });
-      if (!r.ok) throw new Error(String(r.status));
-      const blob = await r.blob();
-      LOGO_URL = await new Promise((res) => {
-        const fr = new FileReader();
-        fr.onload = () => res(fr.result);
-        fr.onerror = () => res("");
-        fr.readAsDataURL(blob);
-      });
-    } catch (e) {
-      LOGO_URL = ""; // fall back to the wordmark alone, never break the export
+    LOGO_URL = await logoViaCanvas();
+    if (!LOGO_URL) {
+      // last resort: hand dom-to-image the raw path and let it try
+      LOGO_URL = "assets/logo-mark.PNG";
     }
     return LOGO_URL;
   }
