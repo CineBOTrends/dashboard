@@ -1600,6 +1600,80 @@
     return libLoad;
   }
 
+  // Wordmark under the data on the export card
+  function watermarkFooter() {
+    return h(
+      "div",
+      { class: "exp-wm" },
+      h("span", null, "CINE", h("b", null, "BO"), "TRENDS"),
+    );
+  }
+
+  function summaryChip(ic, val) {
+    return h("span", { class: "exp-chip" }, icon(ic), h("b", null, val));
+  }
+
+  // The PNG is not a screenshot of the section: we compose a branded card
+  // offscreen (logo + title + meta + summary chips + the section's table),
+  // rasterise that, then throw it away.
+  function buildExportCard(section, sectionTitle) {
+    const m = DL_META || {};
+    const k = m.kpi || {};
+
+    // clone the section, strip on-page chrome (the button, and the block
+    // heading — its title is reproduced in the card header instead)
+    const clone = section.cloneNode(true);
+    clone.querySelectorAll(".dl-btn").forEach((b) => b.remove());
+    clone.querySelectorAll(".block-hd").forEach((b) => b.remove());
+    clone.classList.remove("closed");
+
+    const heading = [m.title, m.ctxLabel, sectionTitle]
+      .filter(Boolean)
+      .join(" — ");
+
+    return h(
+      "div",
+      { class: "exp-card" },
+      h(
+        "div",
+        { class: "exp-inner" },
+        h(
+          "div",
+          { class: "exp-top" },
+          h(
+            "div",
+            { class: "exp-brand" },
+            h("img", { src: "assets/logo-mark.PNG", alt: "" }),
+            h("span", null, "Cine", h("b", null, "BO"), "Trends"),
+          ),
+          h("div", { class: "exp-host" }, siteHost()),
+        ),
+        h("h2", { class: "exp-title" }, heading),
+        h(
+          "div",
+          { class: "exp-meta" },
+          [
+            m.date ? fmtDate(m.date) : null,
+            m.updated ? "Last Updated: " + m.updated : null,
+          ]
+            .filter(Boolean)
+            .join("  •  "),
+        ),
+        k.gross != null
+          ? h(
+              "div",
+              { class: "exp-chips" },
+              summaryChip("sack-dollar", inr(k.gross)),
+              summaryChip("ticket", num(k.sold)),
+              summaryChip("clapperboard", num(k.shows)),
+            )
+          : null,
+        h("div", { class: "exp-body" }, clone),
+        watermarkFooter(),
+      ),
+    );
+  }
+
   // Delivery differs by platform, and the differences are not cosmetic:
   //  - desktop / Android : <a download> on a blob URL. A real download.
   //  - iOS               : Safari won't offer "Save Image" on a blob: URL, and
