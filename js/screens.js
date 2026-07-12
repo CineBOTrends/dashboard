@@ -1575,93 +1575,26 @@
       : hn;
   };
 
-  let h2cLoad = null;
-  function ensureH2C() {
-    if (window.html2canvas) return Promise.resolve();
-    if (h2cLoad) return h2cLoad;
-    h2cLoad = new Promise((res, rej) => {
+  // dom-to-image-more, not html2canvas: html2canvas walks the DOM and blocks on
+  // every asset, and on iOS it never resolves ("rendering timed out"). This
+  // library serialises into an SVG <foreignObject>, inlines fonts/images itself,
+  // and returns a PNG data URL. (Same renderer tracktollywood uses.)
+  let libLoad = null;
+  function ensureLib() {
+    if (window.domtoimage) return Promise.resolve();
+    if (libLoad) return libLoad;
+    libLoad = new Promise((res, rej) => {
       const sc = document.createElement("script");
       sc.src =
-        "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+        "https://cdn.jsdelivr.net/npm/dom-to-image-more@3.6.0/dist/dom-to-image-more.min.js";
       sc.onload = () => res();
       sc.onerror = () => {
-        h2cLoad = null;
-        rej(new Error("html2canvas failed to load"));
+        libLoad = null;
+        rej(new Error("renderer failed to load"));
       };
       document.head.appendChild(sc);
     });
-    return h2cLoad;
-  }
-
-  // Wordmark under the data
-  function watermarkFooter() {
-    return h(
-      "div",
-      { class: "exp-wm" },
-      h("span", null, "CINE", h("b", null, "BO"), "TRENDS"),
-    );
-  }
-
-  function summaryChip(ic, val) {
-    return h("span", { class: "exp-chip" }, icon(ic), h("b", null, val));
-  }
-
-  function buildExportCard(section, sectionTitle) {
-    const m = DL_META || {};
-    const k = m.kpi || {};
-
-    // clone the section, strip the on-page chrome (button + block heading:
-    // the title lives in the card header instead)
-    const clone = section.cloneNode(true);
-    clone.querySelectorAll(".dl-btn").forEach((b) => b.remove());
-    clone.querySelectorAll(".block-hd").forEach((b) => b.remove());
-    clone.classList.remove("closed");
-
-    const heading = [m.title, m.ctxLabel, sectionTitle]
-      .filter(Boolean)
-      .join(" — ");
-
-    return h(
-      "div",
-      { class: "exp-card" },
-      h(
-        "div",
-        { class: "exp-inner" },
-        h(
-          "div",
-          { class: "exp-top" },
-          h(
-            "div",
-            { class: "exp-brand" },
-            h("img", { src: "assets/logo-mark.PNG", alt: "" }),
-            h("span", null, "Cine", h("b", null, "BO"), "Trends"),
-          ),
-          h("div", { class: "exp-host" }, siteHost()),
-        ),
-        h("h2", { class: "exp-title" }, heading),
-        h(
-          "div",
-          { class: "exp-meta" },
-          [
-            m.date ? fmtDate(m.date) : null,
-            m.updated ? "Last Updated: " + m.updated : null,
-          ]
-            .filter(Boolean)
-            .join("  •  "),
-        ),
-        k.gross != null
-          ? h(
-              "div",
-              { class: "exp-chips" },
-              summaryChip("sack-dollar", inr(k.gross)),
-              summaryChip("ticket", num(k.sold)),
-              summaryChip("clapperboard", num(k.shows)),
-            )
-          : null,
-        h("div", { class: "exp-body" }, clone),
-        watermarkFooter(),
-      ),
-    );
+    return libLoad;
   }
 
   // Delivery differs by platform, and the differences are not cosmetic:
@@ -1775,6 +1708,32 @@
     document.body.appendChild(sheet);
     return {
       sheet,
+      // download fired; give the user an out if iOS swallowed it
+      saved(openPreview) {
+        msg.textContent = "Saved. If nothing downloaded, save it manually:";
+        box.appendChild(
+          h(
+            "div",
+            { class: "dlm-row", style: "margin-top:12px" },
+            h(
+              "button",
+              {
+                class: "dlm-btn primary",
+                onclick: () => {
+                  sheet.remove();
+                  openPreview();
+                },
+              },
+              "Show image",
+            ),
+            h(
+              "button",
+              { class: "dlm-btn", onclick: () => sheet.remove() },
+              "Done",
+            ),
+          ),
+        );
+      },
       fail(text) {
         msg.textContent = "Couldn't build the image: " + text;
         box.appendChild(
@@ -1827,7 +1786,6 @@
     const label = btn.querySelector(".dl-label");
     const was = label ? label.textContent : "";
     const touch = isIOS() || window.matchMedia("(max-width: 760px)").matches;
-    // on a phone the button label is hidden, so state has to live in a sheet
     const prog = touch ? progressSheet() : null;
 
     btn.disabled = true;
@@ -1836,59 +1794,48 @@
     const card = buildExportCard(section, sectionTitle);
     document.body.appendChild(card);
     try {
-      await withTimeout(ensureH2C(), 15000, "loading the renderer");
-
-      await withTimeout(
-        Promise.all(
-          [...card.querySelectorAll("img")].map((im) =>
-            im.complete
-              ? Promise.resolve()
-              : new Promise((r) => {
-                  im.onload = im.onerror = r;
-                }),
-          ),
-        ),
-        8000,
-        "loading the logo",
-      );
-
-      // iOS caps canvas memory hard; a tall table at scale 2 comes back blank.
-      const w = card.offsetWidth || 1180;
-      const hgt = card.offsetHeight || 800;
-      const cap = isIOS() ? 12e6 : 3e7;
-      let scale = isIOS() ? 1.6 : 2;
-      if (w * hgt * scale * scale > cap)
-        scale = Math.max(1, Math.sqrt(cap / (w * hgt)));
+      await withTimeout(ensureLib(), 15000, "loading the renderer");
 
       const bg = (
         getComputedStyle(document.body).getPropertyValue("--bg") || "#0E0C09"
       ).trim();
-      const canvas = await withTimeout(
-        window.html2canvas(card, {
-          backgroundColor: bg,
-          scale,
-          useCORS: true,
-          logging: false,
-          // never block the whole render on one slow/undecodable asset
-          imageTimeout: 5000,
+      const w = card.offsetWidth || 1180;
+      const hgt = card.offsetHeight || 800;
+
+      // iOS caps canvas memory hard: degrade resolution rather than fail
+      const cap = isIOS() ? 12e6 : 3e7;
+      let scale = isIOS() ? 1.5 : 2;
+      if (w * hgt * scale * scale > cap)
+        scale = Math.max(1, Math.sqrt(cap / (w * hgt)));
+
+      const dataUrl = await withTimeout(
+        window.domtoimage.toPng(card, {
+          bgcolor: bg,
+          width: w * scale,
+          height: hgt * scale,
+          style: {
+            transform: "scale(" + scale + ")",
+            transformOrigin: "top left",
+          },
+          cacheBust: true,
         }),
-        30000,
+        45000,
         "rendering",
       );
-      if (!canvas || !canvas.width) throw new Error("empty canvas");
+      if (!dataUrl || dataUrl.length < 2000)
+        throw new Error("renderer returned an empty image");
+
+      // Every platform gets a real download first: <a download> on a data: URL
+      // is honoured by desktop, Android Chrome and iOS (this is what
+      // tracktollywood does, and it downloads directly there).
+      anchorDownload(dataUrl, name);
 
       if (isIOS()) {
-        if (prog) prog.done();
-        iosSheet(canvas.toDataURL("image/png"), name);
-      } else {
-        const blob = await new Promise((res) =>
-          canvas.toBlob(res, "image/png"),
-        );
-        if (!blob) throw new Error("toBlob returned nothing");
-        const url = URL.createObjectURL(blob);
-        anchorDownload(url, name);
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
-        if (prog) prog.done();
+        // ...but iOS can silently swallow it depending on browser/version, and
+        // we get no callback either way. So offer a fallback the user can act on.
+        if (prog) prog.saved(() => iosSheet(dataUrl, name));
+      } else if (prog) {
+        prog.done();
       }
       if (label) label.textContent = was;
     } catch (e) {
