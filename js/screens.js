@@ -1609,14 +1609,85 @@
     );
   }
 
-  function summaryChip(ic, val) {
-    return h("span", { class: "exp-chip" }, icon(ic), h("b", null, val));
+  // Inline SVG, not the icon font: the uicons face is served from a CDN with no
+  // CORS headers, so dom-to-image can't inline it and glyphs rasterise as tofu
+  // (懶). A path drawn in the document itself has nothing to fetch.
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  // Lucide icon geometry (ISC). Proper 24x24 stroke icons — not hand-drawn
+  // approximations, and not emoji.
+  const EXP_ICONS = {
+    // indian-rupee
+    gross: ["M6 3h12", "M6 8h12", "m6.5 13 8.5 8", "M6 13h3a6 6 0 0 0 0-12"],
+    // ticket
+    tickets: [
+      "M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z",
+      "M13 5v2",
+      "M13 17v2",
+      "M13 11v2",
+    ],
+    // clapperboard
+    shows: [
+      "M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z",
+      "m6.2 5.3 3.1 3.9",
+      "m12.4 3.4 3.1 4",
+      "M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z",
+    ],
+  };
+
+  function expIcon(kind) {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", "19");
+    svg.setAttribute("height", "19");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "1.9");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    (EXP_ICONS[kind] || []).forEach((d) => {
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", d);
+      svg.appendChild(path);
+    });
+    return svg;
   }
 
-  // The PNG is not a screenshot of the section: we compose a branded card
-  // offscreen (logo + title + meta + summary chips + the section's table),
-  // rasterise that, then throw it away.
-  function buildExportCard(section, sectionTitle) {
+  function summaryChip(kind, label, val) {
+    return h(
+      "span",
+      { class: "exp-chip" },
+      expIcon(kind),
+      h(
+        "span",
+        { class: "exp-chip-t" },
+        h("i", null, label),
+        h("b", null, val),
+      ),
+    );
+  }
+
+  // dom-to-image fetches <img> src itself and swaps in the placeholder when that
+  // fails — which is why the logo came out blank. Inline it up-front instead.
+  let LOGO_URL = null;
+  async function logoDataUrl() {
+    if (LOGO_URL !== null) return LOGO_URL;
+    try {
+      const r = await fetch("assets/logo-mark.PNG", { cache: "force-cache" });
+      if (!r.ok) throw new Error(String(r.status));
+      const blob = await r.blob();
+      LOGO_URL = await new Promise((res) => {
+        const fr = new FileReader();
+        fr.onload = () => res(fr.result);
+        fr.onerror = () => res("");
+        fr.readAsDataURL(blob);
+      });
+    } catch (e) {
+      LOGO_URL = ""; // fall back to the wordmark alone, never break the export
+    }
+    return LOGO_URL;
+  }
+
+  function buildExportCard(section, sectionTitle, logoUrl) {
     const m = DL_META || {};
     const k = m.kpi || {};
 
@@ -1643,7 +1714,7 @@
           h(
             "div",
             { class: "exp-brand" },
-            h("img", { src: "assets/logo-mark.PNG", alt: "" }),
+            logoUrl ? h("img", { src: logoUrl, alt: "" }) : null,
             h("span", null, "Cine", h("b", null, "BO"), "Trends"),
           ),
           h("div", { class: "exp-host" }, siteHost()),
@@ -1663,9 +1734,9 @@
           ? h(
               "div",
               { class: "exp-chips" },
-              summaryChip("sack-dollar", inr(k.gross)),
-              summaryChip("ticket", num(k.sold)),
-              summaryChip("clapperboard", num(k.shows)),
+              summaryChip("gross", "Gross", inr(k.gross)),
+              summaryChip("tickets", "Tickets", num(k.sold)),
+              summaryChip("shows", "Shows", num(k.shows)),
             )
           : null,
         h("div", { class: "exp-body" }, clone),
@@ -1878,7 +1949,8 @@
     }, 35000);
 
     try {
-      card = buildExportCard(section, sectionTitle);
+      const logo = await withTimeout(logoDataUrl(), 6000, "loading the logo");
+      card = buildExportCard(section, sectionTitle, logo);
       document.body.appendChild(card);
 
       await withTimeout(ensureLib(), 10000, "loading the renderer");
