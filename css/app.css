@@ -788,7 +788,6 @@ table.bo tbody tr:has(.totcell) {
 .exp-wm b { color: rgba(233, 176, 45, .62); font-weight: 700; }
 
 /* header */
-.exp-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .exp-brand { display: flex; align-items: center; gap: 10px; }
 .exp-brand img { width: 34px; height: 34px; object-fit: contain; }
 .exp-brand span {
@@ -972,6 +971,74 @@ table.bo.cities .gross-cell { width: 15%; }
 
 /* breathing room between the right-aligned Shows figure and the occupancy bar */
 table.bo.cities th:nth-child(5),
-table.bo.cities td:nth-child(5) { padding-left: 100px; }
+table.bo.cities td:nth-child(5) { padding-left: 30px; }
 table.bo.cities th:nth-child(4),
 table.bo.cities td:nth-child(4) { padding-right: 4px; }
+
+/* ============================================================
+   Export card hero (poster band above the data)
+   ============================================================ */
+.exp-card { padding: 0; }
+.exp-hero {
+  position: relative; display: flex; align-items: stretch;
+  min-height: 300px; overflow: hidden;
+  background: linear-gradient(120deg, #17130B 0%, #0E0C09 70%);
+}
+.exp-hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background-size: cover; background-position: center;
+  opacity: .30; filter: blur(2px) saturate(.85);
+}
+.exp-hero.has-bg::after {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(90deg, rgba(14,12,9,.96) 32%, rgba(14,12,9,.55) 70%, rgba(14,12,9,.25) 100%);
+}
+.exp-hero-l {
+  position: relative; z-index: 2; flex: 1 1 auto; min-width: 0;
+  padding: 30px 34px 30px; display: flex; flex-direction: column;
+}
+.exp-hero-r {
+  position: relative; z-index: 2; flex: 0 0 300px;
+  display: flex; align-items: stretch;
+}
+.exp-hero-r img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  border-left: 1px solid var(--line-2);
+}
+
+.exp-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.exp-brand img { width: 30px; height: 30px; object-fit: contain; }
+.exp-brand span {
+  font-family: var(--display); font-size: 19px; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--ink);
+}
+.exp-brand b { color: var(--brand); font-weight: 400; }
+.exp-mode {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--brand);
+  border: 1px solid var(--brand-line); border-radius: 999px;
+  padding: 5px 11px; background: var(--brand-soft); white-space: nowrap;
+}
+
+.exp-movie {
+  margin: 26px 0 0; font-size: 44px; font-weight: 800; line-height: 1.05;
+  letter-spacing: -1px; color: var(--ink);
+}
+.exp-submeta {
+  margin-top: 8px; font-family: var(--mono); font-size: 12.5px;
+  letter-spacing: .04em; color: var(--muted);
+}
+.exp-headline {
+  margin: 18px 0 0; font-size: 30px; font-weight: 800; letter-spacing: -.5px;
+  color: var(--brand);
+}
+.exp-section {
+  margin-top: 4px; font-size: 13px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-2);
+}
+.exp-hero .exp-chips { margin: 20px 0 0; }
+.exp-hero .exp-meta { margin-top: auto; padding-top: 18px; }
+
+/* data sits below the hero */
+.exp-inner { padding: 22px 34px 30px; }
+.exp-body { margin-top: 0; }
