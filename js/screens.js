@@ -2054,6 +2054,42 @@
       ),
     ]);
 
+  // dom-to-image serialises the node into an SVG immediately. Any <img> that
+  // has not DECODED yet rasterises as nothing — which is why the first download
+  // after a fresh page load came out with an empty poster, and the second (with
+  // the image already decoded in memory) was fine. Wait for decode explicitly.
+  function decodeAll(root) {
+    const jobs = [];
+
+    [...root.querySelectorAll("img")].forEach((im) => {
+      if (!im.src) return;
+      jobs.push(
+        im.decode
+          ? im.decode().catch(() => {})
+          : new Promise((r) => {
+              if (im.complete) return r();
+              im.onload = im.onerror = r;
+            }),
+      );
+    });
+
+    // CSS background-image (the hero backdrop) needs the same treatment
+    [...root.querySelectorAll("*")].forEach((el) => {
+      const bgi = getComputedStyle(el).backgroundImage;
+      const m = bgi && bgi.match(/url\("?(data:[^")]+)"?\)/);
+      if (!m) return;
+      jobs.push(
+        new Promise((r) => {
+          const im = new Image();
+          im.onload = im.onerror = r;
+          im.src = m[1];
+        }),
+      );
+    });
+
+    return Promise.all(jobs);
+  }
+
   async function downloadSection(section, sectionTitle, name, btn) {
     const label = btn.querySelector(".dl-label");
     const was = label ? label.textContent : "";
@@ -2076,6 +2112,9 @@
       const A = await withTimeout(exportAssets(), 9000, "loading images");
       card = buildExportCard(section, sectionTitle, A);
       document.body.appendChild(card);
+
+      // must happen AFTER the card is in the DOM, before we rasterise
+      await withTimeout(decodeAll(card), 8000, "decoding images");
 
       await withTimeout(ensureLib(), 10000, "loading the renderer");
 
