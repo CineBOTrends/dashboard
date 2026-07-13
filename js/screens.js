@@ -68,7 +68,12 @@
     const bySlug = new Map();
     if (advNat && advNat.movies)
       for (const mv of advNat.movies)
-        bySlug.set(mv.slug, { mv, mode: "advance", date: advDate, live: false });
+        bySlug.set(mv.slug, {
+          mv,
+          mode: "advance",
+          date: advDate,
+          live: false,
+        });
     if (daily && daily.movies)
       for (const mv of daily.movies)
         bySlug.set(mv.slug, { mv, mode: "daily", date: dailyDate, live: true });
@@ -80,7 +85,8 @@
   // Tracking badge instead. If the release date is unknown we keep the advance
   // treatment (the movie is, after all, still in the advance/pre-sale feed).
   function isPreRelease(mv) {
-    const rd = (mv && (mv.releaseDate || (mv.meta && mv.meta.releaseDate))) || "";
+    const rd =
+      (mv && (mv.releaseDate || (mv.meta && mv.meta.releaseDate))) || "";
     const m = String(rd).match(/(\d{4})-(\d{2})-(\d{2})/);
     if (!m) return true;
     const release = new Date(+m[1], +m[2] - 1, +m[3]);
@@ -257,8 +263,7 @@
         : [];
     let liveSection = null;
     if (dayTop.length) {
-      const updated =
-        (daily && daily.last_updated) || fmtDate(dailyDate);
+      const updated = (daily && daily.last_updated) || fmtDate(dailyDate);
       liveSection = h(
         "section",
         { class: "section", id: "live" },
@@ -424,7 +429,9 @@
         return;
       }
       grid.replaceChildren(
-        ...list.map((e) => movieCard(e.mv, e.mode, e.date, { advance: !e.live })),
+        ...list.map((e) =>
+          movieCard(e.mv, e.mode, e.date, { advance: !e.live }),
+        ),
       );
     }
 
@@ -1018,8 +1025,7 @@
       // resolve mode + date
       // Historical = accumulated DAILY tracking, so the hero/info card and the
       // history file both come from the daily feed (advance only as a fallback).
-      let mode =
-        tab === "historical" ? (hasDay ? "daily" : "advance") : tab;
+      let mode = tab === "historical" ? (hasDay ? "daily" : "advance") : tab;
       let dates = mode === "advance" ? c.advDates : c.dayDates;
       if (tab !== "historical" && (!date || !dates.includes(date)))
         date = latest(dates);
@@ -1177,11 +1183,7 @@
       h(
         "div",
         { class: "mh-info" },
-        h(
-          "div",
-          { class: "eyebrow" },
-          modeLabel(c, mode) + " · India",
-        ),
+        h("div", { class: "eyebrow" }, modeLabel(c, mode) + " · India"),
         h("h1", null, title),
         h(
           "div",
@@ -1265,7 +1267,8 @@
       genres: dmeta.genres || [],
       runtime: dmeta.runTime || dmeta.runtime || "",
       poster: (movie && movie.poster) || null,
-      updated: movie && movie.last_updated ? fmtUpdated(movie.last_updated) : "",
+      updated:
+        movie && movie.last_updated ? fmtUpdated(movie.last_updated) : "",
       kpi: movie && movie.kpi ? movie.kpi : null,
     };
     DL_CTX =
@@ -1300,7 +1303,8 @@
       return body.replaceChildren(
         stateMsg(
           "calendar",
-          (mode === "daily" ? "Today's" : "Advance") + " tracking hasn't started",
+          (mode === "daily" ? "Today's" : "Advance") +
+            " tracking hasn't started",
           mode === "daily"
             ? "Today's collections appear here once the collector runs in daily mode."
             : "No advance data is available yet.",
@@ -1430,9 +1434,14 @@
   const ymdToDate = (ymd) =>
     new Date(+ymd.slice(0, 4), +ymd.slice(4, 6) - 1, +ymd.slice(6, 8));
   const ymdShort = (ymd) =>
-    ymdToDate(ymd).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    ymdToDate(ymd).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+    });
   const ymdDow = (ymd) =>
-    ymdToDate(ymd).toLocaleDateString("en-IN", { weekday: "short" }).toUpperCase();
+    ymdToDate(ymd)
+      .toLocaleDateString("en-IN", { weekday: "short" })
+      .toUpperCase();
   const ymdLong = (ymd) =>
     ymdToDate(ymd).toLocaleDateString("en-IN", {
       day: "numeric",
@@ -1453,7 +1462,11 @@
         ? String(movie.meta.releaseDate).slice(0, 10)
         : null;
     if (rel && /^\d{4}-\d{2}-\d{2}$/.test(rel)) {
-      const r = new Date(+rel.slice(0, 4), +rel.slice(5, 7) - 1, +rel.slice(8, 10));
+      const r = new Date(
+        +rel.slice(0, 4),
+        +rel.slice(5, 7) - 1,
+        +rel.slice(8, 10),
+      );
       const diff = Math.round((ymdToDate(ymd) - r) / 86400000);
       if (diff >= 0) return diff + 1;
     }
@@ -1556,8 +1569,7 @@
     return h(
       "section",
       {
-        class:
-          "bd-panel" + (adv ? " adv" : "") + (BD_OPEN ? "" : " closed"),
+        class: "bd-panel" + (adv ? " adv" : "") + (BD_OPEN ? "" : " closed"),
       },
       dlBtn(adv ? "Advance Summary" : "Breakdown", "on-head"),
       head,
@@ -1765,7 +1777,6 @@
           h(
             "div",
             { class: "exp-brand" },
-            A.logo ? h("img", { src: A.logo, alt: "" }) : null,
             h("span", null, "Cine", h("b", null, "BO"), "Trends"),
           ),
           h("div", { class: "exp-mode" }, m.ctxLabel || ""),
@@ -1774,11 +1785,7 @@
         metaBits.length
           ? h("div", { class: "exp-submeta" }, metaBits.join("  ·  "))
           : null,
-        h(
-          "h2",
-          { class: "exp-headline" },
-          (m.ctxLabel || "") + " breakdown",
-        ),
+        h("h2", { class: "exp-headline" }, (m.ctxLabel || "") + " breakdown"),
         h("div", { class: "exp-section" }, sectionTitle),
         k.gross != null
           ? h(
@@ -1809,15 +1816,24 @@
         : null,
     );
 
+    // The card is wrapped in a frame and we rasterise the FRAME, not the card.
+    // Rendering the card directly puts its border on the exact pixel boundary of
+    // the canvas, where it gets shaved off (the right edge especially, once the
+    // scale factor makes it fractional). Inside a frame the border is interior
+    // and cannot be cropped.
     return h(
       "div",
-      { class: "exp-card" },
-      hero,
+      { class: "exp-frame" },
       h(
         "div",
-        { class: "exp-inner" },
-        h("div", { class: "exp-body" }, clone),
-        watermarkFooter(),
+        { class: "exp-card" },
+        hero,
+        h(
+          "div",
+          { class: "exp-inner" },
+          h("div", { class: "exp-body" }, clone),
+          watermarkFooter(),
+        ),
       ),
     );
   }
@@ -2047,8 +2063,8 @@
       const dataUrl = await withTimeout(
         window.domtoimage.toPng(card, {
           bgcolor: bg,
-          width: w * scale,
-          height: hgt * scale,
+          width: Math.ceil(w * scale),
+          height: Math.ceil(hgt * scale),
           style: {
             transform: "scale(" + scale + ")",
             transformOrigin: "top left",
@@ -2515,8 +2531,8 @@
         "No completed days yet",
         t.live
           ? "Day " +
-            t.live.day +
-            " is still running. Totals appear once the day closes."
+              t.live.day +
+              " is still running. Totals appear once the day closes."
           : "Totals appear once the first tracked day finishes.",
       );
 
@@ -2529,7 +2545,11 @@
         t.days + (t.days === 1 ? " day" : " days"),
         true,
       ),
-      bdMetric("Tickets", num(t.sold), t.seats ? num(t.seats) + " seats" : null),
+      bdMetric(
+        "Tickets",
+        num(t.sold),
+        t.seats ? num(t.seats) + " seats" : null,
+      ),
       bdMetric("Shows", num(t.shows)),
       t.theatres ? bdMetric("Theatres", num(t.theatres), "peak") : null,
       t.cities ? bdMetric("Cities", num(t.cities), "peak") : null,
@@ -2537,7 +2557,9 @@
       t.best
         ? bdMetric("Best Day", "Day " + t.best.day, fmtDate(t.best.date))
         : null,
-      t.housefull ? bdMetric("Housefull", num(t.housefull), "shows", true) : null,
+      t.housefull
+        ? bdMetric("Housefull", num(t.housefull), "shows", true)
+        : null,
     );
 
     return h(
@@ -2716,7 +2738,8 @@
     // on older history files (or before any day closes) they are a single-day snapshot.
     const scope = hist.cumulative
       ? "Cumulative across " + t.days + (t.days === 1 ? " day" : " days")
-      : "Live snapshot" + (t.live ? " · day " + t.live.day + " in progress" : "");
+      : "Live snapshot" +
+        (t.live ? " · day " + t.live.day + " in progress" : "");
 
     // Table 2 — city-wise (same shape as Top 20 Cities: state under the city name)
     parts.push(

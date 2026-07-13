@@ -763,13 +763,7 @@ table.bo tbody tr:has(.totcell) {
 /* ============================================================
    PNG export card (lives offscreen; never seen in the UI)
    ============================================================ */
-.exp-card {
-  position: absolute; left: -20000px; top: 0; z-index: -1;
-  width: 1180px; padding: 0; overflow: hidden;
-  background: var(--bg);
-  border: 1px solid var(--line-2); border-radius: var(--r);
-  font-family: var(--sans);
-}
+
 .exp-inner { position: relative; z-index: 1; padding: 30px 34px 34px; }
 
 /* wordmark under the data, low opacity */
@@ -962,7 +956,7 @@ table.bo.cities th:nth-child(1), table.bo.cities td:nth-child(1) { width: 54px; 
 table.bo.cities th:nth-child(2), table.bo.cities td:nth-child(2) { width: 26%; }    /* city + state */
 table.bo.cities th:nth-child(3), table.bo.cities td:nth-child(3) { width: 15%; }    /* gross */
 table.bo.cities th:nth-child(4), table.bo.cities td:nth-child(4) { width: 11%; }    /* shows */
-table.bo.cities th:nth-child(5), table.bo.cities td:nth-child(5) { width: 28%; }    /* occupancy */
+table.bo.cities th:nth-child(5), table.bo.cities td:nth-child(5) { width: 20%; }    /* occupancy */
 table.bo.cities th:nth-child(6), table.bo.cities td:nth-child(6) { width: 14%; }    /* sold */
 table.bo.cities .city-nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 table.bo.cities .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -971,74 +965,201 @@ table.bo.cities .gross-cell { width: 15%; }
 
 /* breathing room between the right-aligned Shows figure and the occupancy bar */
 table.bo.cities th:nth-child(5),
-table.bo.cities td:nth-child(5) { padding-left: 30px; }
+table.bo.cities td:nth-child(5) { padding-left: 90px; }
 table.bo.cities th:nth-child(4),
 table.bo.cities td:nth-child(4) { padding-right: 4px; }
 
+
+
+
 /* ============================================================
-   Export card hero (poster band above the data)
+   EXPORT CARD — one continuous artifact, not a card stacked on a
+   table. The hero bleeds into the data through a shared surface and
+   a single hairline divider. Type comes from the project tokens
+   (--display / --sans / --mono, --ink / --muted / --brand).
    ============================================================ */
-.exp-card { padding: 0; }
+.exp-card {
+  padding: 0;
+  background: var(--bg);
+  /* solid, full-strength frame — a 1.5px border at .75 alpha all but vanishes
+     once the PNG is scaled and viewed small */
+  border: 2px solid var(--brand);
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px rgba(233,176,45,.22);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* ---------- hero ---------- */
 .exp-hero {
-  position: relative; display: flex; align-items: stretch;
-  min-height: 300px; overflow: hidden;
-  background: linear-gradient(120deg, #17130B 0%, #0E0C09 70%);
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  min-height: 390px;
+  margin: 14px 14px 0;
+  border-radius: 18px;
+  overflow: hidden;                 /* clips the notches into real bites */
+  background: var(--panel);
 }
 .exp-hero-bg {
   position: absolute; inset: 0; z-index: 0;
-  background-size: cover; background-position: center;
-  opacity: .30; filter: blur(2px) saturate(.85);
+  background-size: cover; background-position: center 18%;
+  opacity: .30;
 }
 .exp-hero.has-bg::after {
   content: ""; position: absolute; inset: 0; z-index: 1;
-  background: linear-gradient(90deg, rgba(14,12,9,.96) 32%, rgba(14,12,9,.55) 70%, rgba(14,12,9,.25) 100%);
-}
-.exp-hero-l {
-  position: relative; z-index: 2; flex: 1 1 auto; min-width: 0;
-  padding: 30px 34px 30px; display: flex; flex-direction: column;
-}
-.exp-hero-r {
-  position: relative; z-index: 2; flex: 0 0 300px;
-  display: flex; align-items: stretch;
-}
-.exp-hero-r img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-  border-left: 1px solid var(--line-2);
+  background: linear-gradient(90deg,
+    var(--bg) 22%, rgba(14,12,9,.86) 48%, rgba(14,12,9,.45) 72%, rgba(14,12,9,.10) 100%);
 }
 
-.exp-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.exp-brand img { width: 30px; height: 30px; object-fit: contain; }
-.exp-brand span {
-  font-family: var(--display); font-size: 19px; letter-spacing: .05em;
+.exp-hero-l {
+  position: relative; z-index: 2; flex: 1 1 auto; min-width: 0;
+  padding: 30px 34px 28px; display: flex; flex-direction: column;
+}
+.exp-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.exp-brand {
+  font-family: var(--display); font-size: 20px; letter-spacing: .07em;
   text-transform: uppercase; color: var(--ink);
 }
 .exp-brand b { color: var(--brand); font-weight: 400; }
 .exp-mode {
-  font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--brand);
-  border: 1px solid var(--brand-line); border-radius: 999px;
-  padding: 5px 11px; background: var(--brand-soft); white-space: nowrap;
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--brand);
+  white-space: nowrap;
 }
 
 .exp-movie {
-  margin: 26px 0 0; font-size: 44px; font-weight: 800; line-height: 1.05;
-  letter-spacing: -1px; color: var(--ink);
+  margin: 52px 0 0; font-family: var(--sans); font-size: 60px; font-weight: 700;
+  line-height: 1.02; letter-spacing: -1.8px; color: var(--ink);
 }
 .exp-submeta {
-  margin-top: 8px; font-family: var(--mono); font-size: 12.5px;
-  letter-spacing: .04em; color: var(--muted);
+  margin-top: 10px; font-family: var(--mono); font-size: 13.5px;
+  letter-spacing: .02em; color: var(--muted);
 }
+
 .exp-headline {
-  margin: 18px 0 0; font-size: 30px; font-weight: 800; letter-spacing: -.5px;
-  color: var(--brand);
+  /* auto: takes a share of the leftover height, so the headline + chips sit
+     lower down instead of everything crowding under the title */
+  margin: auto 0 0; padding-top: 26px;
+  font-family: var(--sans); font-size: 30px; font-weight: 700;
+  letter-spacing: -.6px; color: var(--brand);
 }
 .exp-section {
-  margin-top: 4px; font-size: 13px; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--ink-2);
+  margin-top: 6px; font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--muted-2);
 }
-.exp-hero .exp-chips { margin: 20px 0 0; }
-.exp-hero .exp-meta { margin-top: auto; padding-top: 18px; }
 
-/* data sits below the hero */
-.exp-inner { padding: 22px 34px 30px; }
-.exp-body { margin-top: 0; }
+.exp-hero .exp-chips { display: flex; align-items: center; gap: 34px; margin: 22px 0 0; }
+.exp-chip { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.exp-chip > svg, .exp-chip > i.fi {
+  flex: 0 0 auto; color: var(--ink); font-size: 20px; line-height: 1;
+}
+.exp-chip b {
+  font-family: var(--mono); font-weight: 700; font-size: 24px; color: var(--ink);
+  letter-spacing: -.5px; line-height: 1.15; white-space: nowrap;
+}
+/* gross carries the accent; tickets + shows stay white */
+.exp-chip:first-child > svg,
+.exp-chip:first-child > i.fi,
+.exp-chip:first-child b { color: var(--brand); }
+.exp-hero .exp-meta {
+  margin-top: auto;                 /* back to the bottom of the panel */
+  padding-top: 22px;
+  font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+}
+
+/* the stub: poster torn off along a perforation */
+.exp-hero-r {
+  position: relative; z-index: 2; flex: 0 0 34%;
+  border-left: 2px dashed rgba(233,176,45,.45);
+}
+.exp-hero-r img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+/* notches punched out of the ticket edges, on the perforation line.
+   No stroke — a ring reads as a floating circle, a plain fill reads as a bite. */
+.exp-hero-r::before,
+.exp-hero-r::after {
+  content: "";
+  position: absolute; left: -21px;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--bg);
+  z-index: 6;
+}
+.exp-hero-r::before { top: -21px; }
+.exp-hero-r::after  { bottom: -21px; }
+
+/* ---------- data ---------- */
+.exp-inner { padding: 22px 24px 20px; }
+.exp-body { margin: 0; }
+.exp-body .block { margin: 0; }
+/* `background: transparent` (shorthand) also nukes background-image, which is
+   what the watermark tile rides on — hence no watermark in exported tables.
+   Reset only the colour, and restate the tile. */
+.exp-body .table-wrap {
+  border: 0;
+  background-color: transparent;
+  background-image: var(--wm-tile);
+  background-repeat: repeat;
+  overflow: visible;
+}
+.exp-body .state-card,
+.exp-body .fmt-card,
+.exp-body .bd-strip,
+.exp-body .kpi-card {
+  background-image: var(--wm-tile);
+  background-repeat: repeat;
+}
+.exp-body table.bo { min-width: 0; }
+
+/* ---------- footer ---------- */
+.exp-wm {
+  margin-top: 22px; padding-top: 16px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.exp-wm span {
+  font-family: var(--display); font-size: 24px; letter-spacing: .20em;
+  text-transform: uppercase; color: var(--muted-2);
+}
+.exp-wm b { color: var(--brand-line); font-weight: 400; }
+
+/* the frame we actually rasterise — the card's border lives inside it */
+.exp-frame {
+  position: absolute; left: -20000px; top: 0; z-index: -1;
+  width: 1204px;                 /* 1180 card + 12px frame each side */
+  padding: 12px;
+  background: var(--bg);
+  font-family: var(--sans);
+  box-sizing: border-box;
+}
+.exp-frame .exp-card {
+  position: static;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   Export card is viewport-independent.
+   The media queries above key off the PHONE's viewport, not the
+   card's own 1180px width — so without these, a PNG downloaded on
+   mobile would collapse to 2-column strips and min-width'd tables.
+   The export must look identical from any device.
+   ============================================================ */
+@media (max-width: 900px) {
+  .exp-frame .bd-strip { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px; }
+  .exp-frame .bd-m .v { font-size: 21px; }
+}
+@media (max-width: 760px) {
+  .exp-frame table.bo { min-width: 0; }
+  .exp-frame table.bo tbody td,
+  .exp-frame table.bo thead th { padding: 13px 16px; }
+  .exp-frame .table-wrap { overflow: visible; }
+  .exp-frame table.bo td .occ .bar { min-width: 56px; }
+}
+@media (max-width: 560px) {
+  .exp-frame .bd-strip { grid-template-columns: repeat(8, minmax(0, 1fr)); padding: 16px 18px; }
+  .exp-frame .bd-updated { text-align: right; }
+  .exp-frame .exp-chips { display: flex; gap: 34px; }
+  .exp-frame .exp-chip .dl-label { display: inline; }
+}
