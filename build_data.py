@@ -38,134 +38,10 @@ MODES = {
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "data")              # FULL tree (admin)
+POSTER_DIR = os.path.join(HERE, "assets", "posters")   # self-hosted poster art
 OUT_PUBLIC = os.path.join(HERE, "data-public")  # TRIMMED tree (public)
 
 KEY_RE = re.compile(r"^(.*)\s\(([^)]*?)\s-\s([^)]*)\)\s*$")
-
-# BookMyShow image CDN pattern.
-#   id = "<title-slug>-<event-code>-<timestamp>"  e.g. balaramana-dinagalu-et00478884-1782106150
-BMS = "https://assets-in.bmscdn.com/iedb/movies/images/mobile"
-def bms_thumb(bms_id):  return f"{BMS}/thumbnail/xlarge/{bms_id}.jpg"
-def bms_bg(bms_id):     return f"{BMS}/listing/xxlarge/{bms_id}.jpg"
-
-
-def load_posters(collector):
-    """
-    Optional poster map. Looked for in the dashboard root first, then the collector
-    root (dashboard wins). Keys may be a movie title or its slug. A value can be:
-        "balaramana-dinagalu-et00478884-1782106150"      (a BMS id)
-        {"id": "<bms-id>"}                                 (same)
-        {"thumb": "<url>", "bg": "<url>"}                  (explicit URLs)
-    Returns a dict keyed by lowercased title AND slug -> {"thumb":..., "bg":...}.
-    """
-    out = {}
-    for root in (collector, HERE):                       # HERE overrides collector
-        fp = os.path.join(root, "posters.json")
-        if not os.path.exists(fp):
-            continue
-        try:
-            raw = json.load(open(fp, encoding="utf-8"))
-        except Exception as e:
-            print(f"    ! posters.json in {root} ignored ({e})")
-            continue
-        for k, v in raw.items():
-            if k.startswith("_"):
-                continue
-            if isinstance(v, str):
-                p = {"thumb": bms_thumb(v), "bg": bms_bg(v)}
-            elif isinstance(v, dict) and v.get("id"):
-                p = {"thumb": bms_thumb(v["id"]), "bg": bms_bg(v["id"])}
-            elif isinstance(v, dict):
-                thumb = v.get("thumb") or v.get("bg")
-                p = {"thumb": thumb, "bg": v.get("bg") or thumb}
-            else:
-                continue
-            key = k.strip().lower()
-            out[key] = p
-            out[slugify(k)] = p
-            out["canon:" + canonical_title(k).casefold()] = p
-            fw = _first_word_key(k)
-            if fw:
-                out["fw:" + fw] = p
-    return out
-
-
-def resolve_poster(title, slug, posters):
-    return (
-        posters.get(title.strip().lower())
-        or posters.get(slug)
-        or posters.get("canon:" + canonical_title(title).casefold())
-        or posters.get("fw:" + _first_word_key(title))
-    )
-
-
-def load_metadata(collector):
-    """Load metadata.json (title -> {genres, runTime, certification, ...}) if present.
-    Keyed by lowercase title and slug. dashboard root overrides collector."""
-    out = {}
-    for root in (collector, HERE):
-        fp = os.path.join(root, "metadata.json")
-        if not os.path.exists(fp):
-            continue
-        try:
-            raw = json.load(open(fp, encoding="utf-8"))
-        except Exception as e:
-            print(f"    ! metadata.json in {root} ignored ({e})")
-            continue
-        for k, v in raw.items():
-            if k.startswith("_") or not isinstance(v, dict):
-                continue
-            out[k.strip().lower()] = v
-            out[slugify(k)] = v
-            out.setdefault("canon:" + canonical_title(k).casefold(), v)
-            fw = _first_word_key(k)
-            if fw:
-                out.setdefault("fw:" + fw, v)
-    return out
-
-
-def resolve_meta(title, slug, metadata):
-    m = (
-        metadata.get(title.strip().lower())
-        or metadata.get(slug)
-        or metadata.get("canon:" + canonical_title(title).casefold())
-        or metadata.get("fw:" + _first_word_key(title))
-    )
-    if not m:
-        return None
-    rt = (m.get("runTime") or "").strip()
-    if rt in ("", "0h 0m", "0h 00m"):
-        rt = None
-    return {
-        "genres": m.get("genres") or [],
-        "runTime": rt,
-        "certification": (m.get("certification") or "").strip() or None,
-        "languages": m.get("languages") or [],
-        "likes": m.get("likes"),
-        "eventCode": (m.get("eventCode") or "").strip() or None,
-        "releaseDate": (m.get("releaseDate") or "").strip() or None,
-        "cast": m.get("cast") or [],
-        "trailer": (m.get("trailer") or "").strip() or None,
-    }
-
-
-def _fmt_runtime(mins):
-    try:
-        mins = int(mins)
-    except (TypeError, ValueError):
-        return None
-    if mins <= 0:
-        return None
-    return f"{mins // 60}h {mins % 60:02d}m"
-
-
-# District/BMS movieInfo blocks are inconsistent about field names, so probe
-# several aliases when pulling out release date and cast.
-_RELEASE_KEYS = ("releaseDate", "releasedate", "release_date", "releaseDateText",
-                 "release", "releaseOn", "releasedOn")
-_CAST_KEYS = ("cast", "casts", "actors", "starCast", "starcast", "castList",
-              "castCrew", "castAndCrew")
-
 
 def _extract_release_date(info):
     """Return an ISO-ish 'YYYY-MM-DD' release date from a movieInfo block, or None."""
@@ -216,6 +92,61 @@ def _extract_cast(info):
     return []
 
 
+def _poster_ext(url):
+    m = re.search(r"\.(jpe?g|png|webp)(?:\?|$)", url or "", re.I)
+    return "." + m.group(1).lower().replace("jpeg", "jpg") if m else ".jpg"
+
+
+def localize_poster(slug, poster):
+    """Download District's poster art and serve it from our own origin.
+
+    Hotlinking the CDN meant every export had to pull the image cross-origin,
+    which is where Safari's CORS cache, canvas tainting and dom-to-image's
+    cold-cache misses all came from. A same-origin file has none of those
+    problems. Downloads once, then reuses the cached file on later runs.
+    """
+    if not poster:
+        return None
+
+    import urllib.request
+
+    os.makedirs(POSTER_DIR, exist_ok=True)
+    out = {}
+    for kind in ("thumb", "bg"):
+        url = (poster.get(kind) or "").strip()
+        if not url:
+            continue
+        if url.startswith("assets/"):        # already local
+            out[kind] = url
+            continue
+        name = f"{slug}-{kind}{_poster_ext(url)}"
+        dest = os.path.join(POSTER_DIR, name)
+        rel = f"assets/posters/{name}"
+        if not os.path.exists(dest) or os.path.getsize(dest) == 0:
+            try:
+                req = urllib.request.Request(
+                    url, headers={"User-Agent": "Mozilla/5.0 (CineBOTrends collector)"}
+                )
+                with urllib.request.urlopen(req, timeout=20) as r:
+                    data = r.read()
+                if not data:
+                    raise ValueError("empty body")
+                with open(dest, "wb") as f:
+                    f.write(data)
+                print(f"    poster: {rel} ({len(data)//1024} KB)")
+            except Exception as e:
+                print(f"    ! poster {url} failed ({e}); hotlinking instead")
+                out[kind] = url          # fall back to the remote URL
+                continue
+        out[kind] = rel
+
+    if not out:
+        return None
+    # a missing crop falls back to the other one, as before
+    return {"thumb": out.get("thumb") or out.get("bg"),
+            "bg": out.get("bg") or out.get("thumb")}
+
+
 def district_meta_from_rows(rows):
     """Derive {poster, meta} from the District worker's movieInfo embedded in rows."""
     best = None
@@ -260,19 +191,6 @@ def district_meta_from_rows(rows):
         "trailer": (info.get("trailer") or "").strip() or None,
     }
     return {"poster": poster, "meta": meta}
-
-
-def _merge_meta(primary, fallback):
-    """Curated metadata wins per-field; District movieInfo fills the gaps."""
-    if not primary:
-        return fallback
-    if not fallback:
-        return primary
-    out = dict(primary)
-    for k, v in fallback.items():
-        if out.get(k) in (None, "", [], 0):
-            out[k] = v
-    return out
 
 
 _TITLE_TAG_RE = re.compile(r"\s*[\(\[][^\)\]]*[\)\]]\s*$")
@@ -565,7 +483,10 @@ def public_history(hist):
 # --------------------------------------------------------------------------- #
 #  Per-date driver
 # --------------------------------------------------------------------------- #
-def build_date(mode, date, src_dir, out_dir, posters, metadata, pub_dir=None):
+# NOTE: `posters` and `metadata` are accepted but ignored. District's movieInfo
+# is the only source for poster art and movie meta now. They stay in the
+# signature so an existing caller passing them does not break.
+def build_date(mode, date, src_dir, out_dir, posters=None, metadata=None, pub_dir=None):
     detailed = os.path.join(src_dir, "finaldetailed.json")
     if not os.path.exists(detailed):
         print(f"    ! {mode}/{date}: finaldetailed.json missing, skipping")
@@ -608,8 +529,13 @@ def build_date(mode, date, src_dir, out_dir, posters, metadata, pub_dir=None):
             movie["slug"] = slug
         used_slugs.add(slug)
         dm = district_meta_from_rows(mrows)
-        movie["poster"] = resolve_poster(title, movie["slug"], posters) or dm["poster"]
-        movie["meta"] = _merge_meta(resolve_meta(title, movie["slug"], metadata), dm["meta"])
+        # Posters come from District only, and we mirror them locally so the
+        # dashboard serves them same-origin (see localize_poster).
+        movie["poster"] = localize_poster(movie["slug"], dm["poster"])
+        # District is the single source of truth: the collector already returns
+        # poster, genres, runtime, certification, cast and release date in
+        # movieInfo, so there is no curated metadata.json layer to merge.
+        movie["meta"] = dm["meta"]
         movie["last_updated"] = last_updated
         movies_for_history[movie["slug"]] = movie
         # FULL tree (admin)
@@ -869,60 +795,6 @@ def main(collector):
     manifest = {"generated": "", "timezone": "Asia/Kolkata", "modes": {}}
     import datetime
     manifest["generated"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-
-    posters = load_posters(collector)
-    metadata = load_metadata(collector)
-    if metadata:
-        print(f"  metadata: {len({k for k in metadata})//2 or len(metadata)} movies")
-    if posters:
-        print(f"  posters: {len(set(id(v) for v in posters.values()))} mapped")
-
-    all_titles = {}                                      # title -> has_poster
-    for mode, meta in MODES.items():
-        data_root = os.path.join(collector, mode, "data")
-        dates = []
-        per_date = []
-        if os.path.isdir(data_root):
-            for date in sorted(os.listdir(data_root)):
-                src = os.path.join(data_root, date)
-                if not os.path.isdir(src) or not re.fullmatch(r"\d{8}", date):
-                    continue
-                out_dir = os.path.join(OUT, mode, date)
-                os.makedirs(out_dir, exist_ok=True)
-                pub_dir = os.path.join(OUT_PUBLIC, mode, date)
-                os.makedirs(pub_dir, exist_ok=True)
-                res = build_date(mode, date, src, out_dir, posters, metadata, pub_dir=pub_dir)
-                if res:
-                    dates.append(date)
-                    per_date.append(res)
-                    for mv in res["movies"].values():
-                        all_titles[mv["title"]] = bool(mv.get("poster"))
-        if per_date:
-            build_history(mode, per_date, os.path.join(OUT, mode),
-                          pub_dir=os.path.join(OUT_PUBLIC, mode))
-        manifest["modes"][mode] = {
-            "label": meta["label"], "runsPerDay": meta["runsPerDay"],
-            "runTimes": meta["runTimes"], "dates": dates,
-        }
-        print(f"  {mode}: {len(dates)} date(s)")
-
-    with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8") as f:
-        json.dump(manifest, f, ensure_ascii=False, indent=2)
-    with open(os.path.join(OUT_PUBLIC, "manifest.json"), "w", encoding="utf-8") as f:
-        json.dump(manifest, f, ensure_ascii=False, indent=2)
-
-    # Fill-in template: every tracked title -> "" (paste the BMS id to add a poster).
-    # Refreshed each run; never overwrites your real posters.json.
-    if all_titles:
-        tmpl = {"_comment": "Map a movie title to its BookMyShow image id "
-                            "(the filename without .jpg, e.g. 'balaramana-dinagalu-et00478884-1782106150'). "
-                            "Rename this file to posters.json to use it."}
-        for t in sorted(all_titles):
-            tmpl[t] = ""
-        with open(os.path.join(HERE, "posters.template.json"), "w", encoding="utf-8") as f:
-            json.dump(tmpl, f, ensure_ascii=False, indent=2)
-        have = sum(1 for v in all_titles.values() if v)
-        print(f"  posters.template.json: {len(all_titles)} titles ({have} with posters)")
 
     # editorial content (admin-posted news / reviews / box office) -> both trees
     build_editorial()

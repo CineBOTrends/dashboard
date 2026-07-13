@@ -1765,12 +1765,17 @@
     return out;
   }
 
+  // A poster mirrored into assets/posters/ is same-origin: no CORS request, no
+  // cache taint, no canvas restrictions. Only a still-hotlinked URL needs the
+  // cross-origin path.
+  const isRemote = (u) => /^https?:/i.test(u || "");
+
   async function exportAssets() {
     const pos = (DL_META && DL_META.poster) || {};
     const [logo, poster, bg] = await Promise.all([
       imgToDataUrl("assets/logo-mark.PNG", false),
-      imgToDataUrl(pos.thumb, true),
-      imgToDataUrl(pos.bg, true),
+      imgToDataUrl(pos.thumb, isRemote(pos.thumb)),
+      imgToDataUrl(pos.bg, isRemote(pos.bg)),
     ]);
     return { logo, poster, bg };
   }
