@@ -2130,21 +2130,46 @@
       if (w * hgt * scale * scale > cap)
         scale = Math.max(1, Math.sqrt(cap / (w * hgt)));
 
-      const dataUrl = await withTimeout(
+      const opts = {
+        bgcolor: bg,
+        width: Math.ceil(w * scale),
+        height: Math.ceil(hgt * scale),
+        style: {
+          transform: "scale(" + scale + ")",
+          transformOrigin: "top left",
+        },
+        // NO cacheBust: it appends ?t=… to every URL, which corrupts the
+        // data: URI watermark tile. And a failed image THROWS unless a
+        // placeholder is supplied — a cross-origin icon font must not kill
+        // the whole render.
+        imagePlaceholder: TRANSPARENT_PX,
+      };
+
+      // dom-to-image drops embedded images on the FIRST toPng() of a node — the
+      // <img>/background data URIs aren't in its internal cache yet, so they
+      // rasterise empty. The second pass has them warm. (Fresh load = posterless
+      // card; reload = fine.) So: one throwaway pass, then the real one.
+      //
+      // The warm-up is rendered TINY. It only has to populate the cache, and a
+      // full-size throwaway doubles peak memory — which on an iPhone is the one
+      // resource we cannot spend.
+      const WARM = 0.12;
+      await withTimeout(
         window.domtoimage.toPng(card, {
-          bgcolor: bg,
-          width: Math.ceil(w * scale),
-          height: Math.ceil(hgt * scale),
+          ...opts,
+          width: Math.max(1, Math.ceil(w * WARM)),
+          height: Math.max(1, Math.ceil(hgt * WARM)),
           style: {
-            transform: "scale(" + scale + ")",
+            transform: "scale(" + WARM + ")",
             transformOrigin: "top left",
           },
-          // NO cacheBust: it appends ?t=… to every URL, which corrupts the
-          // data: URI watermark tile. And a failed image THROWS unless a
-          // placeholder is supplied — a cross-origin icon font must not kill
-          // the whole render.
-          imagePlaceholder: TRANSPARENT_PX,
         }),
+        20000,
+        "preparing images",
+      );
+
+      const dataUrl = await withTimeout(
+        window.domtoimage.toPng(card, opts),
         25000,
         "rendering",
       );
