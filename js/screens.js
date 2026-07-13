@@ -68,12 +68,7 @@
     const bySlug = new Map();
     if (advNat && advNat.movies)
       for (const mv of advNat.movies)
-        bySlug.set(mv.slug, {
-          mv,
-          mode: "advance",
-          date: advDate,
-          live: false,
-        });
+        bySlug.set(mv.slug, { mv, mode: "advance", date: advDate, live: false });
     if (daily && daily.movies)
       for (const mv of daily.movies)
         bySlug.set(mv.slug, { mv, mode: "daily", date: dailyDate, live: true });
@@ -85,8 +80,7 @@
   // Tracking badge instead. If the release date is unknown we keep the advance
   // treatment (the movie is, after all, still in the advance/pre-sale feed).
   function isPreRelease(mv) {
-    const rd =
-      (mv && (mv.releaseDate || (mv.meta && mv.meta.releaseDate))) || "";
+    const rd = (mv && (mv.releaseDate || (mv.meta && mv.meta.releaseDate))) || "";
     const m = String(rd).match(/(\d{4})-(\d{2})-(\d{2})/);
     if (!m) return true;
     const release = new Date(+m[1], +m[2] - 1, +m[3]);
@@ -263,7 +257,8 @@
         : [];
     let liveSection = null;
     if (dayTop.length) {
-      const updated = (daily && daily.last_updated) || fmtDate(dailyDate);
+      const updated =
+        (daily && daily.last_updated) || fmtDate(dailyDate);
       liveSection = h(
         "section",
         { class: "section", id: "live" },
@@ -429,9 +424,7 @@
         return;
       }
       grid.replaceChildren(
-        ...list.map((e) =>
-          movieCard(e.mv, e.mode, e.date, { advance: !e.live }),
-        ),
+        ...list.map((e) => movieCard(e.mv, e.mode, e.date, { advance: !e.live })),
       );
     }
 
@@ -981,7 +974,7 @@
           h(
             "div",
             { class: "meta-grid", style: "max-width:560px" },
-            mi("Support Email", "info@cinebotrends.com"),
+            mi("Support Email", "support@cinebotrends.example"),
             mi("X / Twitter", "@cinebotrends"),
             mi("Telegram", "t.me/cinebotrends"),
             mi("Instagram", "@cinebotrends"),
@@ -1025,7 +1018,8 @@
       // resolve mode + date
       // Historical = accumulated DAILY tracking, so the hero/info card and the
       // history file both come from the daily feed (advance only as a fallback).
-      let mode = tab === "historical" ? (hasDay ? "daily" : "advance") : tab;
+      let mode =
+        tab === "historical" ? (hasDay ? "daily" : "advance") : tab;
       let dates = mode === "advance" ? c.advDates : c.dayDates;
       if (tab !== "historical" && (!date || !dates.includes(date)))
         date = latest(dates);
@@ -1183,7 +1177,11 @@
       h(
         "div",
         { class: "mh-info" },
-        h("div", { class: "eyebrow" }, modeLabel(c, mode) + " · India"),
+        h(
+          "div",
+          { class: "eyebrow" },
+          modeLabel(c, mode) + " · India",
+        ),
         h("h1", null, title),
         h(
           "div",
@@ -1255,12 +1253,19 @@
           : tab === "advance"
             ? "Advance " + ymdShort(date)
             : "Day " + dayNumber(date, dates, movie);
+    const dmeta = (movie && movie.meta) || {};
     DL_META = {
       title,
       ctxLabel,
       date,
-      updated:
-        movie && movie.last_updated ? fmtUpdated(movie.last_updated) : "",
+      langs:
+        (dmeta.languages && dmeta.languages.length
+          ? dmeta.languages
+          : movie && movie.languages) || [],
+      genres: dmeta.genres || [],
+      runtime: dmeta.runTime || dmeta.runtime || "",
+      poster: (movie && movie.poster) || null,
+      updated: movie && movie.last_updated ? fmtUpdated(movie.last_updated) : "",
       kpi: movie && movie.kpi ? movie.kpi : null,
     };
     DL_CTX =
@@ -1295,8 +1300,7 @@
       return body.replaceChildren(
         stateMsg(
           "calendar",
-          (mode === "daily" ? "Today's" : "Advance") +
-            " tracking hasn't started",
+          (mode === "daily" ? "Today's" : "Advance") + " tracking hasn't started",
           mode === "daily"
             ? "Today's collections appear here once the collector runs in daily mode."
             : "No advance data is available yet.",
@@ -1426,14 +1430,9 @@
   const ymdToDate = (ymd) =>
     new Date(+ymd.slice(0, 4), +ymd.slice(4, 6) - 1, +ymd.slice(6, 8));
   const ymdShort = (ymd) =>
-    ymdToDate(ymd).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-    });
+    ymdToDate(ymd).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
   const ymdDow = (ymd) =>
-    ymdToDate(ymd)
-      .toLocaleDateString("en-IN", { weekday: "short" })
-      .toUpperCase();
+    ymdToDate(ymd).toLocaleDateString("en-IN", { weekday: "short" }).toUpperCase();
   const ymdLong = (ymd) =>
     ymdToDate(ymd).toLocaleDateString("en-IN", {
       day: "numeric",
@@ -1454,11 +1453,7 @@
         ? String(movie.meta.releaseDate).slice(0, 10)
         : null;
     if (rel && /^\d{4}-\d{2}-\d{2}$/.test(rel)) {
-      const r = new Date(
-        +rel.slice(0, 4),
-        +rel.slice(5, 7) - 1,
-        +rel.slice(8, 10),
-      );
+      const r = new Date(+rel.slice(0, 4), +rel.slice(5, 7) - 1, +rel.slice(8, 10));
       const diff = Math.round((ymdToDate(ymd) - r) / 86400000);
       if (diff >= 0) return diff + 1;
     }
@@ -1561,7 +1556,8 @@
     return h(
       "section",
       {
-        class: "bd-panel" + (adv ? " adv" : "") + (BD_OPEN ? "" : " closed"),
+        class:
+          "bd-panel" + (adv ? " adv" : "") + (BD_OPEN ? "" : " closed"),
       },
       dlBtn(adv ? "Advance Summary" : "Breakdown", "on-head"),
       head,
@@ -1695,74 +1691,104 @@
 
   // dom-to-image fetches <img> src itself and swaps in the placeholder when that
   // fails — which is why the logo came out blank. Inline it up-front instead.
-  let LOGO_URL = null;
+  // Every image in the card must be inlined as a data: URL — dom-to-image can't
+  // pull a cross-origin asset (BMS posters send no CORS headers for XHR), and a
+  // failed image silently becomes the transparent placeholder.
+  const IMG_CACHE = {};
 
-  // Decode the logo with an <img> and repaint it through a canvas. The image is
-  // same-origin, so the canvas isn't tainted and toDataURL() works. This avoids
-  // fetch()/XHR entirely — the previous version swallowed a failed fetch and
-  // silently returned "", which is why the export card had no logo.
-  function logoViaCanvas() {
+  function imgToDataUrl(url, cors) {
+    if (!url) return Promise.resolve("");
+    if (IMG_CACHE[url] !== undefined) return Promise.resolve(IMG_CACHE[url]);
     return new Promise((res) => {
       const im = new Image();
+      if (cors) im.crossOrigin = "anonymous";
+      const done = (v) => {
+        IMG_CACHE[url] = v;
+        res(v);
+      };
       im.onload = () => {
         try {
           const c = document.createElement("canvas");
-          c.width = im.naturalWidth || 64;
-          c.height = im.naturalHeight || 64;
+          c.width = im.naturalWidth || 1;
+          c.height = im.naturalHeight || 1;
           c.getContext("2d").drawImage(im, 0, 0);
-          res(c.toDataURL("image/png"));
+          done(c.toDataURL("image/png"));
         } catch (e) {
-          res(""); // tainted canvas — shouldn't happen same-origin
+          done(""); // tainted canvas: host refused CORS
         }
       };
-      im.onerror = () => res("");
-      im.src = "assets/logo-mark.PNG";
+      im.onerror = () => done("");
+      im.src = url;
     });
   }
 
-  async function logoDataUrl() {
-    if (LOGO_URL !== null) return LOGO_URL;
-    LOGO_URL = await logoViaCanvas();
-    if (!LOGO_URL) {
-      // last resort: hand dom-to-image the raw path and let it try
-      LOGO_URL = "assets/logo-mark.PNG";
-    }
-    return LOGO_URL;
+  async function exportAssets() {
+    const pos = (DL_META && DL_META.poster) || {};
+    const [logo, poster, bg] = await Promise.all([
+      imgToDataUrl("assets/logo-mark.PNG", false),
+      imgToDataUrl(pos.thumb, true),
+      imgToDataUrl(pos.bg, true),
+    ]);
+    return { logo, poster, bg };
   }
 
-  function buildExportCard(section, sectionTitle, logoUrl) {
+  function buildExportCard(section, sectionTitle, A) {
     const m = DL_META || {};
     const k = m.kpi || {};
 
-    // clone the section, strip on-page chrome (the button, and the block
-    // heading — its title is reproduced in the card header instead)
     const clone = section.cloneNode(true);
     clone.querySelectorAll(".dl-btn").forEach((b) => b.remove());
     clone.querySelectorAll(".block-hd").forEach((b) => b.remove());
     clone.classList.remove("closed");
 
-    const heading = [m.title, m.ctxLabel, sectionTitle]
-      .filter(Boolean)
-      .join(" — ");
+    const metaBits = [
+      (m.langs || []).join(" · "),
+      m.runtime || "",
+      (m.genres || []).slice(0, 2).join(", "),
+    ].filter(Boolean);
 
-    return h(
+    const hero = h(
       "div",
-      { class: "exp-card" },
+      { class: "exp-hero" + (A.bg ? " has-bg" : "") },
+      A.bg
+        ? h("div", {
+            class: "exp-hero-bg",
+            style: 'background-image:url("' + A.bg + '")',
+          })
+        : null,
       h(
         "div",
-        { class: "exp-inner" },
+        { class: "exp-hero-l" },
         h(
           "div",
-          { class: "exp-top" },
+          { class: "exp-hero-top" },
           h(
             "div",
             { class: "exp-brand" },
-            logoUrl ? h("img", { src: logoUrl, alt: "" }) : null,
+            A.logo ? h("img", { src: A.logo, alt: "" }) : null,
             h("span", null, "Cine", h("b", null, "BO"), "Trends"),
           ),
-          h("div", { class: "exp-host" }, siteHost()),
+          h("div", { class: "exp-mode" }, m.ctxLabel || ""),
         ),
-        h("h2", { class: "exp-title" }, heading),
+        h("h1", { class: "exp-movie" }, m.title || ""),
+        metaBits.length
+          ? h("div", { class: "exp-submeta" }, metaBits.join("  ·  "))
+          : null,
+        h(
+          "h2",
+          { class: "exp-headline" },
+          (m.ctxLabel || "") + " breakdown",
+        ),
+        h("div", { class: "exp-section" }, sectionTitle),
+        k.gross != null
+          ? h(
+              "div",
+              { class: "exp-chips" },
+              summaryChip("money-bill-wave", inr(k.gross)),
+              summaryChip("ticket", num(k.sold)),
+              summaryChip("clapperboard-play", num(k.shows)),
+            )
+          : null,
         h(
           "div",
           { class: "exp-meta" },
@@ -1773,15 +1799,23 @@
             .filter(Boolean)
             .join("  •  "),
         ),
-        k.gross != null
-          ? h(
-              "div",
-              { class: "exp-chips" },
-              summaryChip("money-bill-wave", inr(k.gross)),
-              summaryChip("ticket", num(k.sold)),
-              summaryChip("clapperboard-play", num(k.shows)),
-            )
-          : null,
+      ),
+      A.poster
+        ? h(
+            "div",
+            { class: "exp-hero-r" },
+            h("img", { src: A.poster, alt: "" }),
+          )
+        : null,
+    );
+
+    return h(
+      "div",
+      { class: "exp-card" },
+      hero,
+      h(
+        "div",
+        { class: "exp-inner" },
         h("div", { class: "exp-body" }, clone),
         watermarkFooter(),
       ),
@@ -1992,8 +2026,8 @@
     }, 35000);
 
     try {
-      const logo = await withTimeout(logoDataUrl(), 6000, "loading the logo");
-      card = buildExportCard(section, sectionTitle, logo);
+      const A = await withTimeout(exportAssets(), 9000, "loading images");
+      card = buildExportCard(section, sectionTitle, A);
       document.body.appendChild(card);
 
       await withTimeout(ensureLib(), 10000, "loading the renderer");
@@ -2481,8 +2515,8 @@
         "No completed days yet",
         t.live
           ? "Day " +
-              t.live.day +
-              " is still running. Totals appear once the day closes."
+            t.live.day +
+            " is still running. Totals appear once the day closes."
           : "Totals appear once the first tracked day finishes.",
       );
 
@@ -2495,11 +2529,7 @@
         t.days + (t.days === 1 ? " day" : " days"),
         true,
       ),
-      bdMetric(
-        "Tickets",
-        num(t.sold),
-        t.seats ? num(t.seats) + " seats" : null,
-      ),
+      bdMetric("Tickets", num(t.sold), t.seats ? num(t.seats) + " seats" : null),
       bdMetric("Shows", num(t.shows)),
       t.theatres ? bdMetric("Theatres", num(t.theatres), "peak") : null,
       t.cities ? bdMetric("Cities", num(t.cities), "peak") : null,
@@ -2507,9 +2537,7 @@
       t.best
         ? bdMetric("Best Day", "Day " + t.best.day, fmtDate(t.best.date))
         : null,
-      t.housefull
-        ? bdMetric("Housefull", num(t.housefull), "shows", true)
-        : null,
+      t.housefull ? bdMetric("Housefull", num(t.housefull), "shows", true) : null,
     );
 
     return h(
@@ -2688,8 +2716,7 @@
     // on older history files (or before any day closes) they are a single-day snapshot.
     const scope = hist.cumulative
       ? "Cumulative across " + t.days + (t.days === 1 ? " day" : " days")
-      : "Live snapshot" +
-        (t.live ? " · day " + t.live.day + " in progress" : "");
+      : "Live snapshot" + (t.live ? " · day " + t.live.day + " in progress" : "");
 
     // Table 2 — city-wise (same shape as Top 20 Cities: state under the city name)
     parts.push(
