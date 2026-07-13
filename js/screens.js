@@ -1245,8 +1245,10 @@
     );
 
     // filename + export-card context for section downloads
-    const ctxLabel =
-      tab === "historical"
+    const openDay = openingDay(movie);
+    const ctxLabel = openDay
+      ? "Opening Day"
+      : tab === "historical"
         ? "Historical"
         : !date
           ? tab === "advance"
@@ -1346,7 +1348,10 @@
       );
 
     // ---- day / advance chips (Day 1 · 10 Jul · FRI) ----
-    if (dates.length) parts.push(dayChips(s, movie));
+    // An unreleased film gets no chips: one date matters (its opening day), and
+    // that is named in the panel header instead.
+    const opening = openingDay(movie);
+    if (dates.length && !opening) parts.push(dayChips(s, movie));
 
     // drill: city details
     if (stateName && cityName) {
@@ -1426,6 +1431,20 @@
     );
 
     body.replaceChildren(...parts);
+  }
+
+  /* ---- upcoming releases: opening day only ---------------------------- */
+  // A film whose release date is still in the future has no "days" to page
+  // through — only its opening day matters. So the date chips are hidden and
+  // the panel is labelled OPENING DAY ADVANCE instead.
+  function openingDay(movie) {
+    const rel =
+      movie && movie.meta && movie.meta.releaseDate
+        ? String(movie.meta.releaseDate).slice(0, 10)
+        : null;
+    if (!rel || !/^\d{4}-\d{2}-\d{2}$/.test(rel)) return null;
+    const ymdRel = rel.replace(/-/g, "");
+    return ymdRel > todayYMD() ? ymdRel : null; // null once it has released
   }
 
   /* ---- day chips + breakdown strip (Daily / Advance) ---------------- */
@@ -1515,11 +1534,14 @@
     const adv = tab === "advance";
     const isToday = !adv && date === todayYMD();
 
-    const title = adv
-      ? "Advance for " + ymdLong(date)
-      : isToday
-        ? "Today's Breakdown"
-        : "Day " + dayNumber(date, s.dates, movie) + " · " + ymdLong(date);
+    const open = openingDay(movie);
+    const title = open
+      ? "Opening Day Advance · " + ymdLong(open)
+      : adv
+        ? "Advance for " + ymdLong(date)
+        : isToday
+          ? "Today's Breakdown"
+          : "Day " + dayNumber(date, s.dates, movie) + " · " + ymdLong(date);
 
     const strip = h(
       "div",
