@@ -1708,30 +1708,61 @@
   // failed image silently becomes the transparent placeholder.
   const IMG_CACHE = {};
 
-  function imgToDataUrl(url, cors) {
-    if (!url) return Promise.resolve("");
-    if (IMG_CACHE[url] !== undefined) return Promise.resolve(IMG_CACHE[url]);
+  const blobToDataUrl = (blob) =>
+    new Promise((res) => {
+      const fr = new FileReader();
+      fr.onload = () => res(fr.result);
+      fr.onerror = () => res("");
+      fr.readAsDataURL(blob);
+    });
+
+  // Route 1: fetch + FileReader. Preferred, because it has no canvas to taint.
+  async function viaFetch(url) {
+    try {
+      // cache-bust ONLY for the cross-origin case: Safari will happily reuse the
+      // no-CORS response the page already cached for the same URL, and then the
+      // canvas/response is unusable. A distinct URL forces a fresh CORS request.
+      const u = url + (url.indexOf("?") < 0 ? "?" : "&") + "cbt=1";
+      const r = await fetch(u, { mode: "cors", cache: "reload" });
+      if (!r.ok) return "";
+      return await blobToDataUrl(await r.blob());
+    } catch (e) {
+      return "";
+    }
+  }
+
+  // Route 2: <img> + canvas. Works same-origin; cross-origin only if the host
+  // sends CORS headers AND Safari didn't already poison the cache.
+  function viaCanvas(url, cors) {
     return new Promise((res) => {
       const im = new Image();
       if (cors) im.crossOrigin = "anonymous";
-      const done = (v) => {
-        IMG_CACHE[url] = v;
-        res(v);
-      };
       im.onload = () => {
         try {
           const c = document.createElement("canvas");
           c.width = im.naturalWidth || 1;
           c.height = im.naturalHeight || 1;
-          c.getContext("2d").drawImage(im, 0, 0);
-          done(c.toDataURL("image/png"));
+          const ctx = c.getContext("2d");
+          ctx.drawImage(im, 0, 0);
+          const out = c.toDataURL("image/png");
+          res(out && out.length > 2000 ? out : "");
         } catch (e) {
-          done(""); // tainted canvas: host refused CORS
+          res("");
         }
       };
-      im.onerror = () => done("");
-      im.src = url;
+      im.onerror = () => res("");
+      im.src = cors ? url + (url.indexOf("?") < 0 ? "?" : "&") + "cbt=1" : url;
     });
+  }
+
+  async function imgToDataUrl(url, cors) {
+    if (!url) return "";
+    if (IMG_CACHE[url] !== undefined) return IMG_CACHE[url];
+    let out = "";
+    if (cors) out = await viaFetch(url); // iOS-safe path first
+    if (!out) out = await viaCanvas(url, cors);
+    IMG_CACHE[url] = out;
+    return out;
   }
 
   async function exportAssets() {

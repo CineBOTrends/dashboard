@@ -956,7 +956,7 @@ table.bo.cities th:nth-child(1), table.bo.cities td:nth-child(1) { width: 54px; 
 table.bo.cities th:nth-child(2), table.bo.cities td:nth-child(2) { width: 26%; }    /* city + state */
 table.bo.cities th:nth-child(3), table.bo.cities td:nth-child(3) { width: 15%; }    /* gross */
 table.bo.cities th:nth-child(4), table.bo.cities td:nth-child(4) { width: 11%; }    /* shows */
-table.bo.cities th:nth-child(5), table.bo.cities td:nth-child(5) { width: 20%; }    /* occupancy */
+table.bo.cities th:nth-child(5), table.bo.cities td:nth-child(5) { width: 18%; }    /* occupancy */
 table.bo.cities th:nth-child(6), table.bo.cities td:nth-child(6) { width: 14%; }    /* sold */
 table.bo.cities .city-nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 table.bo.cities .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -965,7 +965,7 @@ table.bo.cities .gross-cell { width: 15%; }
 
 /* breathing room between the right-aligned Shows figure and the occupancy bar */
 table.bo.cities th:nth-child(5),
-table.bo.cities td:nth-child(5) { padding-left: 90px; }
+table.bo.cities td:nth-child(5) { padding-left: 100px; }
 table.bo.cities th:nth-child(4),
 table.bo.cities td:nth-child(4) { padding-right: 4px; }
 
@@ -984,7 +984,7 @@ table.bo.cities td:nth-child(4) { padding-right: 4px; }
   /* solid, full-strength frame — a 1.5px border at .75 alpha all but vanishes
      once the PNG is scaled and viewed small */
   border: 2px solid var(--brand);
-  border-radius: 10px;
+  border-radius: 26px;
   box-shadow: inset 0 0 0 1px rgba(233,176,45,.22);
   overflow: hidden;
   box-sizing: border-box;
@@ -1163,3 +1163,7 @@ table.bo.cities td:nth-child(4) { padding-right: 4px; }
   .exp-frame .exp-chips { display: flex; gap: 34px; }
   .exp-frame .exp-chip .dl-label { display: inline; }
 }
+
+/* no poster (host refused CORS) -> no empty stub, no orphan perforation */
+.exp-hero:not(:has(.exp-hero-r)) .exp-hero-l { padding-right: 40px; }
+.exp-hero-r:empty { display: none; }
