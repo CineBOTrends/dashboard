@@ -1438,10 +1438,18 @@
   // through — only its opening day matters. So the date chips are hidden and
   // the panel is labelled OPENING DAY ADVANCE instead.
   function openingDay(movie) {
-    const rel =
-      movie && movie.meta && movie.meta.releaseDate
-        ? String(movie.meta.releaseDate).slice(0, 10)
-        : null;
+    const m = (movie && movie.meta) || {};
+
+    // Primary signal: build_data flags a film that has advance bookings but has
+    // NEVER appeared in daily -> it hasn't released, and its opening day is the
+    // earliest advance date. (District's API carries no release date at all, so
+    // this is inferred from bookings rather than read from a field.)
+    if (m.upcoming && /^\d{8}$/.test(String(m.openingDay || ""))) {
+      return String(m.openingDay) > todayYMD() ? String(m.openingDay) : null;
+    }
+
+    // Fallback: an explicit future release date, if one ever shows up.
+    const rel = m.releaseDate ? String(m.releaseDate).slice(0, 10) : null;
     if (!rel || !/^\d{4}-\d{2}-\d{2}$/.test(rel)) return null;
     const ymdRel = rel.replace(/-/g, "");
     return ymdRel > todayYMD() ? ymdRel : null; // null once it has released
