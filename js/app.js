@@ -399,11 +399,12 @@
 
   /* ---------- shared components ---------- */
   function occMeter(p) {
+    // percentage only — the bar was eating a third of the table width and
+    // colliding with the next column on mobile
     p = Math.max(0, Math.min(100, Number(p) || 0));
     return h(
       "span",
       { class: "occ" },
-      h("span", { class: "bar" }, h("i", { style: `width:${p}%` })),
       h("span", { class: "pct" }, p.toFixed(1) + "%"),
     );
   }

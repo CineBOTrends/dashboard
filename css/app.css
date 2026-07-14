@@ -964,6 +964,9 @@ table.bo.cities .sub { overflow: hidden; text-overflow: ellipsis; white-space: n
 table.bo.cities .gross-cell { width: 15%; }
 
 /* breathing room between the right-aligned Shows figure and the occupancy bar */
+/* header must carry the same indent as the cells, or 'OCCUPANCY' floats
+   100px left of the bars it labels */
+table.bo.cities th:nth-child(5),
 table.bo.cities td:nth-child(5) { padding-left: 100px; }
 table.bo.cities th:nth-child(4),
 table.bo.cities td:nth-child(4) { padding-right: 4px; }
@@ -1175,3 +1178,44 @@ table.bo.cities td:nth-child(4) { padding-right: 4px; }
 /* no poster (host refused CORS) -> no empty stub, no orphan perforation */
 .exp-hero:not(:has(.exp-hero-r)) .exp-hero-l { padding-right: 40px; }
 .exp-hero-r:empty { display: none; }
+
+/* --- cities table on mobile ---------------------------------------------
+   Desktop uses fixed columns + a 100px indent on Occupancy. On a phone that
+   indent has nowhere to go, so the meter runs under Sold. Below 760px the
+   table scrolls horizontally anyway, so give it real room instead.        */
+@media (max-width: 760px) {
+  table.bo.cities { min-width: 700px; }
+  table.bo.cities th:nth-child(5),
+  table.bo.cities td:nth-child(5) {
+    padding-left: 18px;              /* was 100px */
+    width: 26%;
+  }
+  table.bo.cities th:nth-child(1),
+  table.bo.cities td:nth-child(1) { width: 40px; }   /* # */
+  table.bo.cities th:nth-child(2),
+  table.bo.cities td:nth-child(2) { width: 30%; }    /* city + state */
+  table.bo.cities th:nth-child(3),
+  table.bo.cities td:nth-child(3) { width: 16%; }    /* gross */
+  table.bo.cities th:nth-child(4),
+  table.bo.cities td:nth-child(4) { width: 10%; }    /* shows */
+  table.bo.cities th:nth-child(6),
+  table.bo.cities td:nth-child(6) { width: 14%; padding-left: 10px; }  /* sold */
+  table.bo.cities td .occ { gap: 8px; }
+  table.bo.cities td .occ .bar { min-width: 40px; }
+}
+
+/* --- occupancy: percentage only (no bar) --- */
+table.bo td .occ { display: inline-flex; width: auto; }
+table.bo td .occ .pct { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* the occupancy column no longer needs to be wide or indented */
+table.bo.cities th:nth-child(5),
+table.bo.cities td:nth-child(5) { width: 12%; padding-left: 16px; }
+table.bo.cities th:nth-child(2),
+table.bo.cities td:nth-child(2) { width: 32%; }   /* give city the room back */
+
+@media (max-width: 760px) {
+  table.bo.cities { min-width: 560px; }           /* narrower without the bar */
+  table.bo.cities th:nth-child(5),
+  table.bo.cities td:nth-child(5) { width: 16%; padding-left: 12px; }
+}
