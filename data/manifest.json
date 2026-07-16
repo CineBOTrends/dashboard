@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-16 17:31",
+  "generated": "2026-07-16 18:00",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -117,6 +117,8 @@
     "devi": "20260717",
     "father-s-day": "20260717",
     "first-night-with-devva": "20260717",
+    "ghatak": "20260717",
+    "kan-imaikkum-nerathil": "20260717",
     "kothamrito": "20260717",
     "m-r-p": "20260717",
     "mrp": "20260717",
@@ -133,6 +135,7 @@
     "rakta-charitra": "20260717",
     "ram-lakhan": "20260717",
     "sarvantaryami": "20260717",
+    "sema-thimiru": "20260717",
     "shatir": "20260717",
     "snake-cave": "20260717",
     "the-odyssey": "20260717",
@@ -2905,6 +2908,12 @@
         "20260717",
         "20260723"
       ],
+      "ghatak": [
+        "20260717"
+      ],
+      "kan-imaikkum-nerathil": [
+        "20260717"
+      ],
       "kothamrito": [
         "20260717",
         "20260723"
@@ -2964,6 +2973,9 @@
       "sarvantaryami": [
         "20260717",
         "20260723"
+      ],
+      "sema-thimiru": [
+        "20260717"
       ],
       "shatir": [
         "20260717",
