@@ -1019,6 +1019,15 @@
     mount(page(h("div", { class: "wrap" }, loading())));
     try {
       const c = await ctx();
+      // Narrow the GLOBAL date lists to the ones THIS movie actually has data
+      // for. modes.<mode>.dates is every date in the tree, so without this a
+      // film shows chips for another film's dates (e.g. a different release
+      // day) that 404 when opened. manifest.movieDates is the per-movie map.
+      const md = c.m.movieDates || {};
+      const mineAdv = (md.advance && md.advance[slug]) || null;
+      const mineDay = (md.daily && md.daily[slug]) || null;
+      if (mineAdv) c.advDates = c.advDates.filter((d) => mineAdv.includes(d));
+      if (mineDay) c.dayDates = c.dayDates.filter((d) => mineDay.includes(d));
       const hasAdv = c.advDates.length,
         hasDay = c.dayDates.length;
       if (!tab) tab = hasDay ? "daily" : hasAdv ? "advance" : "historical"; // spec default = Daily
