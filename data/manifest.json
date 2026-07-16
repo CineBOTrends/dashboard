@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-16 21:32",
+  "generated": "2026-07-16 22:32",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -133,7 +133,6 @@
     "padayappa": "20260717",
     "rahun-main-tere-rubaru": "20260717",
     "raja-the-raja": "20260717",
-    "rakta-charitra": "20260717",
     "ram-lakhan": "20260717",
     "sarvantaryami": "20260717",
     "sema-thimiru": "20260717",
@@ -450,7 +449,8 @@
         "20260713",
         "20260714",
         "20260715",
-        "20260716"
+        "20260716",
+        "20260717"
       ],
       "navya-chakra": [
         "20260702"
@@ -777,7 +777,8 @@
         "20260713",
         "20260714",
         "20260715",
-        "20260716"
+        "20260716",
+        "20260717"
       ],
       "evanukku-sariyana-aalu-illai": [
         "20260712",
@@ -1419,6 +1420,9 @@
       ],
       "the-millet-diary": [
         "20260716"
+      ],
+      "rakta-charitra": [
+        "20260717"
       ],
       "the-odyssey": [
         "20260717"
