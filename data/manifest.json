@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-16 10:32",
+  "generated": "2026-07-16 11:16",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -19,7 +19,8 @@
         "20260714",
         "20260715",
         "20260716",
-        "20260717"
+        "20260717",
+        "20260723"
       ]
     },
     "daily": {
@@ -134,6 +135,9 @@
     "ugra-mardhini": "20260717",
     "umesh": "20260717",
     "vadala": "20260717",
-    "venkatramaiah-gari-taluka": "20260717"
+    "venkatramaiah-gari-taluka": "20260717",
+    "bharat-bhagya-vidhata": "20260723",
+    "jana-nayagan": "20260723",
+    "jana-nayakudu": "20260723"
   }
 }
