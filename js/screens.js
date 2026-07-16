@@ -1029,15 +1029,12 @@
       if (mineAdv) c.advDates = c.advDates.filter((d) => mineAdv.includes(d));
       if (mineDay) c.dayDates = c.dayDates.filter((d) => mineDay.includes(d));
 
-      // Unreleased film ONLY: District lists it on future dates beyond its
-      // opening day (advance seat maps open for a range), so movieDates alone
-      // still shows e.g. both 17 Jul and 23 Jul. For an opening-day film just
-      // one date is meaningful. Gate strictly on manifest.upcoming — a RELEASED
-      // film can legitimately have several advance dates and must NOT collapse.
-      const _openDay = c.m.upcoming && c.m.upcoming[slug];
-      if (_openDay && /^\d{8}$/.test(String(_openDay))) {
-        c.advDates = c.advDates.filter((d) => d === String(_openDay));
-      }
+      // Unreleased film: District lists it on future dates beyond its opening
+      // day too (advance seat maps open for a range), so movieDates can show
+      // e.g. both 17 Jul (opening day) and 23 Jul (a normal advance date for
+      // a later show). Both are real, selectable dates — only the LABELLING
+      // of each one changes (see openingDay/isOpeningDate below), so we no
+      // longer collapse advDates down to a single date here.
 
       const hasAdv = c.advDates.length,
         hasDay = c.dayDates.length;
@@ -1265,18 +1262,18 @@
     );
 
     // filename + export-card context for section downloads
-    const openDay = openingDay(movie);
-    const ctxLabel = openDay
-      ? "Opening Day"
-      : tab === "historical"
-        ? "Historical"
-        : !date
-          ? tab === "advance"
-            ? "Advance"
-            : "Today"
-          : tab === "advance"
-            ? "Advance " + ymdShort(date)
-            : "Day " + dayNumber(date, dates, movie);
+    const ctxLabel =
+      date && isOpeningDate(movie, date)
+        ? "Opening Day"
+        : tab === "historical"
+          ? "Historical"
+          : !date
+            ? tab === "advance"
+              ? "Advance"
+              : "Today"
+            : tab === "advance"
+              ? "Advance " + ymdShort(date)
+              : "Day " + dayNumber(date, dates, movie);
     const dmeta = (movie && movie.meta) || {};
     DL_META = {
       title,
@@ -1368,10 +1365,12 @@
       );
 
     // ---- day / advance chips (Day 1 · 10 Jul · FRI) ----
-    // An unreleased film gets no chips: one date matters (its opening day), and
-    // that is named in the panel header instead.
-    const opening = openingDay(movie);
-    if (dates.length && !opening) parts.push(dayChips(s, movie));
+    // An unreleased film with only ONE tracked date gets no chips: that single
+    // date is its opening day and is already named in the panel header. Once
+    // it has more than one date (opening day + later advance dates), the
+    // chips come back so each date is reachable and individually labelled.
+    if (dates.length > 1 || (dates.length === 1 && !openingDay(movie)))
+      parts.push(dayChips(s, movie));
 
     // drill: city details
     if (stateName && cityName) {
@@ -1475,6 +1474,15 @@
     return ymdRel > todayYMD() ? ymdRel : null; // null once it has released
   }
 
+  // True only for the ONE date that is this film's opening day. A film can
+  // have several advance dates (seat maps open for a range beyond release),
+  // and every date except the opening day itself is a normal advance date —
+  // it should be labelled "Advance for <date>", not "Opening Day".
+  function isOpeningDate(movie, ymd) {
+    const open = openingDay(movie);
+    return !!open && open === ymd;
+  }
+
   /* ---- day chips + breakdown strip (Daily / Advance) ---------------- */
   let BD_OPEN = true; // collapse state, remembered for the session
 
@@ -1537,7 +1545,11 @@
           h(
             "span",
             { class: "dc-t" },
-            adv ? "Advance" : "Day " + dayNumber(d, dates, movie),
+            adv
+              ? isOpeningDate(movie, d)
+                ? "Opening Day"
+                : "Advance"
+              : "Day " + dayNumber(d, dates, movie),
           ),
           h("span", { class: "dc-d" }, ymdShort(d)),
           h("span", { class: "dc-w" }, ymdDow(d)),
@@ -1562,14 +1574,14 @@
     const adv = tab === "advance";
     const isToday = !adv && date === todayYMD();
 
-    const open = openingDay(movie);
-    const title = open
-      ? "Opening Day Advance · " + ymdLong(open)
-      : adv
-        ? "Advance for " + ymdLong(date)
-        : isToday
-          ? "Today's Breakdown"
-          : "Day " + dayNumber(date, s.dates, movie) + " · " + ymdLong(date);
+    const title =
+      adv && isOpeningDate(movie, date)
+        ? "Opening Day Advance · " + ymdLong(date)
+        : adv
+          ? "Advance for " + ymdLong(date)
+          : isToday
+            ? "Today's Breakdown"
+            : "Day " + dayNumber(date, s.dates, movie) + " · " + ymdLong(date);
 
     const strip = h(
       "div",
