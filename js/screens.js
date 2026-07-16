@@ -1028,6 +1028,17 @@
       const mineDay = (md.daily && md.daily[slug]) || null;
       if (mineAdv) c.advDates = c.advDates.filter((d) => mineAdv.includes(d));
       if (mineDay) c.dayDates = c.dayDates.filter((d) => mineDay.includes(d));
+
+      // Unreleased film ONLY: District lists it on future dates beyond its
+      // opening day (advance seat maps open for a range), so movieDates alone
+      // still shows e.g. both 17 Jul and 23 Jul. For an opening-day film just
+      // one date is meaningful. Gate strictly on manifest.upcoming — a RELEASED
+      // film can legitimately have several advance dates and must NOT collapse.
+      const _openDay = c.m.upcoming && c.m.upcoming[slug];
+      if (_openDay && /^\d{8}$/.test(String(_openDay))) {
+        c.advDates = c.advDates.filter((d) => d === String(_openDay));
+      }
+
       const hasAdv = c.advDates.length,
         hasDay = c.dayDates.length;
       if (!tab) tab = hasDay ? "daily" : hasAdv ? "advance" : "historical"; // spec default = Daily
