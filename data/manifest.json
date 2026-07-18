@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-18 05:33",
+  "generated": "2026-07-18 06:36",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -111,6 +111,7 @@
     "fifa-club-world-cup-finals": "20260719",
     "fifa-world-cup-2026-final-argentina-vs-spain": "20260719",
     "fifa-world-cup-2026-final-argentina-vs-spain-2": "20260719",
+    "fifa-world-cup-2026-third-place-play-off-france-vs-england": "20260719",
     "fifa-world-cup-2026-england-vs-france": "20260719",
     "karavali": "20260719",
     "jana-nayagan": "20260723",
@@ -1949,8 +1950,7 @@
         "20260715",
         "20260716",
         "20260717",
-        "20260718",
-        "20260719"
+        "20260718"
       ],
       "bharat-bhhagya-viddhaata": [
         "20260703"
@@ -3718,6 +3718,9 @@
         "20260719"
       ],
       "fifa-world-cup-2026-final-argentina-vs-spain-2": [
+        "20260719"
+      ],
+      "fifa-world-cup-2026-third-place-play-off-france-vs-england": [
         "20260719"
       ],
       "fifa-world-cup-2026-england-vs-france": [
