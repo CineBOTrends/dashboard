@@ -154,14 +154,287 @@
           }
         }
       }
-      renderHome(c, mode, date, nat, daily, dailyDate, advNat, advDate);
+      // Overseas: separate collector, may not exist yet -> null, section hidden
+      const overseas = await safeOverseas();
+      renderHome(
+        c,
+        mode,
+        date,
+        nat,
+        daily,
+        dailyDate,
+        advNat,
+        advDate,
+        overseas,
+      );
     } catch (e) {
       console.error(e);
       mount(fetchError(e));
     }
   };
 
-  function renderHome(c, mode, date, nat, daily, dailyDate, advNat, advDate) {
+  /* ============================================================
+     OVERSEAS BOX OFFICE
+     Fed by a SEPARATE collector (still in testing), so everything here is
+     written defensively: a missing file, a half-written file or a schema that
+     drifts must never break the home page. If we can't read usable data the
+     section simply does not render — same pattern as liveSection.
+     ============================================================ */
+
+  // Never throws. A 404 while the overseas collector is still being built is a
+  // normal state, not an error.
+  async function safeOverseas() {
+    try {
+      return normalizeOverseas(await Data.overseas());
+    } catch (e) {
+      return null; // no file yet, bad JSON, offline — all mean "nothing to show"
+    }
+  }
+
+  const _num = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  // Pick the first key that's actually present — the collector's field names
+  // are not final yet, so accept the obvious synonyms instead of hard-coding one.
+  const _pick = (o, keys, dflt) => {
+    for (const k of keys) if (o && o[k] != null && o[k] !== "") return o[k];
+    return dflt;
+  };
+
+  function normalizeOverseas(raw) {
+    if (!raw) return null;
+
+    // Never render the sample file. If latest.json.sample gets copied to
+    // latest.json to try the layout, its _comment marks it as fake — showing
+    // invented box-office numbers as real is worse than showing nothing.
+    if (raw._comment && /sample/i.test(String(raw._comment))) {
+      console.warn("overseas: sample data ignored — publish real figures");
+      return null;
+    }
+    // accept either { movies: [...] } or a bare [...]
+    const list = Array.isArray(raw) ? raw : raw.movies || raw.data || [];
+    if (!Array.isArray(list) || !list.length) return null;
+
+    const currency = (raw && raw.currency) || "USD";
+
+    const movies = list
+      .map((m) => {
+        const title = _pick(m, ["title", "name", "movie"], "");
+        if (!title) return null;
+        const terrRaw =
+          _pick(m, ["territories", "countries", "markets"], []) || [];
+        const territories = (Array.isArray(terrRaw) ? terrRaw : [])
+          .map((t) => ({
+            name: _pick(t, ["territory", "country", "market", "name"], "—"),
+            gross: _num(_pick(t, ["gross", "grossUsd", "total", "amount"], 0)),
+            admissions: _num(
+              _pick(t, ["admissions", "admits", "tickets", "sold"], 0),
+            ),
+            shows: _num(_pick(t, ["shows", "screens", "showCount"], 0)),
+          }))
+          .sort((a, b) => b.gross - a.gross);
+
+        // movie total, else derived from its territories
+        const gross =
+          _num(_pick(m, ["gross", "grossUsd", "total", "amount"], 0)) ||
+          territories.reduce((a, t) => a + t.gross, 0);
+
+        return {
+          slug: _pick(m, ["slug", "id"], null),
+          title,
+          poster: m.poster || null,
+          gross,
+          admissions:
+            _num(_pick(m, ["admissions", "admits", "tickets", "sold"], 0)) ||
+            territories.reduce((a, t) => a + t.admissions, 0),
+          shows:
+            _num(_pick(m, ["shows", "screens", "showCount"], 0)) ||
+            territories.reduce((a, t) => a + t.shows, 0),
+          territories,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.gross - a.gross);
+
+    if (!movies.length) return null;
+    return {
+      updated: _pick(raw, ["updated", "last_updated", "generated"], ""),
+      currency,
+      movies,
+    };
+  }
+
+  // Compact money: overseas figures are large and in a foreign currency, so
+  // inr()'s lakh/crore scaling would be actively misleading here.
+  function money(v, cur) {
+    const sym = {
+      USD: "$",
+      GBP: "£",
+      EUR: "€",
+      AUD: "A$",
+      CAD: "C$",
+      AED: "AED ",
+    };
+    const p = sym[cur] || (cur ? cur + " " : "");
+    const n = _num(v);
+    if (n >= 1e6) return p + (n / 1e6).toFixed(2) + "M";
+    if (n >= 1e3) return p + (n / 1e3).toFixed(1) + "K";
+    return p + grp(Math.round(n));
+  }
+
+  // Mirrors movieCard() and reuses its classes (.mcard/.poster/.body/.ttl/
+  // .langs/.card-gross), so an overseas card is visually identical to a Live
+  // Tracking card. It is NOT clickable: there is no overseas detail page yet,
+  // and routing to /movie/<slug> would show INDIA figures under an Overseas
+  // card. The territory split is shown inline instead.
+  function overseasCard(m, currency) {
+    const poster = posterEl(m.title, m.poster);
+    poster.append(
+      h(
+        "div",
+        { class: "badges" },
+        h(
+          "span",
+          { class: "badge overseastrack" },
+          h("span", { class: "live-dot" }),
+          "Overseas",
+        ),
+        m.territories.length
+          ? h(
+              "span",
+              { class: "badge nation" },
+              icon("globe"),
+              " " +
+                m.territories.length +
+                (m.territories.length === 1 ? " territory" : " territories"),
+            )
+          : null,
+      ),
+    );
+
+    // top territories in place of the languages line
+    const top = m.territories
+      .slice(0, 3)
+      .map((t) => t.name + " " + money(t.gross, currency))
+      .join("  ·  ");
+
+    return h(
+      "div",
+      { class: "mcard ov-card" },
+      poster,
+      h(
+        "div",
+        { class: "body" },
+        h("div", { class: "ttl" }, m.title),
+        top ? h("div", { class: "langs" }, top) : null,
+        m.admissions || m.shows
+          ? h(
+              "div",
+              { class: "cardmeta" },
+              m.admissions
+                ? h("span", { class: "g" }, grp(m.admissions) + " admissions")
+                : null,
+              m.shows
+                ? h("span", { class: "rt" }, grp(m.shows) + " shows")
+                : null,
+            )
+          : null,
+        h(
+          "div",
+          { class: "card-gross" },
+          h("span", { class: "cg-label" }, "Overseas Gross"),
+          h("span", { class: "cg-val" }, money(m.gross, currency)),
+        ),
+      ),
+    );
+  }
+
+  function overseasSection(ov) {
+    // Always render the section. Until the overseas collector publishes real
+    // figures we show a "coming soon" placeholder rather than sample numbers —
+    // dummy data on a live box-office site would be read as real.
+    if (!ov) {
+      return h(
+        "section",
+        { class: "section", id: "overseas" },
+        h(
+          "div",
+          { class: "wrap" },
+          h(
+            "div",
+            { class: "section-head" },
+            h(
+              "div",
+              null,
+              h(
+                "div",
+                { class: "eyebrow" },
+                h("span", { class: "live-dot" }),
+                "Overseas Box Office",
+                h("span", { class: "beta-tag" }, "Soon"),
+              ),
+            ),
+          ),
+          h(
+            "div",
+            { class: "ov-soon" },
+            stateMsg(
+              "globe",
+              "Coming soon",
+              "International box office tracking is on the way — territory-wise " +
+                "collections for every title we follow.",
+            ),
+          ),
+        ),
+      );
+    }
+
+    return h(
+      "section",
+      { class: "section", id: "overseas" },
+      h(
+        "div",
+        { class: "wrap" },
+        h(
+          "div",
+          { class: "section-head" },
+          h(
+            "div",
+            null,
+            h(
+              "div",
+              { class: "eyebrow" },
+              h("span", { class: "live-dot" }),
+              "Overseas Box Office",
+              h("span", { class: "beta-tag" }, "Beta"),
+            ),
+          ),
+          ov.updated
+            ? h("div", { class: "meta" }, "Updated " + ov.updated)
+            : null,
+        ),
+        h(
+          "div",
+          { class: "movie-grid" },
+          ...ov.movies.slice(0, 8).map((m) => overseasCard(m, ov.currency)),
+        ),
+      ),
+    );
+  }
+
+  function renderHome(
+    c,
+    mode,
+    date,
+    nat,
+    daily,
+    dailyDate,
+    advNat,
+    advDate,
+    overseas,
+  ) {
     // hero ticker — brand message
     const phrases = [
       "You name it, we track it.",
@@ -333,7 +606,20 @@
       ),
     );
 
-    mount(page(frag(hero, liveSection, moviesSection, social)));
+    // Overseas sits directly below Live Box Office Tracking. overseasSection()
+    // returns null when there's no data, and frag() skips nulls, so the page is
+    // unchanged until the overseas collector starts publishing.
+    mount(
+      page(
+        frag(
+          hero,
+          liveSection,
+          overseasSection(overseas),
+          moviesSection,
+          social,
+        ),
+      ),
+    );
   }
 
   // ---- Dedicated All Movies page (#/movies) with full list + filters ----
@@ -1440,6 +1726,23 @@
       ),
     );
 
+    // Language-wise — sits directly under States, above Format Summary.
+    // Shown for single-language films too: a one-row table still states plainly
+    // which language the figures are for, and its absence reads like a bug.
+    const langGrid = languageGrid(movie.languageSummary);
+    if (langGrid) {
+      parts.push(
+        block(
+          "Language-wise",
+          (movie.languageSummary || []).length +
+            ((movie.languageSummary || []).length === 1
+              ? " language tracked"
+              : " languages tracked"),
+          langGrid,
+        ),
+      );
+    }
+
     // Format summary
     parts.push(
       block(
@@ -2358,6 +2661,62 @@
             h("th", { class: "num" }, "Shows"),
             h("th", { class: "occ-cell" }, "Occupancy"),
             h("th", { class: "num" }, "Sold"),
+          ),
+        ),
+        h("tbody", null, ...rows),
+      ),
+    );
+  }
+
+  // Language-wise collections. The collector has always emitted
+  // movie.languageSummary alongside formatSummary — it just was never shown.
+  // Same shape as formatGrid, plus a share-of-gross % column, since "which
+  // language is actually driving this" is the thing people read it for.
+  function languageGrid(langs) {
+    if (!langs || !langs.length) return null;
+
+    const total = langs.reduce((a, l) => a + (l.gross || 0), 0);
+    const ordered = langs.slice().sort((a, b) => b.gross - a.gross);
+
+    const rows = ordered.map((l) =>
+      h(
+        "tr",
+        null,
+        h("td", null, h("span", { class: "tag lang" }, l.language)),
+        h("td", { class: "num gold" }, inr(l.gross)),
+        h(
+          "td",
+          { class: "num" },
+          h(
+            "span",
+            { class: "share" },
+            total ? ((l.gross / total) * 100).toFixed(1) + "%" : "—",
+          ),
+        ),
+        h("td", { class: "num" }, num(l.sold)),
+        h("td", { class: "num" }, num(l.shows)),
+        h("td", null, occMeter(l.occupancy)),
+      ),
+    );
+
+    return h(
+      "div",
+      { class: "table-wrap" },
+      h(
+        "table",
+        { class: "bo langwise" },
+        h(
+          "thead",
+          null,
+          h(
+            "tr",
+            null,
+            h("th", null, "Language"),
+            h("th", { class: "num" }, "Gross"),
+            h("th", { class: "num" }, "%"),
+            h("th", { class: "num" }, "Tickets"),
+            h("th", { class: "num" }, "Shows"),
+            h("th", null, "Occupancy"),
           ),
         ),
         h("tbody", null, ...rows),

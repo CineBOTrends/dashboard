@@ -150,6 +150,16 @@
     news: () => getJSON("data/news.json"),
     reviews: () => getJSON("data/reviews.json"),
     boxoffice: () => getJSON("data/boxoffice.json"),
+    // Overseas box office, from a SEPARATE collector.
+    //
+    // NOT under data/ on purpose: the India collector publishes with
+    //     rm -rf out/data && cp -r data out/data
+    // so anything it doesn't generate inside data/ is deleted on its next
+    // run. The overseas collector owns overseas/ and the two never collide.
+    //
+    // The file may legitimately not exist yet — callers must treat a
+    // rejection as 'no data', not an error (see safeOverseas in screens.js).
+    overseas: () => getJSON("overseas/latest.json"),
   };
 
   /* ---------- routing ---------- */

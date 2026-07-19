@@ -1219,3 +1219,95 @@ table.bo.cities td:nth-child(2) { width: 32%; }   /* give city the room back */
   table.bo.cities th:nth-child(5),
   table.bo.cities td:nth-child(5) { width: 16%; padding-left: 12px; }
 }
+
+/* ============================================================
+   OVERSEAS BOX OFFICE (home page, below Live Tracking)
+   Cards reuse .mcard/.poster/.body wholesale, so only the bits
+   that differ from a Live Tracking card are defined here.
+   Section stays hidden until overseas/latest.json exists.
+   ============================================================ */
+.beta-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border: 1px solid var(--brand-line);
+  border-radius: 999px;
+  background: var(--brand-soft);
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--brand);
+  vertical-align: middle;
+}
+
+/* distinct from livetrack (gold) / advancetrack (amber) so the three
+   card types are tellable apart at a glance */
+.badge.overseastrack {
+  background: #4FA3C7;
+  color: #06171F;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.badge.overseastrack .live-dot { background: #06171F; box-shadow: none; }
+
+/* no detail page yet -> the card must not look clickable */
+.mcard.ov-card { cursor: default; }
+.mcard.ov-card:hover { transform: none; }
+
+/* territory line sits where .langs normally does */
+.mcard.ov-card .langs {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .01em;
+  color: var(--ink-2);
+}
+.mcard.ov-card .cardmeta .g,
+.mcard.ov-card .cardmeta .rt {
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+
+/* ============================================================
+   LANGUAGE-WISE table (movie page, above Format Summary)
+   ============================================================ */
+.tag.lang {
+  background: var(--brand-soft);
+  border: 1px solid var(--brand-line);
+  color: var(--brand);
+}
+
+/* share-of-gross pill — reads as a proportion, not another figure */
+.share {
+  display: inline-block;
+  min-width: 46px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--raise);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  text-align: center;
+}
+table.bo.langwise tbody tr:first-child .share {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+table.bo.langwise th:nth-child(3),
+table.bo.langwise td:nth-child(3) { width: 80px; }
+
+@media (max-width: 760px) {
+  table.bo.langwise { min-width: 620px; }
+}
+
+/* Overseas: placeholder shown until the collector publishes real figures */
+.ov-soon {
+  border: 1px dashed var(--line-2);
+  border-radius: var(--r-md);
+  background: var(--panel);
+  padding: 6px 0;
+}
+.ov-soon .state-msg { padding: 34px 20px; }
