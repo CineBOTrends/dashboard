@@ -613,7 +613,7 @@
           { class: "kpis" },
           social_kpi("10M+", "Impressions"),
           social_kpi("1M+", "Engagements"),
-          social_kpi("17.9k+", "Followers"),
+          social_kpi("7.8k+", "Followers"),
         ),
         h(
           "a",
