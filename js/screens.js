@@ -64,16 +64,41 @@
   // starts daily tracking it DROPS its advance card and shows the daily/live
   // card instead ("advance batch removed, live tracking shown").
   // Returns [{ mv, mode, date, live }]; live=true means the daily card won.
-  function mergeFeeds(advNat, advDate, daily, dailyDate) {
+  // Load EVERY advance date, not just the newest one.
+  //
+  // Different films open on different days, so each advance date's national.json
+  // holds a different set of movies: 23 Jul has the Jana Nayagan releases, 30 Jul
+  // has Spider-Man. Reading only latest(advDates) meant every film whose opening
+  // day was not the newest date silently disappeared from All Movies — even
+  // though its data was published and its movie page worked.
+  async function loadAdvanceFeeds(c) {
+    const dates = (c.advDates || []).slice().sort(); // oldest -> newest
+    const feeds = await Promise.all(
+      dates.map(async (d) => {
+        try {
+          return { nat: await Data.national("advance", d), date: d };
+        } catch (e) {
+          return null; // date not published
+        }
+      }),
+    );
+    return feeds.filter(Boolean);
+  }
+
+  function mergeFeeds(advFeeds, daily, dailyDate) {
     const bySlug = new Map();
-    if (advNat && advNat.movies)
-      for (const mv of advNat.movies)
+    // oldest first, so a later date overwrites an earlier one for the same film
+    for (const f of advFeeds || []) {
+      if (!f || !f.nat || !f.nat.movies) continue;
+      for (const mv of f.nat.movies)
         bySlug.set(mv.slug, {
           mv,
           mode: "advance",
-          date: advDate,
+          date: f.date,
           live: false,
         });
+    }
+    // a film that is actually running wins over its advance entry
     if (daily && daily.movies)
       for (const mv of daily.movies)
         bySlug.set(mv.slug, { mv, mode: "daily", date: dailyDate, live: true });
@@ -140,20 +165,11 @@
           daily = null;
         }
       }
-      // advance data (new releases on pre-sale) for the live strip
-      let advNat = null,
-        advDate = null;
-      if (c.advDates.length) {
-        advDate = latest(c.advDates);
-        advNat = mode === "advance" ? nat : null;
-        if (!advNat) {
-          try {
-            advNat = await Data.national("advance", advDate);
-          } catch (e) {
-            advNat = null;
-          }
-        }
-      }
+      // advance data (new releases on pre-sale) — ALL dates, since films open
+      // on different days and each date holds a different set of movies
+      const advFeeds = await loadAdvanceFeeds(c);
+      const advDate = c.advDates.length ? latest(c.advDates) : null;
+      const advNat = advFeeds.length ? advFeeds[advFeeds.length - 1].nat : null;
       // Overseas: separate collector, may not exist yet -> null, section hidden
       const overseas = await safeOverseas();
       renderHome(
@@ -163,9 +179,10 @@
         nat,
         daily,
         dailyDate,
-        advNat,
+        advFeeds,
         advDate,
         overseas,
+        advNat,
       );
     } catch (e) {
       console.error(e);
@@ -431,9 +448,10 @@
     nat,
     daily,
     dailyDate,
-    advNat,
+    advFeeds,
     advDate,
     overseas,
+    advNat,
   ) {
     // hero ticker — brand message
     const phrases = [
@@ -485,7 +503,7 @@
     // ---- All Movies preview (top 5; full list on the dedicated page) ----
     // Advance batch minus anything now live in daily, plus the live titles —
     // daily cards win. Sorted by gross.
-    const merged = mergeFeeds(advNat, advDate, daily, dailyDate).sort(
+    const merged = mergeFeeds(advFeeds, daily, dailyDate).sort(
       (a, b) => b.mv.gross - a.mv.gross,
     );
     const topMovies = merged.slice(0, 5);
@@ -650,17 +668,10 @@
             ),
           ),
         );
-      const advDate = c.advDates.length ? latest(c.advDates) : null;
       const dailyDate = c.dayDates.length ? latest(c.dayDates) : null;
-      let advNat = null,
-        daily = null;
-      if (advDate) {
-        try {
-          advNat = await Data.national("advance", advDate);
-        } catch (e) {
-          advNat = null;
-        }
-      }
+      // every advance date, so films opening on different days all appear
+      const advFeeds = await loadAdvanceFeeds(c);
+      let daily = null;
       if (dailyDate) {
         try {
           daily = await Data.national("daily", dailyDate);
@@ -668,16 +679,16 @@
           daily = null;
         }
       }
-      renderAllMovies(c, advNat, advDate, daily, dailyDate);
+      renderAllMovies(c, advFeeds, daily, dailyDate);
     } catch (e) {
       console.error(e);
       mount(fetchError(e));
     }
   };
 
-  function renderAllMovies(c, advNat, advDate, daily, dailyDate) {
-    // Advance batch with live titles swapped in (daily wins); see mergeFeeds.
-    const entries = mergeFeeds(advNat, advDate, daily, dailyDate);
+  function renderAllMovies(c, advFeeds, daily, dailyDate) {
+    // Every advance date with live titles swapped in (daily wins); see mergeFeeds.
+    const entries = mergeFeeds(advFeeds, daily, dailyDate);
     const movies = entries.map((e) => e.mv);
     const langs = [...new Set(movies.flatMap((m) => m.languages))].sort();
     const fmts = FORMAT_ORDER.filter((f) =>
