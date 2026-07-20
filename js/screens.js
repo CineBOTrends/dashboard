@@ -687,6 +687,13 @@
   };
 
   function renderAllMovies(c, advFeeds, daily, dailyDate) {
+    // advFeeds is oldest -> newest; the last one is the most recent advance
+    // date, used only for the "updated" line in the header.
+    const lastFeed =
+      advFeeds && advFeeds.length ? advFeeds[advFeeds.length - 1] : null;
+    const advNat = lastFeed ? lastFeed.nat : null;
+    const advDate = lastFeed ? lastFeed.date : null;
+
     // Every advance date with live titles swapped in (daily wins); see mergeFeeds.
     const entries = mergeFeeds(advFeeds, daily, dailyDate);
     const movies = entries.map((e) => e.mv);
