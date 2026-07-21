@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-21 09:33",
+  "generated": "2026-07-21 10:19",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -64,10 +64,10 @@
     }
   },
   "upcoming": {
+    "chennai-love-story": "20260723",
     "jan-neta": "20260723",
     "jana-nayagan": "20260723",
     "jana-nayakudu": "20260723",
-    "chennai-love-story": "20260724",
     "spider-man-brand-new-day": "20260730"
   },
   "movieDates": {
@@ -284,6 +284,11 @@
         "20260724",
         "20260730"
       ],
+      "chennai-love-story": [
+        "20260723",
+        "20260724",
+        "20260730"
+      ],
       "jan-neta": [
         "20260723",
         "20260724",
@@ -296,10 +301,6 @@
       ],
       "jana-nayakudu": [
         "20260723",
-        "20260724",
-        "20260730"
-      ],
-      "chennai-love-story": [
         "20260724",
         "20260730"
       ],
