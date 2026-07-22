@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-22 22:34",
+  "generated": "2026-07-22 23:33",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -67,7 +67,6 @@
   },
   "upcoming": {
     "chennai-love-story": "20260723",
-    "jan-neta": "20260723",
     "spider-man-brand-new-day": "20260730"
   },
   "movieDates": {
@@ -112,7 +111,8 @@
         "20260719",
         "20260720",
         "20260721",
-        "20260722"
+        "20260722",
+        "20260723"
       ],
       "dhamaal-4": [
         "20260712",
@@ -178,6 +178,9 @@
       ],
       "jana-nayagan": [
         "20260722",
+        "20260723"
+      ],
+      "jan-neta": [
         "20260723"
       ],
       "jana-nayakudu": [
