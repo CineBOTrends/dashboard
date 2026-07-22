@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-22 16:34",
+  "generated": "2026-07-22 17:33",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -67,7 +67,6 @@
   "upcoming": {
     "chennai-love-story": "20260723",
     "jan-neta": "20260723",
-    "jana-nayagan": "20260723",
     "jana-nayakudu": "20260723",
     "spider-man-brand-new-day": "20260730"
   },
@@ -173,6 +172,9 @@
         "20260719",
         "20260720",
         "20260721",
+        "20260722"
+      ],
+      "jana-nayagan": [
         "20260722"
       ]
     },
