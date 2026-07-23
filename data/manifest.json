@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-23 03:14",
+  "generated": "2026-07-23 03:33",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -66,7 +66,6 @@
     }
   },
   "upcoming": {
-    "chennai-love-story": "20260723",
     "spider-man-brand-new-day": "20260730"
   },
   "movieDates": {
@@ -183,6 +182,9 @@
       ],
       "jana-nayagan": [
         "20260722",
+        "20260723"
+      ],
+      "chennai-love-story": [
         "20260723"
       ],
       "jan-neta": [
