@@ -143,13 +143,14 @@
     }
   }
   const Data = {
-    manifest: () => getJSON("data/manifest.json"),
-    national: (mode, date) => getJSON(`data/${mode}/${date}/national.json`),
-    movie: (mode, date, slug) => getJSON(`data/${mode}/${date}/m/${slug}.json`),
-    history: (mode, slug) => getJSON(`data/${mode}/history/${slug}.json`),
-    news: () => getJSON("data/news.json"),
-    reviews: () => getJSON("data/reviews.json"),
-    boxoffice: () => getJSON("data/boxoffice.json"),
+    manifest: () => getJSON("/data/manifest.json"),
+    national: (mode, date) => getJSON(`/data/${mode}/${date}/national.json`),
+    movie: (mode, date, slug) =>
+      getJSON(`/data/${mode}/${date}/m/${slug}.json`),
+    history: (mode, slug) => getJSON(`/data/${mode}/history/${slug}.json`),
+    news: () => getJSON("/data/news.json"),
+    reviews: () => getJSON("/data/reviews.json"),
+    boxoffice: () => getJSON("/data/boxoffice.json"),
     // Overseas box office, from a SEPARATE collector.
     //
     // NOT under data/ on purpose: the India collector publishes with
@@ -159,18 +160,36 @@
     //
     // The file may legitimately not exist yet — callers must treat a
     // rejection as 'no data', not an error (see safeOverseas in screens.js).
-    overseas: () => getJSON("overseas/latest.json"),
+    overseas: () => getJSON("/overseas/latest.json"),
   };
 
-  /* ---------- routing ---------- */
+  /* ---------- routing ----------
+     Real paths via the History API (not #hash routes), so the server
+     (and social/crawler bots, which never see anything after a #) can
+     see which page is being requested and hand back per-page previews.
+     A trailing "#fragment" (e.g. "/home#live") is preserved as a genuine
+     in-page anchor — go() splits it off the path on the way in and lets
+     the browser handle the scroll via location.hash. */
   const enc = encodeURIComponent,
     dec = decodeURIComponent;
-  const go = (hash) => {
-    location.hash = hash;
+  const go = (path) => {
+    path = String(path || "/home");
+    const hashIdx = path.indexOf("#");
+    const frag = hashIdx === -1 ? "" : path.slice(hashIdx);
+    let clean = hashIdx === -1 ? path : path.slice(0, hashIdx);
+    if (!clean.startsWith("/")) clean = "/" + clean;
+    const full = clean + frag;
+    if (full === location.pathname + location.hash) return; // no-op
+    history.pushState(null, "", full);
+    window.__CBO.render();
+    if (frag) {
+      const el = document.getElementById(frag.slice(1));
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }
   };
   function parts() {
-    return location.hash
-      .replace(/^#\/?/, "")
+    return location.pathname
+      .replace(/^\/+/, "")
       .split("/")
       .filter(Boolean)
       .map(dec);
@@ -181,12 +200,12 @@
     const nav = h(
       "nav",
       { class: "nav", id: "nav" },
-      h("a", { href: "#/home", onclick: closeNav }, "Home"),
-      h("a", { href: "#/movies", onclick: closeNav }, "All Movies"),
+      h("a", { href: "/home", onclick: closeNav }, "Home"),
+      h("a", { href: "/movies", onclick: closeNav }, "All Movies"),
       h(
         "a",
         {
-          href: "#/home#live",
+          href: "/home#live",
           class: "live",
           onclick: (e) => {
             closeNav();
@@ -195,11 +214,11 @@
         },
         "Live Box Office Tracking",
       ),
-      h("a", { href: "#/boxoffice", onclick: closeNav }, "Box Office Updates"),
-      h("a", { href: "#/news", onclick: closeNav }, "Movie News"),
-      h("a", { href: "#/reviews", onclick: closeNav }, "Movie Reviews"),
-      h("a", { href: "#/about", onclick: closeNav }, "About"),
-      h("a", { href: "#/contact", onclick: closeNav }, "Contact"),
+      h("a", { href: "/boxoffice", onclick: closeNav }, "Box Office Updates"),
+      h("a", { href: "/news", onclick: closeNav }, "Movie News"),
+      h("a", { href: "/reviews", onclick: closeNav }, "Movie Reviews"),
+      h("a", { href: "/about", onclick: closeNav }, "About"),
+      h("a", { href: "/contact", onclick: closeNav }, "Contact"),
     );
     return h(
       "header",
@@ -213,7 +232,7 @@
           h(
             "span",
             { class: "dot" },
-            h("img", { src: "assets/logo-mark.PNG", alt: "" }),
+            h("img", { src: "/assets/logo-mark.PNG", alt: "" }),
           ),
           h("span", { class: "name", html: "Cine<b>BOTrends</b>" }),
         ),
@@ -257,7 +276,7 @@
     t._tm = setTimeout(() => t.classList.remove("show"), 2600);
   }
   function jumpTo(e, id) {
-    if (location.hash.startsWith("#/home")) {
+    if (location.pathname === "/" || location.pathname.startsWith("/home")) {
       if (e) e.preventDefault();
       const el = document.getElementById(id);
       if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -283,7 +302,7 @@
 
   function footer() {
     const links = (arr) =>
-      arr.map((x) => h("a", { href: x[1] || "#/home", onclick: x[2] }, x[0]));
+      arr.map((x) => h("a", { href: x[1] || "/home", onclick: x[2] }, x[0]));
     return h(
       "footer",
       { class: "site-footer" },
@@ -298,7 +317,7 @@
             { class: "foot-brand" },
             h("div", {
               class: "name",
-              html: '<img class="foot-mark" src="assets/logo-mark.PNG" alt=""/>Cine<b>BOTrends</b>',
+              html: '<img class="foot-mark" src="/assets/logo-mark.PNG" alt=""/>Cine<b>BOTrends</b>',
             }),
             h(
               "p",
@@ -320,13 +339,13 @@
               ),
               h(
                 "a",
-                { href: "#/home", "aria-label": "Instagram" },
+                { href: "/home", "aria-label": "Instagram" },
                 icon("camera"),
               ),
-              h("a", { href: "#/home", "aria-label": "YouTube" }, icon("play")),
+              h("a", { href: "/home", "aria-label": "YouTube" }, icon("play")),
               h(
                 "a",
-                { href: "#/home", "aria-label": "Telegram" },
+                { href: "/home", "aria-label": "Telegram" },
                 icon("paper-plane"),
               ),
             ),
@@ -336,18 +355,18 @@
             null,
             h("h4", null, "Quick Links"),
             links([
-              ["Home", "#/home"],
+              ["Home", "/home"],
               [
                 "Movies",
-                "#/home",
+                "/home",
                 (e) => {
                   jumpMovies(e);
                 },
               ],
-              ["Release Calendar", "#/home"],
-              ["Box Office Tracker", "#/home"],
-              ["About", "#/about"],
-              ["Contact", "#/contact"],
+              ["Release Calendar", "/home"],
+              ["Box Office Tracker", "/home"],
+              ["About", "/about"],
+              ["Contact", "/contact"],
             ]),
           ),
           h(
@@ -355,9 +374,9 @@
             null,
             h("h4", null, "Legal"),
             links([
-              ["Privacy Policy", "#/about"],
-              ["Terms & Conditions", "#/about"],
-              ["Copyright Policy", "#/about"],
+              ["Privacy Policy", "/about"],
+              ["Terms & Conditions", "/about"],
+              ["Copyright Policy", "/about"],
             ]),
           ),
           h(
@@ -536,7 +555,27 @@
     }
   };
 
-  window.addEventListener("hashchange", () => window.__CBO.render());
+  window.addEventListener("popstate", () => window.__CBO.render());
+
+  // Every internal link is rendered as a normal <a href="/..."> so it still
+  // works (new tab, copy link, no-JS) if intercept fails — but for a normal
+  // same-tab left-click we hijack navigation into the SPA router so the
+  // page doesn't fully reload.
+  document.addEventListener("click", (e) => {
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest && e.target.closest("a[href]");
+    if (!a || a.target === "_blank" || a.hasAttribute("download")) return;
+    let url;
+    try {
+      url = new URL(a.href, location.href);
+    } catch (_) {
+      return;
+    }
+    if (url.origin !== location.origin) return;
+    e.preventDefault();
+    go(url.pathname + url.hash);
+  });
 
   // splash intro (2.5s, respects reduced motion), then hand off to router
   window.__CBO.boot = function boot() {
@@ -549,7 +588,8 @@
         splash.classList.add("out");
         setTimeout(() => splash.remove(), 500);
       }
-      if (!location.hash) location.hash = "#/home";
+      if (location.pathname === "/" || location.pathname === "")
+        history.replaceState(null, "", "/home" + location.hash);
       window.__CBO.render();
     };
     setTimeout(finish, reduce ? 200 : 2400);

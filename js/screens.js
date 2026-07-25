@@ -791,7 +791,7 @@
           h(
             "div",
             { class: "crumb" },
-            h("a", { href: "#/home" }, "Home"),
+            h("a", { href: "/home" }, "Home"),
             icon("angle-right"),
             h("span", null, "All Movies"),
           ),
@@ -1055,7 +1055,7 @@
       card: (it) =>
         h(
           "a",
-          { class: "ed-card", href: "#/news/" + encodeURIComponent(it.slug) },
+          { class: "ed-card", href: "/news/" + encodeURIComponent(it.slug) },
           it.image
             ? h("div", {
                 class: "ed-thumb",
@@ -1092,7 +1092,7 @@
             ? h("img", { class: "ed-hero", src: it.image, alt: it.title || "" })
             : null,
           h("div", { style: "max-width:680px" }, ...bodyBlocks(it.body)),
-          h("a", { href: "#/news", class: "ed-back" }, "\u2190 All news"),
+          h("a", { href: "/news", class: "ed-back" }, "\u2190 All news"),
         ),
     });
   };
@@ -1108,7 +1108,7 @@
           "a",
           {
             class: "ed-card",
-            href: "#/reviews/" + encodeURIComponent(it.slug),
+            href: "/reviews/" + encodeURIComponent(it.slug),
           },
           it.poster
             ? h("div", {
@@ -1159,7 +1159,7 @@
               })
             : null,
           h("div", { style: "max-width:680px" }, ...bodyBlocks(it.body)),
-          h("a", { href: "#/reviews", class: "ed-back" }, "\u2190 All reviews"),
+          h("a", { href: "/reviews", class: "ed-back" }, "\u2190 All reviews"),
         ),
     });
   };
@@ -1175,7 +1175,7 @@
           "a",
           {
             class: "ed-card",
-            href: "#/boxoffice/" + encodeURIComponent(it.slug),
+            href: "/boxoffice/" + encodeURIComponent(it.slug),
           },
           it.image
             ? h("div", {
@@ -1225,7 +1225,7 @@
           h("div", { style: "max-width:680px" }, ...bodyBlocks(it.body)),
           h(
             "a",
-            { href: "#/boxoffice", class: "ed-back" },
+            { href: "/boxoffice", class: "ed-back" },
             "\u2190 All updates",
           ),
         ),
@@ -1452,12 +1452,12 @@
     const crumb = h(
       "div",
       { class: "crumb" },
-      h("a", { href: "#/home" }, "Home"),
+      h("a", { href: "/home" }, "Home"),
       icon("angle-right"),
       h(
         "a",
         {
-          href: "#/home",
+          href: "/home",
           onclick: (e) => {
             e.preventDefault();
             go("/home");
@@ -1466,14 +1466,14 @@
         "Movies",
       ),
       icon("angle-right"),
-      h("a", { href: `#/movie/${enc(slug)}` }, title),
+      h("a", { href: `/movie/${enc(slug)}` }, title),
       stateName &&
         frag(
           icon("angle-right"),
           h(
             "a",
             {
-              href: `#/movie/${enc(slug)}/${tab}/${date}/state/${enc(stateName)}`,
+              href: `/movie/${enc(slug)}/${tab}/${date}/state/${enc(stateName)}`,
             },
             stateName,
           ),
@@ -2156,7 +2156,7 @@
   async function exportAssets() {
     const pos = (DL_META && DL_META.poster) || {};
     const [logo, poster, bg] = await Promise.all([
-      imgToDataUrl("assets/logo-mark.PNG", false),
+      imgToDataUrl("/assets/logo-mark.PNG", false),
       imgToDataUrl(pos.thumb, isRemote(pos.thumb)),
       imgToDataUrl(pos.bg, isRemote(pos.bg)),
     ]);
