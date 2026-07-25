@@ -34,7 +34,9 @@ function escapeHtml(s) {
   return String(s || "").replace(
     /[&<>"']/g,
     (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
   );
 }
 
@@ -57,7 +59,6 @@ function ogPage({ title, description, image, url }) {
 <meta name="twitter:title" content="${t}">
 <meta name="twitter:description" content="${d}">
 <meta name="twitter:image" content="${img}">
-<meta http-equiv="refresh" content="0; url=${url}">
 </head><body>
 <p><a href="${url}">${t}</a></p>
 </body></html>`;
@@ -90,7 +91,8 @@ const SECTION_DEFAULTS = {
   },
   about: {
     title: "About — CineBOTrends",
-    description: "About CineBOTrends, real-time Indian box office intelligence.",
+    description:
+      "About CineBOTrends, real-time Indian box office intelligence.",
   },
   contact: {
     title: "Contact — CineBOTrends",
@@ -139,7 +141,9 @@ async function buildOgData(env, url) {
     const item = await findItem(env, url, routeToDataFile[section], slug);
     if (item) {
       return {
-        title: pick(item, ["title", "name", "headline"]) || SECTION_DEFAULTS[section].title,
+        title:
+          pick(item, ["title", "name", "headline"]) ||
+          SECTION_DEFAULTS[section].title,
         description:
           pick(item, ["description", "summary", "excerpt", "subtitle"]) ||
           SECTION_DEFAULTS[section].description,
