@@ -123,6 +123,54 @@ async function findItem(env, url, dataPath, slug) {
   }
 }
 
+async function getJson(env, url, path) {
+  try {
+    const res = await env.ASSETS.fetch(new URL(path, url.origin).toString());
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (_e) {
+    return null;
+  }
+}
+
+// Mirrors S.movie()'s tab/mode/date resolution in screens.js, simplified:
+// walk the movie's own date list (from manifest.movieDates) most-recent-first
+// until a day's file for this movie actually exists, and read its poster.
+async function findMoviePoster(env, url, slug, restParts) {
+  const manifest = await getJson(env, url, "/data/manifest.json");
+  const movieDates = (manifest && manifest.movieDates) || {};
+  const mineDay = (movieDates.daily && movieDates.daily[slug]) || [];
+  const mineAdv = (movieDates.advance && movieDates.advance[slug]) || [];
+
+  let tab =
+    restParts.find((t) => ["advance", "daily", "historical"].includes(t)) ||
+    null;
+  const urlDate = restParts.find((t) => /^\d{8}$/.test(t)) || null;
+
+  if (!tab)
+    tab = mineDay.length ? "daily" : mineAdv.length ? "advance" : "historical";
+  const mode =
+    tab === "historical" ? (mineDay.length ? "daily" : "advance") : tab;
+  const dates = (mode === "advance" ? mineAdv : mineDay)
+    .slice()
+    .sort()
+    .reverse(); // newest first
+
+  const ordered =
+    urlDate && dates.includes(urlDate)
+      ? [urlDate, ...dates.filter((d) => d !== urlDate)]
+      : dates;
+
+  // Cap the walk-back so a bot request can't trigger unbounded fetches.
+  for (const d of ordered.slice(0, 6)) {
+    const movie = await getJson(env, url, `/data/${mode}/${d}/m/${slug}.json`);
+    if (movie) return movie;
+  }
+
+  const hist = await getJson(env, url, `/data/${mode}/history/${slug}.json`);
+  return hist ? { title: hist.title, poster: null } : null;
+}
+
 // Mirrors window.__CBO.render()'s dispatch in app.js — figure out which
 // section/slug a path refers to, and build OG data for it.
 async function buildOgData(env, url) {
@@ -154,16 +202,19 @@ async function buildOgData(env, url) {
   }
 
   if (section === "movie" && slug) {
-    // /movie/<slug>/... — no dedicated list endpoint here (see Data.movie in
-    // app.js, which needs a mode+date too), so use the slug itself for a
-    // readable title rather than leaving it generic.
+    const movie = await findMoviePoster(env, url, slug, parts.slice(2));
     const readable = decodeURIComponent(slug).replace(/[-_]+/g, " ").trim();
+    const fallbackTitle = readable
+      ? readable.replace(/\b\w/g, (c) => c.toUpperCase())
+      : null;
     return {
-      title: readable
-        ? readable.replace(/\b\w/g, (c) => c.toUpperCase()) + " — CineBOTrends"
-        : SECTION_DEFAULTS.home.title,
+      title:
+        (movie && pick(movie, ["title", "name"])) ||
+        (fallbackTitle
+          ? fallbackTitle + " — CineBOTrends"
+          : SECTION_DEFAULTS.home.title),
       description: SECTION_DEFAULTS.boxoffice.description,
-      image: null,
+      image: movie ? pick(movie, ["poster", "image"]) : null,
       url: canonical,
     };
   }
