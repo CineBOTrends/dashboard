@@ -110,6 +110,24 @@ function pick(obj, keys) {
   return null;
 }
 
+// poster/image fields in this app's data are objects like {thumb, bg}, not
+// plain URL strings — pull out a real URL regardless of which shape shows up.
+function imageUrl(value) {
+  if (!value) return null;
+  if (typeof value === "string") return value;
+  if (typeof value === "object")
+    return value.thumb || value.bg || value.full || value.large || null;
+  return null;
+}
+
+function pickImage(obj, keys) {
+  for (const k of keys) {
+    const url = imageUrl(obj && obj[k]);
+    if (url) return url;
+  }
+  return null;
+}
+
 async function findItem(env, url, dataPath, slug) {
   try {
     const assetUrl = new URL(dataPath, url.origin);
@@ -167,6 +185,19 @@ async function findMoviePoster(env, url, slug, restParts) {
     if (movie) return movie;
   }
 
+  // Per-movie file missing/empty for every date tried — national.json for
+  // that date is a summary list of all movies and has the same poster shape.
+  for (const d of ordered.slice(0, 3)) {
+    const national = await getJson(
+      env,
+      url,
+      `/data/${mode}/${d}/national.json`,
+    );
+    const list = (national && national.movies) || [];
+    const found = list.find((m) => m && m.slug === slug);
+    if (found) return found;
+  }
+
   const hist = await getJson(env, url, `/data/${mode}/history/${slug}.json`);
   return hist ? { title: hist.title, poster: null } : null;
 }
@@ -195,7 +226,7 @@ async function buildOgData(env, url) {
         description:
           pick(item, ["description", "summary", "excerpt", "subtitle"]) ||
           SECTION_DEFAULTS[section].description,
-        image: pick(item, ["image", "poster", "thumbnail", "thumb"]),
+        image: pickImage(item, ["image", "poster", "thumbnail", "thumb"]),
         url: canonical,
       };
     }
@@ -214,7 +245,7 @@ async function buildOgData(env, url) {
           ? fallbackTitle + " — CineBOTrends"
           : SECTION_DEFAULTS.home.title),
       description: SECTION_DEFAULTS.boxoffice.description,
-      image: movie ? pick(movie, ["poster", "image"]) : null,
+      image: movie ? pickImage(movie, ["poster", "image"]) : null,
       url: canonical,
     };
   }
