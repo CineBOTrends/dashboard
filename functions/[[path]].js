@@ -174,10 +174,9 @@ async function findMoviePoster(env, url, slug, restParts) {
     .sort()
     .reverse(); // newest first
 
-  const ordered =
-    urlDate && dates.includes(urlDate)
-      ? [urlDate, ...dates.filter((d) => d !== urlDate)]
-      : dates;
+  const ordered = urlDate
+    ? [urlDate, ...dates.filter((d) => d !== urlDate)]
+    : dates;
 
   // Cap the walk-back so a bot request can't trigger unbounded fetches.
   for (const d of ordered.slice(0, 6)) {
