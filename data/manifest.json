@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-27 03:14",
+  "generated": "2026-07-27 03:35",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -73,9 +73,7 @@
       ]
     }
   },
-  "upcoming": {
-    "spider-man-brand-new-day": "20260727"
-  },
+  "upcoming": {},
   "movieDates": {
     "daily": {
       "alpha": [
@@ -246,6 +244,9 @@
         "20260724",
         "20260725",
         "20260726",
+        "20260727"
+      ],
+      "spider-man-brand-new-day": [
         "20260727"
       ]
     },
