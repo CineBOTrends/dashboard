@@ -40,10 +40,20 @@ function escapeHtml(s) {
   );
 }
 
+// Route third-party image URLs through our own /img-proxy so crawlers
+// (X/Twitter, Facebook, etc.) only ever fetch from cinebotrends.com — some
+// source CDNs silently block known crawler ASNs/UAs, which drops the card
+// with no visible error even though the image loads fine for normal requests.
+function proxyImage(raw) {
+  if (!raw) return null;
+  if (raw.startsWith(SITE + "/")) return raw; // already same-origin
+  return SITE + "/img-proxy?u=" + encodeURIComponent(raw);
+}
+
 function ogPage({ title, description, image, url }) {
   const t = escapeHtml(title);
   const d = escapeHtml(description);
-  const img = image || DEFAULT_IMAGE;
+  const img = proxyImage(image) || DEFAULT_IMAGE;
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <title>${t}</title>
