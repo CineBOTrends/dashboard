@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-28 03:14",
+  "generated": "2026-07-28 03:35",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -263,7 +263,8 @@
         "20260728"
       ],
       "spider-man-brand-new-day": [
-        "20260727"
+        "20260727",
+        "20260728"
       ]
     },
     "advance": {
