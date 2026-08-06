@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-06 09:31",
+  "generated": "2026-08-06 10:28",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -94,7 +94,7 @@
     }
   },
   "upcoming": {
-    "dookudu": "20260807"
+    "dookudu": "20260809"
   },
   "movieDates": {
     "daily": {
@@ -565,7 +565,6 @@
         "20260809"
       ],
       "dookudu": [
-        "20260807",
         "20260809"
       ]
     }
