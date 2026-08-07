@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-07 22:31",
+  "generated": "2026-08-07 23:31",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -96,9 +96,7 @@
       ]
     }
   },
-  "upcoming": {
-    "dookudu": "20260808"
-  },
+  "upcoming": {},
   "movieDates": {
     "daily": {
       "welcome-to-the-jungle": [
@@ -323,7 +321,8 @@
         "20260804",
         "20260805",
         "20260806",
-        "20260807"
+        "20260807",
+        "20260808"
       ],
       "srinivasa-mangapuram": [
         "20260730",
@@ -335,6 +334,9 @@
         "20260805",
         "20260806",
         "20260807"
+      ],
+      "dookudu": [
+        "20260808"
       ]
     },
     "advance": {
