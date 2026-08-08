@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-08 21:31",
+  "generated": "2026-08-08 22:30",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -346,7 +346,8 @@
         "20260808"
       ],
       "dookudu": [
-        "20260808"
+        "20260808",
+        "20260809"
       ]
     },
     "advance": {
