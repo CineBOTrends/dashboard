@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-25 08:59",
+  "generated": "2026-09-02 19:49",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -45,7 +45,8 @@
         "20260809",
         "20260810",
         "20260811",
-        "20260826"
+        "20260826",
+        "20260903"
       ]
     },
     "daily": {
@@ -102,13 +103,13 @@
     }
   },
   "upcoming": {
-    "toxic-a-fairy-tale-for-grown-ups": "20260826"
+    "romanchakam": "20260903"
   },
   "movieDates": {
     "daily": {},
     "advance": {
-      "toxic-a-fairy-tale-for-grown-ups": [
-        "20260826"
+      "romanchakam": [
+        "20260903"
       ]
     }
   }
