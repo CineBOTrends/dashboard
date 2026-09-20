@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-02 20:17",
+  "generated": "2026-09-20 15:59",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -46,7 +46,8 @@
         "20260810",
         "20260811",
         "20260826",
-        "20260903"
+        "20260903",
+        "20260924"
       ]
     },
     "daily": {
@@ -103,13 +104,13 @@
     }
   },
   "upcoming": {
-    "romanchakam": "20260903"
+    "the-paradise": "20260924"
   },
   "movieDates": {
     "daily": {},
     "advance": {
-      "romanchakam": [
-        "20260903"
+      "the-paradise": [
+        "20260924"
       ]
     }
   }
