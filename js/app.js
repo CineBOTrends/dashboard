@@ -145,6 +145,8 @@
   const Data = {
     manifest: () => getJSON("/data/manifest.json"),
     national: (mode, date) => getJSON(`/data/${mode}/${date}/national.json`),
+    multiplex: (mode, date) =>
+      getJSON(`/data/${mode}/${date}/multiplex.json`),
     movie: (mode, date, slug) =>
       getJSON(`/data/${mode}/${date}/m/${slug}.json`),
     history: (mode, slug) => getJSON(`/data/${mode}/history/${slug}.json`),
@@ -215,10 +217,10 @@
         "Live Box Office Tracking",
       ),
       h("a", { href: "/boxoffice", onclick: closeNav }, "Box Office Updates"),
+      h("a", { href: "/multiplex", onclick: closeNav }, "Multiplex"),
       h("a", { href: "/news", onclick: closeNav }, "Movie News"),
       h("a", { href: "/reviews", onclick: closeNav }, "Movie Reviews"),
-      h("a", { href: "/about", onclick: closeNav }, "About"),
-      h("a", { href: "/contact", onclick: closeNav }, "Contact"),
+      // About and Contact remain available by direct route but are hidden from the header.
     );
     return h(
       "header",
@@ -547,6 +549,7 @@
       if (p[0] === "news") return S.news(p);
       if (p[0] === "reviews") return S.reviews(p);
       if (p[0] === "boxoffice") return S.boxoffice(p);
+      if (p[0] === "multiplex") return S.multiplex();
       if (p[0] === "movie") return S.movie(p); // movie/<slug>/<tab?>/state/<s>/city/<c>
       return S.home();
     } catch (e) {

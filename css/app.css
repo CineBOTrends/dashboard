@@ -1045,6 +1045,29 @@ table.bo .sub { font-size: 11px; color: var(--muted); }
 }
 .ed-back{ display:inline-block; margin-top:24px; color:var(--gold,#FFB000); text-decoration:none; font-size:.9rem; }
 .ed-back:hover{ text-decoration:underline; }
+
+/* ---------- multiplex report ---------- */
+.multiplex-page { position: relative; }
+.multiplex-title { font-size: clamp(30px, 5vw, 48px); margin: 6px 0 2px; }
+.multiplex-subtitle { color: var(--muted); margin: 0 0 20px; }
+.multiplex-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+.multiplex-stat { min-width: 96px; padding: 10px 13px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-sm); }
+.multiplex-stat span { display: block; color: var(--muted); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+.multiplex-stat b { display: block; color: var(--brand); font: 600 14px var(--mono); margin-top: 4px; }
+.multiplex-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; align-items: start; }
+.multiplex-card { overflow: hidden; background: var(--panel); border: 1px solid var(--brand-line); border-radius: var(--r); }
+.multiplex-card-head { display: flex; justify-content: space-between; gap: 10px; padding: 11px 13px; background: rgba(0, 85, 62, .45); color: #42d9a4; }
+.multiplex-card-head strong { font-size: 13px; text-transform: uppercase; }
+.multiplex-card-head span { font: 10px var(--mono); white-space: nowrap; }
+.multiplex-table { font-size: 11.5px !important; }
+.multiplex-table thead th { padding: 8px 10px !important; font-size: 9px !important; }
+.multiplex-table tbody td { padding: 8px 10px !important; }
+.multiplex-table th:first-child, .multiplex-table td:first-child { width: 30px; }
+.multiplex-table th:nth-child(2), .multiplex-table td:nth-child(2) { min-width: 150px; }
+@media (max-width: 560px) {
+  .multiplex-grid { grid-template-columns: 1fr; }
+  .multiplex-card-head { align-items: flex-start; flex-direction: column; gap: 3px; }
+}
 /* ============================================================
    Day chips + collapsible breakdown strip (Daily / Advance)
    Accent is variable-driven: override --bd-accent / --bd-accent-2

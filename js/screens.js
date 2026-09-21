@@ -1442,6 +1442,105 @@
     });
   };
 
+  /* ---------- multiplex report ---------- */
+  function multiplexRows(value) {
+    if (Array.isArray(value)) return value;
+    if (!value || typeof value !== "object") return [];
+    return value.movies || value.items || value.rows || value.data || [];
+  }
+
+  function multiplexGroups(raw) {
+    const groups =
+      (raw && (raw.multiplexes || raw.theatres || raw.groups || raw.data)) ||
+      raw;
+    if (!Array.isArray(groups) || !groups.length) return [];
+    return groups
+      .map((group) => {
+        const rows = multiplexRows(group.movies || group.items || group.rows || group.data);
+        return {
+          name: group.name || group.theatre || group.multiplex || group.title || "Multiplex",
+          gross: group.gross ?? group.totalGross ?? group.collection ?? 0,
+          shows: group.shows ?? group.totalShows ?? rows.reduce((n, row) => n + Number(row.shows || row.showCount || 0), 0),
+          rows,
+        };
+      })
+      .filter((group) => group.rows.length);
+  }
+
+  function multiplexRow(row) {
+    const movie = row.movie || row.title || row.name || "Untitled";
+    const gross = row.gross ?? row.collection ?? row.amount ?? 0;
+    const shows = row.shows ?? row.showCount ?? row.screenCount ?? 0;
+    return [movie, gross, shows];
+  }
+
+  function multiplexMoney(value) {
+    return Number.isFinite(Number(value)) ? inr(value) : String(value || "₹0");
+  }
+
+  S.multiplex = async function () {
+    mount(page(h("div", { class: "wrap section" }, loading())));
+    try {
+      const manifest = await Data.manifest();
+      const dailyDates = (manifest.modes.daily && manifest.modes.daily.dates) || [];
+      const advanceDates = (manifest.modes.advance && manifest.modes.advance.dates) || [];
+      const mode = dailyDates.length ? "daily" : "advance";
+      const dates = mode === "daily" ? dailyDates : advanceDates;
+      let date = null;
+      let raw = null;
+      for (const candidate of dates.slice().reverse()) {
+        try {
+          raw = await Data.multiplex(mode, candidate);
+          date = candidate;
+          break;
+        } catch (e) {
+          // A manifest date can exist before its multiplex collector output.
+        }
+      }
+      if (!date || !raw) {
+        mount(page(h("div", { class: "wrap section" }, stateMsg("film", "No multiplex data yet", "Multiplex reports will appear here when data is published."))));
+        return;
+      }
+      const groups = multiplexGroups(raw);
+      const report = raw && typeof raw === "object" ? raw : {};
+      const totalGross = report.gross ?? report.totalGross ?? groups.reduce((n, group) => n + Number(group.gross || 0), 0);
+      const totalShows = report.shows ?? report.totalShows ?? groups.reduce((n, group) => n + Number(group.shows || 0), 0);
+      mount(page(
+        h("div", { class: "wrap section multiplex-page" },
+          h("div", { class: "eyebrow" }, "Live Tracking"),
+          h("h2", { class: "display multiplex-title" }, "Daily Multiplex Report"),
+          h("p", { class: "multiplex-subtitle" }, "Live tracked collections across select multiplexes."),
+          h("div", { class: "multiplex-meta" },
+            h("div", { class: "multiplex-stat" }, h("span", null, "Date"), h("b", null, postDate(date.slice(0, 4) + "-" + date.slice(4, 6) + "-" + date.slice(6, 8)))),
+            h("div", { class: "multiplex-stat" }, h("span", null, "Theatres"), h("b", null, groups.length)),
+            h("div", { class: "multiplex-stat" }, h("span", null, "Gross"), h("b", null, multiplexMoney(totalGross))),
+            h("div", { class: "multiplex-stat" }, h("span", null, "Shows"), h("b", null, num(totalShows))),
+          ),
+          groups.length
+            ? h("div", { class: "multiplex-grid" }, ...groups.map((group) =>
+                h("section", { class: "multiplex-card" },
+                  h("div", { class: "multiplex-card-head" },
+                    h("strong", null, group.name),
+                    h("span", null, `${multiplexMoney(group.gross)} · ${num(group.shows)} shows`),
+                  ),
+                  h("table", { class: "bo multiplex-table" },
+                    h("thead", null, h("tr", null, h("th", null, "#"), h("th", null, "Movie"), h("th", { class: "num" }, "Gross"), h("th", { class: "num" }, "Shows"))),
+                    h("tbody", null, ...group.rows.map((row, index) => {
+                      const [movie, gross, shows] = multiplexRow(row);
+                      return h("tr", null, h("td", { class: "rank" + (index < 3 ? " top" : "") }, index + 1), h("td", null, movie), h("td", { class: "num gold" }, multiplexMoney(gross)), h("td", { class: "num" }, shows));
+                    })),
+                  ),
+                ),
+              ))
+            : stateMsg("film", "No multiplex data for this date", "Try again after the next multiplex report is published."),
+        ),
+      ));
+    } catch (e) {
+      console.error(e);
+      mount(page(h("div", { class: "wrap section" }, stateMsg("triangle-warning", "Couldn't load multiplex data", "Check that the multiplex report exists for the latest tracking date."))));
+    }
+  };
+
   S.about = function () {
     mount(
       page(
