@@ -1458,7 +1458,7 @@
       .map((group) => {
         const rows = multiplexRows(group.movies || group.items || group.rows || group.data);
         return {
-          name: group.name || group.theatre || group.multiplex || group.title || "Multiplex",
+          name: group.label || group.name || group.theatre || group.multiplex || group.title || "Multiplex",
           gross: group.gross ?? group.totalGross ?? group.collection ?? 0,
           shows: group.shows ?? group.totalShows ?? rows.reduce((n, row) => n + Number(row.shows || row.showCount || 0), 0),
           rows,
@@ -1502,8 +1502,8 @@
       }
       const groups = multiplexGroups(raw);
       const report = raw && typeof raw === "object" ? raw : {};
-      const totalGross = report.gross ?? report.totalGross ?? groups.reduce((n, group) => n + Number(group.gross || 0), 0);
-      const totalShows = report.shows ?? report.totalShows ?? groups.reduce((n, group) => n + Number(group.shows || 0), 0);
+      const totalGross = report.totals?.gross ?? report.gross ?? report.totalGross ?? groups.reduce((n, group) => n + Number(group.gross || 0), 0);
+      const totalShows = report.totals?.shows ?? report.shows ?? report.totalShows ?? groups.reduce((n, group) => n + Number(group.shows || 0), 0);
       mount(page(
         h("div", { class: "wrap section multiplex-page" },
           h("div", { class: "eyebrow" }, "Live Tracking"),
