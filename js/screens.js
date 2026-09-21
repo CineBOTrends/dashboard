@@ -1301,7 +1301,7 @@
           it.image
             ? h("img", { class: "ed-hero", src: it.image, alt: it.title || "" })
             : null,
-          h("div", { style: "max-width:680px" }, ...bodyBlocks(it.body)),
+          h("div", { class: "ed-copy" }, ...bodyBlocks(it.body)),
           h("a", { href: "/news", class: "ed-back" }, "\u2190 All news"),
         ),
     });
@@ -1368,7 +1368,7 @@
                 alt: it.movie || "",
               })
             : null,
-          h("div", { style: "max-width:680px" }, ...bodyBlocks(it.body)),
+          h("div", { class: "ed-copy" }, ...bodyBlocks(it.body)),
           h("a", { href: "/reviews", class: "ed-back" }, "\u2190 All reviews"),
         ),
     });
@@ -1432,7 +1432,7 @@
           it.image
             ? h("img", { class: "ed-hero", src: it.image, alt: it.title || "" })
             : null,
-          h("div", { style: "max-width:680px" }, ...bodyBlocks(it.body)),
+          h("div", { class: "ed-copy" }, ...bodyBlocks(it.body)),
           h(
             "a",
             { href: "/boxoffice", class: "ed-back" },
