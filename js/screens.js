@@ -1526,7 +1526,12 @@
                     h("thead", null, h("tr", null, h("th", null, "#"), h("th", null, "Movie"), h("th", { class: "num" }, "Gross"), h("th", { class: "num" }, "Shows"))),
                     h("tbody", null, ...group.rows.map((row, index) => {
                       const [movie, gross, shows] = multiplexRow(row);
-                      return h("tr", null, h("td", { class: "rank" + (index < 3 ? " top" : "") }, index + 1), h("td", null, movie), h("td", { class: "num gold" }, multiplexMoney(gross)), h("td", { class: "num" }, shows));
+                      return h("tr", null,
+                        h("td", { class: "rank" + (index < 3 ? " top" : "") }, index + 1),
+                        h("td", null, movie),
+                        h("td", { class: "num gold" }, multiplexMoney(gross)),
+                        h("td", { class: "num" }, shows),
+                      );
                     })),
                   ),
                 ),
@@ -2189,6 +2194,21 @@
     return !!open && open === ymd;
   }
 
+  function isPremiereDate(movie, ymd) {
+    const open = openingDay(movie);
+    if (!open) return false;
+    const premiere = ymdToDate(open);
+    premiere.setDate(premiere.getDate() - 1);
+    const p2 = (n) => String(n).padStart(2, "0");
+    return (
+      ymd ===
+      "" +
+        premiere.getFullYear() +
+        p2(premiere.getMonth() + 1) +
+        p2(premiere.getDate())
+    );
+  }
+
   /* ---- day chips + breakdown strip (Daily / Advance) ---------------- */
   let BD_OPEN = true; // collapse state, remembered for the session
 
@@ -2252,9 +2272,11 @@
             "span",
             { class: "dc-t" },
             adv
-              ? isOpeningDate(movie, d)
-                ? "Opening Day"
-                : "Advance"
+              ? isPremiereDate(movie, d)
+                ? "Premiere"
+                : isOpeningDate(movie, d)
+                  ? "Opening Day"
+                  : "Advance"
               : "Day " + dayNumber(d, dates, movie),
           ),
           h("span", { class: "dc-d" }, ymdShort(d)),
@@ -2281,8 +2303,10 @@
     const isToday = !adv && date === todayYMD();
 
     const title =
-      adv && isOpeningDate(movie, date)
-        ? "Opening Day Advance · " + ymdLong(date)
+      adv && isPremiereDate(movie, date)
+        ? "Premiere Advance · " + ymdLong(date)
+        : adv && isOpeningDate(movie, date)
+          ? "Opening Day Advance · " + ymdLong(date)
         : adv
           ? "Advance for " + ymdLong(date)
           : isToday
