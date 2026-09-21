@@ -1056,7 +1056,7 @@ table.bo .sub { font-size: 11px; color: var(--muted); }
 .multiplex-stat b { display: block; color: var(--brand); font: 600 14px var(--mono); margin-top: 4px; }
 .multiplex-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; align-items: start; }
 .multiplex-card { overflow: hidden; background: var(--panel); border: 1px solid var(--brand-line); border-radius: var(--r); }
-.multiplex-card-head { display: flex; justify-content: space-between; gap: 10px; padding: 11px 13px; background: rgba(0, 85, 62, .45); color: #42d9a4; }
+.multiplex-card-head { display: flex; justify-content: space-between; gap: 10px; padding: 11px 13px; background: var(--brand-soft); color: var(--brand); }
 .multiplex-card-head strong { font-size: 13px; text-transform: uppercase; }
 .multiplex-card-head span { font: 10px var(--mono); white-space: nowrap; }
 .multiplex-table { font-size: 11.5px !important; }

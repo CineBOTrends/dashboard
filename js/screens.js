@@ -1483,9 +1483,8 @@
     try {
       const manifest = await Data.manifest();
       const dailyDates = (manifest.modes.daily && manifest.modes.daily.dates) || [];
-      const advanceDates = (manifest.modes.advance && manifest.modes.advance.dates) || [];
-      const mode = dailyDates.length ? "daily" : "advance";
-      const dates = mode === "daily" ? dailyDates : advanceDates;
+      const mode = "daily";
+      const dates = dailyDates;
       let date = null;
       let raw = null;
       for (const candidate of dates.slice().reverse()) {
@@ -2009,32 +2008,70 @@
   function performanceBreakdown(s, movie) {
     const { slug, tab, date } = s;
     const cities = flatCities(movie).slice(0, 20);
+    const stateTotals = movie.states.reduce(
+      (sum, st) => ({
+        gross: sum.gross + (st.gross || 0),
+        sold: sum.sold + (st.sold || 0),
+        shows: sum.shows + (st.shows || 0),
+        theatres: sum.theatres + (st.theatres || 0),
+        seats: sum.seats + (st.seats || 0),
+      }),
+      { gross: 0, sold: 0, shows: 0, theatres: 0, seats: 0 },
+    );
+    const stateOccupancy = stateTotals.seats
+      ? (stateTotals.sold / stateTotals.seats) * 100
+      : 0;
     const stateGrid = h(
       "div",
-      { class: "state-grid" },
-      ...movie.states.map((st) =>
+      { class: "table-wrap statewise-table" },
+      h(
+        "table",
+        { class: "bo" },
         h(
-          "div",
-          {
-            class: "state-card",
-            role: "button",
-            tabindex: "0",
-            onclick: () =>
-              go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`),
-            onkeydown: (e) => {
-              if (e.key === "Enter")
-                go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`);
-            },
-          },
-          h("div", { class: "sn" }, st.state, icon("angle-right")),
-          h("div", { class: "sg" }, inr(st.gross)),
+          "thead",
+          null,
           h(
-            "div",
-            { class: "srow" },
-            sk("Tickets", num(st.sold)),
-            sk("Shows", num(st.shows)),
-            sk("Theatres", num(st.theatres)),
-            sk("Occupancy", pct(st.occupancy)),
+            "tr",
+            null,
+            ...["State", "Gross", "Tickets", "Shows", "Theatres", "Occupancy"].map(
+              (label, index) =>
+                h("th", { class: index ? "num" : null }, label),
+            ),
+          ),
+        ),
+        h(
+          "tbody",
+          null,
+          ...movie.states.map((st) =>
+            h(
+              "tr",
+              {
+                class: "clickable",
+                tabindex: "0",
+                onclick: () =>
+                  go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`),
+                onkeydown: (e) => {
+                  if (e.key === "Enter")
+                    go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`);
+                },
+              },
+              h("td", { class: "city-nm" }, st.state),
+              h("td", { class: "num gold" }, inr(st.gross)),
+              h("td", { class: "num" }, num(st.sold)),
+              h("td", { class: "num" }, num(st.shows)),
+              h("td", { class: "num" }, num(st.theatres)),
+              h("td", { class: "num" }, pct(st.occupancy)),
+            ),
+          ),
+          h(
+            "tr",
+            null,
+            h("td", { class: "totcell" }, "Total"),
+            h("td", { class: "num gold totcell" }, inr(stateTotals.gross)),
+            h("td", { class: "num totcell" }, num(stateTotals.sold)),
+            h("td", { class: "num totcell" }, num(stateTotals.shows)),
+            h("td", { class: "num totcell" }, num(stateTotals.theatres)),
+            h("td", { class: "num totcell" }, pct(stateOccupancy)),
           ),
         ),
       ),
