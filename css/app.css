@@ -1798,6 +1798,25 @@ table.bo.langwise td:nth-child(3) { width: 80px; }
   box-shadow: 0 0 10px var(--brand-glow);
   margin-right: 2px;
 }
+.perf-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dl-btn.perf-download {
+  box-sizing: border-box;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  margin-bottom: 20px;
+  color: var(--ink-2);
+  background: rgba(255,255,255,.04);
+  border-color: var(--line);
+}
+.dl-btn.perf-download i { font-size: 12px; }
+.dl-btn.perf-download .dl-label { display: none; }
 .perf-status-text {
   color: var(--ink-2);
 }

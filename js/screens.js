@@ -1948,6 +1948,7 @@
       { id: "format", label: "Format Wise", icon: "film" },
       { id: "city", label: "City Wise", icon: "city" },
     ];
+    let activePerfTab = perfTabs[3];
 
     const contentFor = (key) => {
       if (key === "language") {
@@ -1983,6 +1984,7 @@
           class: "perf-tab" + (t.id === "city" ? " active" : ""),
           type: "button",
           onclick: () => {
+            activePerfTab = t;
             tabButtons.forEach((btn) =>
               btn.classList.toggle("active", btn.dataset.key === t.id),
             );
@@ -2006,8 +2008,13 @@
         h("h3", { class: "perf-title" }, "Performance Breakdown"),
         h(
           "div",
-          { class: "perf-status" },
-          h("span", { class: "perf-status-text" }, "Updated : " + fmtUpdated(movie.last_updated || "")),
+          { class: "perf-actions" },
+          h(
+            "div",
+            { class: "perf-status" },
+            h("span", { class: "perf-status-text" }, "Updated : " + fmtUpdated(movie.last_updated || "")),
+          ),
+          dlBtn(() => activePerfTab.label, "perf-download"),
         ),
       ),
       h("div", { class: "perf-tabs" }, ...tabButtons),
@@ -2526,6 +2533,11 @@
   function openInTab(dataUrl, name) {
     const w = window.open("", "_blank");
     if (!w) return false;
+    writeImageToTab(w, dataUrl, name);
+    return true;
+  }
+
+  function writeImageToTab(w, dataUrl, name) {
     w.document.write(
       '<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">' +
         "<title>" +
@@ -2538,7 +2550,6 @@
         '" style="width:100%;height:auto;display:block">',
     );
     w.document.close();
-    return true;
   }
 
   function iosSheet(dataUrl, name) {
@@ -2723,7 +2734,8 @@
   async function downloadSection(section, sectionTitle, name, btn) {
     const label = btn.querySelector(".dl-label");
     const was = label ? label.textContent : "";
-    const touch = isIOS() || window.matchMedia("(max-width: 760px)").matches;
+    const ios = isIOS();
+    const touch = ios || window.matchMedia("(max-width: 760px)").matches;
     const prog = touch ? progressSheet() : null;
 
     btn.disabled = true;
@@ -2775,28 +2787,28 @@
         imagePlaceholder: TRANSPARENT_PX,
       };
 
-      // dom-to-image drops embedded images on the FIRST toPng() of a node — the
+      // dom-to-image drops embedded images on the first toPng() of a node — the
       // <img>/background data URIs aren't in its internal cache yet, so they
-      // rasterise empty. The second pass has them warm. (Fresh load = posterless
-      // card; reload = fine.) So: one throwaway pass, then the real one.
+      // rasterise empty. Warm its cache before rendering the real export.
       //
       // The warm-up is rendered TINY. It only has to populate the cache, and a
       // full-size throwaway doubles peak memory — which on an iPhone is the one
       // resource we cannot spend.
       const WARM = 0.12;
-      await withTimeout(
-        window.domtoimage.toPng(card, {
-          ...opts,
-          width: Math.max(1, Math.ceil(w * WARM)),
-          height: Math.max(1, Math.ceil(hgt * WARM)),
-          style: {
-            transform: "scale(" + WARM + ")",
-            transformOrigin: "top left",
-          },
-        }),
-        20000,
-        "preparing images",
-      );
+      for (let pass = 0; pass < (ios ? 2 : 1); pass += 1)
+        await withTimeout(
+          window.domtoimage.toPng(card, {
+            ...opts,
+            width: Math.max(1, Math.ceil(w * WARM)),
+            height: Math.max(1, Math.ceil(hgt * WARM)),
+            style: {
+              transform: "scale(" + WARM + ")",
+              transformOrigin: "top left",
+            },
+          }),
+          20000,
+          "preparing images",
+        );
 
       const dataUrl = await withTimeout(
         window.domtoimage.toPng(card, opts),
@@ -2806,17 +2818,14 @@
       if (!dataUrl || dataUrl.length < 2000)
         throw new Error("renderer returned an empty image");
 
-      // Every platform gets a real download first: <a download> on a data: URL
-      // is honoured by desktop, Android Chrome and iOS (this is what
-      // tracktollywood does, and it downloads directly there).
-      anchorDownload(dataUrl, name);
-
-      if (isIOS()) {
-        // ...but iOS can silently swallow it depending on browser/version, and
-        // we get no callback either way. So offer a fallback the user can act on.
-        if (prog) prog.saved(() => iosSheet(dataUrl, name));
+      if (ios) {
+        if (prog) prog.done();
+        iosSheet(dataUrl, name);
       } else if (prog) {
+        anchorDownload(dataUrl, name);
         prog.done();
+      } else {
+        anchorDownload(dataUrl, name);
       }
       if (label) label.textContent = was;
     } catch (e) {
@@ -2836,8 +2845,6 @@
   }
 
   function dlBtn(section, cls) {
-    const name =
-      dlSlug(["cbt", DL_CTX, section].filter(Boolean).join("_")) + ".png";
     return h(
       "button",
       {
@@ -2845,9 +2852,14 @@
         title: "Download as PNG",
         onclick: (e) => {
           const btn = e.currentTarget;
-          const node = btn.closest(".block, .bd-panel");
+          const node = btn.closest(".block, .bd-panel, .perf-wrap");
+          const sectionTitle =
+            typeof section === "function" ? section() : section;
+          const name =
+            dlSlug(["cbt", DL_CTX, sectionTitle].filter(Boolean).join("_")) +
+            ".png";
           if (node)
-            downloadSection(node, section, name, btn).catch((err) => {
+            downloadSection(node, sectionTitle, name, btn).catch((err) => {
               console.error(err);
               errSheet((err && err.message) || String(err));
               btn.disabled = false;
