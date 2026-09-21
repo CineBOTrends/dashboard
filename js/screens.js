@@ -2170,19 +2170,22 @@
   function openingDay(movie) {
     const m = (movie && movie.meta) || {};
 
+    // The explicit release date is the source of truth for opening day.
+    // Do not gate this by today's date: users can still open older advance
+    // dates and should see the same Premiere / Opening Day labels.
+    const rel = m.releaseDate ? String(m.releaseDate).slice(0, 10) : null;
+    if (rel && /^\d{4}-\d{2}-\d{2}$/.test(rel))
+      return rel.replace(/-/g, "");
+
     // Primary signal: build_data flags a film that has advance bookings but has
     // NEVER appeared in daily -> it hasn't released, and its opening day is the
     // earliest advance date. (District's API carries no release date at all, so
     // this is inferred from bookings rather than read from a field.)
     if (m.upcoming && /^\d{8}$/.test(String(m.openingDay || ""))) {
-      return String(m.openingDay) > todayYMD() ? String(m.openingDay) : null;
+      return String(m.openingDay);
     }
 
-    // Fallback: an explicit future release date, if one ever shows up.
-    const rel = m.releaseDate ? String(m.releaseDate).slice(0, 10) : null;
-    if (!rel || !/^\d{4}-\d{2}-\d{2}$/.test(rel)) return null;
-    const ymdRel = rel.replace(/-/g, "");
-    return ymdRel > todayYMD() ? ymdRel : null; // null once it has released
+    return null;
   }
 
   // True only for the ONE date that is this film's opening day. A film can
