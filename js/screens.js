@@ -172,6 +172,11 @@
       const advNat = advFeeds.length ? advFeeds[advFeeds.length - 1].nat : null;
       // Overseas: separate collector, may not exist yet -> null, section hidden
       const overseas = await safeOverseas();
+      const [news, boxoffice, reviews] = await Promise.all([
+        safeEditorial(Data.news),
+        safeEditorial(Data.boxoffice),
+        safeEditorial(Data.reviews),
+      ]);
       renderHome(
         c,
         mode,
@@ -183,12 +188,22 @@
         advDate,
         overseas,
         advNat,
+        { news, boxoffice, reviews },
       );
     } catch (e) {
       console.error(e);
       mount(fetchError(e));
     }
   };
+
+  async function safeEditorial(fetchFn) {
+    try {
+      const data = await fetchFn();
+      return Array.isArray(data) ? data : data.items || [];
+    } catch (e) {
+      return [];
+    }
+  }
 
   /* ============================================================
      OVERSEAS BOX OFFICE
@@ -369,44 +384,45 @@
   }
 
   function overseasSection(ov) {
-    // Always render the section. Until the overseas collector publishes real
-    // figures we show a "coming soon" placeholder rather than sample numbers —
-    // dummy data on a live box-office site would be read as real.
-    if (!ov) {
-      return h(
-        "section",
-        { class: "section", id: "overseas" },
-        h(
-          "div",
-          { class: "wrap" },
-          h(
-            "div",
-            { class: "section-head" },
-            h(
-              "div",
-              null,
-              h(
-                "div",
-                { class: "eyebrow" },
-                h("span", { class: "live-dot" }),
-                "Overseas Box Office",
-                h("span", { class: "beta-tag" }, "Soon"),
-              ),
-            ),
-          ),
-          h(
-            "div",
-            { class: "ov-soon" },
-            stateMsg(
-              "globe",
-              "Coming soon",
-              "International box office tracking is on the way — territory-wise " +
-                "collections for every title we follow.",
-            ),
-          ),
-        ),
-      );
-    }
+    // Temporarily hide the overseas placeholder while the collector is still
+    // being developed. Keep the original code below commented for easy reuse
+    // when real overseas data is ready.
+    // if (!ov) {
+    //   return h(
+    //     "section",
+    //     { class: "section", id: "overseas" },
+    //     h(
+    //       "div",
+    //       { class: "wrap" },
+    //       h(
+    //         "div",
+    //         { class: "section-head" },
+    //         h(
+    //           "div",
+    //           null,
+    //           h(
+    //             "div",
+    //             { class: "eyebrow" },
+    //             h("span", { class: "live-dot" }),
+    //             "Overseas Box Office",
+    //             h("span", { class: "beta-tag" }, "Soon"),
+    //           ),
+    //         ),
+    //       ),
+    //       h(
+    //         "div",
+    //         { class: "ov-soon" },
+    //         stateMsg(
+    //           "globe",
+    //           "Coming soon",
+    //           "International box office tracking is on the way — territory-wise " +
+    //             "collections for every title we follow.",
+    //         ),
+    //       ),
+    //     ),
+    //   );
+    // }
+    if (!ov) return null;
 
     return h(
       "section",
@@ -452,61 +468,153 @@
     advDate,
     overseas,
     advNat,
+    editorial,
   ) {
-    // hero ticker — brand message
-    const phrases = [
-      "You name it, we track it.",
-      "All in one platform.",
-      "Movie updates",
-      "Movie reviews",
-      "Pre-sales",
-      "Live tracking",
-      "Box Office updates",
-    ];
-    const tkItems = phrases.map((p) =>
-      h("span", { class: "tk" }, h("span", { class: "nm" }, p)),
-    );
-    const ticker = h(
-      "div",
-      { class: "ticker" },
-      h(
-        "div",
-        { class: "track" },
-        ...tkItems,
-        ...tkItems.map((n) => n.cloneNode(true)),
-        ...tkItems.map((n) => n.cloneNode(true)),
-        ...tkItems.map((n) => n.cloneNode(true)),
-      ),
-    );
-
-    const hero = h(
-      "section",
-      { class: "hero" },
-      h(
-        "div",
-        { class: "wrap" },
-        h(
-          "div",
-          { class: "bulbs" },
-          ...Array.from({ length: 13 }, () => h("i")),
-        ),
-        h("h1", null, "Box Office ", h("span", { class: "gold" }, "Tracker")),
-        h(
-          "p",
-          { class: "sub" },
-          "Track real-time box office performance across India with detailed analytics, live occupancy, collections, ticket sales, theatre-wise reports, city-wise insights and historical trends.",
-        ),
-      ),
-      ticker,
-    );
-
-    // ---- All Movies preview (top 5; full list on the dedicated page) ----
     // Advance batch minus anything now live in daily, plus the live titles —
     // daily cards win. Sorted by gross.
     const merged = mergeFeeds(advFeeds, daily, dailyDate).sort(
       (a, b) => b.mv.gross - a.mv.gross,
     );
+    const updated =
+      (daily && daily.last_updated) ||
+      (advNat && advNat.last_updated) ||
+      fmtDate(dailyDate || advDate);
+
     const topMovies = merged.slice(0, 5);
+    const leadMovie = topMovies[0];
+    const latestNews = editorial.news[0] || {};
+    const latestBoxOffice = editorial.boxoffice[0] || {};
+    const latestReview = editorial.reviews[0] || {};
+    const featureCards = [
+      {
+        eyebrow: "Discover",
+        title: "All Movies",
+        summary:
+          merged.length +
+          " titles across live tracking and advance booking, ready to explore.",
+        detail: "Browse every title, filter by language or format, and open its complete performance report.",
+        metric: num(merged.length) + " tracked",
+        action: "Browse all movies",
+        path: "/movies",
+        image:
+          leadMovie &&
+          leadMovie.mv.poster &&
+          (leadMovie.mv.poster.bg || leadMovie.mv.poster.thumb),
+      },
+      {
+        eyebrow: "Stay informed",
+        title: "Movie News",
+        summary:
+          latestNews.title ||
+          "Stories, announcements and updates from the world of cinema.",
+        detail: "Read the latest movie news and open each story for the full update.",
+        metric: "Latest updates",
+        action: "Read movie news",
+        path: "/news",
+        image: latestNews.image || latestNews.poster || null,
+      },
+      {
+        eyebrow: "Follow the numbers",
+        title: "Box Office Updates",
+        summary:
+          latestBoxOffice.title ||
+          "Collection reports, milestones and key performance movements.",
+        detail: "See the latest box office reports and collection updates in one place.",
+        metric: updated ? "Updated " + updated : "Live reports",
+        action: "View box office updates",
+        path: "/boxoffice",
+        image: latestBoxOffice.image || latestBoxOffice.poster || null,
+      },
+      {
+        eyebrow: "What to watch",
+        title: "Movie Reviews",
+        summary:
+          latestReview.movie ||
+          latestReview.title ||
+          "Ratings and quick reading before you choose your next film.",
+        detail: "Browse published reviews and open a title for the complete verdict.",
+        metric: "Fresh reviews",
+        action: "Explore reviews",
+        path: "/reviews",
+        image: latestReview.poster || latestReview.image || null,
+      },
+    ];
+
+    const hero = h(
+      "section",
+      { class: "hero hero-intelligence" },
+      h(
+        "div",
+        { class: "wrap hero-intelligence-grid" },
+        h(
+          "div",
+          { class: "hero-intelligence-copy" },
+          h(
+            "h1",
+            null,
+            "Everything Movies,",
+          ),
+          h(
+            "h1",
+            null,
+            h("span", { class: "gold" }, "One Place."),
+          ),
+          h(
+            "p",
+            { class: "sub" },
+            "Follow real-time collections, advance bookings, movie news, reviews and the performance details that matter.",
+          ),
+          h(
+            "div",
+            { class: "hero-value-list" },
+            heroValue(
+              "globe",
+              "India-wide coverage",
+              "Cities, states and theatres",
+            ),
+            heroValue(
+              "time-past",
+              "Regular updates",
+              "Live and advance tracking",
+            ),
+            heroValue(
+              "chart-histogram",
+              "Performance insights",
+              "Collections, occupancy and sales",
+            ),
+          ),
+          h(
+            "div",
+            { class: "hero-intelligence-actions" },
+            h(
+              "button",
+              {
+                class: "btn",
+                type: "button",
+                onclick: () =>
+                  document
+                    .getElementById("live")
+                    ?.scrollIntoView({ behavior: "smooth" }),
+              },
+              "Explore live tracking",
+              icon("arrow-right"),
+            ),
+            h(
+              "button",
+              {
+                class: "btn ghost",
+                type: "button",
+                onclick: () => go("/movies"),
+              },
+              "Browse movies",
+            ),
+          ),
+        ),
+        homeFeatureCarousel(featureCards),
+      ),
+    );
+
+    // ---- All Movies preview (top 5; full list on the dedicated page) ----
     const grid = h(
       "div",
       { class: "movie-grid" },
@@ -837,6 +945,108 @@
   }
 
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  function heroValue(iconName, title, detail) {
+    return h(
+      "div",
+      { class: "hero-value" },
+      icon(iconName),
+      h(
+        "div",
+        null,
+        h("strong", null, title),
+        h("span", null, detail),
+      ),
+    );
+  }
+  function homeFeatureCarousel(features) {
+    let active = 0;
+    let paused = false;
+    const art = h("div", { class: "feature-card-art" });
+    const eyebrow = h("div", { class: "feature-card-eyebrow" });
+    const title = h("h2", null);
+    const summary = h("p", { class: "feature-card-summary" });
+    const detail = h("p", { class: "feature-card-detail" });
+    const metric = h("span", { class: "feature-card-metric" });
+    const action = h("span", { class: "feature-card-action" });
+    const dots = features.map((feature, index) =>
+      h("button", {
+        class: "feature-card-dot",
+        type: "button",
+        "aria-label": "Show " + feature.title,
+        onclick: () => paint(index),
+      }),
+    );
+    const card = h(
+      "button",
+      {
+        class: "feature-card",
+        type: "button",
+        onmouseenter: () => {
+          paused = true;
+        },
+        onmouseleave: () => {
+          paused = false;
+        },
+        onfocusin: () => {
+          paused = true;
+        },
+        onfocusout: () => {
+          paused = false;
+        },
+        onclick: () => go(features[active].path),
+      },
+      art,
+      h(
+        "div",
+        { class: "feature-card-content" },
+        eyebrow,
+        title,
+        summary,
+        detail,
+        h(
+          "div",
+          { class: "feature-card-footer" },
+          metric,
+          action,
+        ),
+      ),
+    );
+    const carousel = h(
+      "aside",
+      { class: "home-feature", "aria-label": "Featured CineBOTrends content" },
+      card,
+      h("div", { class: "feature-card-dots" }, ...dots),
+    );
+
+    function paint(index) {
+      active = index;
+      const feature = features[active];
+      art.style.backgroundImage = feature.image
+        ? `linear-gradient(180deg, rgba(14,12,9,.05), rgba(14,12,9,.92)), url("${feature.image}")`
+        : "";
+      art.classList.toggle("has-image", !!feature.image);
+      eyebrow.textContent = feature.eyebrow;
+      title.textContent = feature.title;
+      summary.textContent = feature.summary;
+      detail.textContent = feature.detail;
+      metric.textContent = feature.metric;
+      action.replaceChildren("View details ", icon("arrow-right"));
+      dots.forEach((dot, dotIndex) => {
+        dot.classList.toggle("active", dotIndex === active);
+        dot.setAttribute("aria-current", String(dotIndex === active));
+      });
+    }
+
+    paint(0);
+    const timer = window.setInterval(() => {
+      if (!document.body.contains(carousel)) {
+        window.clearInterval(timer);
+      } else if (!paused) {
+        paint((active + 1) % features.length);
+      }
+    }, 5000);
+    return carousel;
+  }
   function social_kpi(n, l) {
     return h(
       "div",
@@ -1692,85 +1902,117 @@
     // ---- main tab view: collapsible breakdown strip ----
     parts.push(breakdownPanel(s, movie));
 
-    // Top 20 cities
-    const cities = flatCities(movie).slice(0, 20);
-    parts.push(
-      block(
-        "Top 20 Cities",
-        "Ranked by booked gross — tap a city to drill in",
-        citiesTable(cities, slug, tab, date),
-      ),
-    );
+    parts.push(performanceBreakdown(s, movie));
 
-    // State cards
-    parts.push(
-      block(
-        "States",
-        movie.states.length + " states tracked",
+    body.replaceChildren(...parts);
+  }
+
+  function performanceBreakdown(s, movie) {
+    const { slug, tab, date } = s;
+    const cities = flatCities(movie).slice(0, 20);
+    const stateGrid = h(
+      "div",
+      { class: "state-grid" },
+      ...movie.states.map((st) =>
         h(
           "div",
-          { class: "state-grid" },
-          ...movie.states.map((st) =>
-            h(
-              "div",
-              {
-                class: "state-card",
-                role: "button",
-                tabindex: "0",
-                onclick: () =>
-                  go(
-                    `/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`,
-                  ),
-                onkeydown: (e) => {
-                  if (e.key === "Enter")
-                    go(
-                      `/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`,
-                    );
-                },
-              },
-              h("div", { class: "sn" }, st.state, icon("angle-right")),
-              h("div", { class: "sg" }, inr(st.gross)),
-              h(
-                "div",
-                { class: "srow" },
-                sk("Tickets", num(st.sold)),
-                sk("Shows", num(st.shows)),
-                sk("Theatres", num(st.theatres)),
-                sk("Occupancy", pct(st.occupancy)),
-              ),
-            ),
+          {
+            class: "state-card",
+            role: "button",
+            tabindex: "0",
+            onclick: () =>
+              go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`),
+            onkeydown: (e) => {
+              if (e.key === "Enter")
+                go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`);
+            },
+          },
+          h("div", { class: "sn" }, st.state, icon("angle-right")),
+          h("div", { class: "sg" }, inr(st.gross)),
+          h(
+            "div",
+            { class: "srow" },
+            sk("Tickets", num(st.sold)),
+            sk("Shows", num(st.shows)),
+            sk("Theatres", num(st.theatres)),
+            sk("Occupancy", pct(st.occupancy)),
           ),
         ),
       ),
     );
 
-    // Language-wise — sits directly under States, above Format Summary.
-    // Shown for single-language films too: a one-row table still states plainly
-    // which language the figures are for, and its absence reads like a bug.
     const langGrid = languageGrid(movie.languageSummary);
-    if (langGrid) {
-      parts.push(
-        block(
-          "Language-wise",
-          (movie.languageSummary || []).length +
-            ((movie.languageSummary || []).length === 1
-              ? " language tracked"
-              : " languages tracked"),
-          langGrid,
-        ),
-      );
-    }
+    const perfTabs = [
+      { id: "state", label: "State Wise", icon: "marker" },
+      { id: "language", label: "Language Wise", icon: "language" },
+      { id: "format", label: "Format Wise", icon: "film" },
+      { id: "city", label: "City Wise", icon: "city" },
+    ];
 
-    // Format summary
-    parts.push(
-      block(
-        "Format Summary",
-        "Collections by presentation format",
-        formatGrid(movie.formatSummary),
+    const contentFor = (key) => {
+      if (key === "language") {
+        return langGrid
+          ? h("div", { class: "perf-panel-body" }, langGrid)
+          : h(
+              "div",
+              { class: "perf-panel-body empty" },
+              "No language-wise breakdown available.",
+            );
+      }
+      if (key === "format") {
+        return h(
+          "div",
+          { class: "perf-panel-body" },
+          formatGrid(movie.formatSummary),
+        );
+      }
+      if (key === "city") {
+        return h(
+          "div",
+          { class: "perf-panel-body" },
+          citiesTable(cities, slug, tab, date),
+        );
+      }
+      return h("div", { class: "perf-panel-body" }, stateGrid);
+    };
+
+    const tabButtons = perfTabs.map((t) =>
+      h(
+        "button",
+        {
+          class: "perf-tab" + (t.id === "city" ? " active" : ""),
+          type: "button",
+          onclick: () => {
+            tabButtons.forEach((btn) =>
+              btn.classList.toggle("active", btn.dataset.key === t.id),
+            );
+            panel.replaceChildren(contentFor(t.id));
+          },
+          "data-key": t.id,
+        },
+        icon(t.icon),
+        h("span", null, t.label),
       ),
     );
 
-    body.replaceChildren(...parts);
+    const panel = h("div", { class: "perf-panel-body" }, contentFor("city"));
+
+    return h(
+      "section",
+      { class: "perf-wrap" },
+      h(
+        "div",
+        { class: "perf-head" },
+        h("h3", { class: "perf-title" }, "Performance Breakdown"),
+        h(
+          "div",
+          { class: "perf-status" },
+          h("span", { class: "perf-status-text" }, "Updated : " + fmtUpdated(movie.last_updated || "")),
+        ),
+      ),
+      h("div", { class: "perf-tabs" }, ...tabButtons),
+      panel,
+    );
   }
 
   /* ---- upcoming releases: opening day only ---------------------------- */
@@ -2693,7 +2935,19 @@
   function languageGrid(langs) {
     if (!langs || !langs.length) return null;
 
-    const total = langs.reduce((a, l) => a + (l.gross || 0), 0);
+    const totals = langs.reduce(
+      (sum, l) => ({
+        gross: sum.gross + (l.gross || 0),
+        sold: sum.sold + (l.sold || 0),
+        seats: sum.seats + (l.seats || 0),
+        shows: sum.shows + (l.shows || 0),
+      }),
+      { gross: 0, sold: 0, seats: 0, shows: 0 },
+    );
+    const total = totals.gross;
+    const totalOccupancy = totals.seats
+      ? (totals.sold / totals.seats) * 100
+      : 0;
     const ordered = langs.slice().sort((a, b) => b.gross - a.gross);
 
     const rows = ordered.map((l) =>
@@ -2737,12 +2991,38 @@
             h("th", null, "Occupancy"),
           ),
         ),
-        h("tbody", null, ...rows),
+        h(
+          "tbody",
+          null,
+          ...rows,
+          h(
+            "tr",
+            null,
+            h("td", { class: "totcell" }, "Total"),
+            h("td", { class: "num gold totcell" }, inr(totals.gross)),
+            h("td", { class: "num totcell" }, "100.0%"),
+            h("td", { class: "num totcell" }, num(totals.sold)),
+            h("td", { class: "num totcell" }, num(totals.shows)),
+            h("td", { class: "totcell" }, occMeter(totalOccupancy)),
+          ),
+        ),
       ),
     );
   }
 
   function formatGrid(fmts) {
+    const totals = fmts.reduce(
+      (sum, f) => ({
+        gross: sum.gross + (f.gross || 0),
+        sold: sum.sold + (f.sold || 0),
+        seats: sum.seats + (f.seats || 0),
+        shows: sum.shows + (f.shows || 0),
+      }),
+      { gross: 0, sold: 0, seats: 0, shows: 0 },
+    );
+    const totalOccupancy = totals.seats
+      ? (totals.sold / totals.seats) * 100
+      : 0;
     const ordered = fmts
       .slice()
       .sort(
@@ -2782,7 +3062,20 @@
             h("th", null, "Occupancy"),
           ),
         ),
-        h("tbody", null, ...rows),
+        h(
+          "tbody",
+          null,
+          ...rows,
+          h(
+            "tr",
+            null,
+            h("td", { class: "totcell" }, "Total"),
+            h("td", { class: "num gold totcell" }, inr(totals.gross)),
+            h("td", { class: "num totcell" }, num(totals.sold)),
+            h("td", { class: "num totcell" }, num(totals.shows)),
+            h("td", { class: "totcell" }, occMeter(totalOccupancy)),
+          ),
+        ),
       ),
     );
   }
