@@ -554,7 +554,7 @@
       if (p[0] === "news") return S.news(p);
       if (p[0] === "reviews") return S.reviews(p);
       if (p[0] === "boxoffice") return S.boxoffice(p);
-      if (p[0] === "multiplex") return S.multiplex();
+      if (p[0] === "multiplex") return S.multiplex(p); // multiplex/<date?>, YYYYMMDD
       if (p[0] === "movie") return S.movie(p); // movie/<slug>/<tab?>/state/<s>/city/<c>
       return S.home();
     } catch (e) {

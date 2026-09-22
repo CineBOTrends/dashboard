@@ -1054,12 +1054,51 @@ table.bo .sub { font-size: 11px; color: var(--muted); }
 .multiplex-stat { min-width: 96px; padding: 10px 13px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-sm); }
 .multiplex-stat span { display: block; color: var(--muted); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .06em; }
 .multiplex-stat b { display: block; color: var(--brand); font: 600 14px var(--mono); margin-top: 4px; }
+.multiplex-date-stat { cursor: pointer; }
+.multiplex-date-input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--brand);
+  font: 600 14px var(--mono);
+  cursor: pointer;
+}
+.multiplex-date-input:focus { outline: none; }
+.multiplex-date-input::-webkit-calendar-picker-indicator { cursor: pointer; margin-left: 6px; }
 .multiplex-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; align-items: start; }
 .multiplex-card { overflow: hidden; background: var(--panel); border: 1px solid var(--brand-line); border-radius: var(--r); }
 .multiplex-card-head { display: flex; justify-content: space-between; gap: 10px; padding: 11px 13px; background: var(--brand-soft); color: var(--brand); }
 .multiplex-card-head strong { font-size: 13px; text-transform: uppercase; }
 .multiplex-card-head span { font: 10px var(--mono); white-space: nowrap; }
 .multiplex-table { font-size: 11.5px !important; }
+table.bo.multiplex-table { min-width: 0; } /* overrides the mobile forced-scroll rule below — cards are narrow by design */
+.multiplex-table-scroll {
+  max-height: 495px; /* header + ~15 rows; shorter lists just don't scroll */
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;      /* Firefox: keep scrolling, hide the bar */
+  -ms-overflow-style: none;   /* old Edge/IE */
+}
+.multiplex-table-scroll::-webkit-scrollbar { display: none; } /* Chrome/Safari/Edge */
+.multiplex-table-scroll thead th {
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+  z-index: 1;
+}
+.multiplex-legend {
+  margin-top: 18px;
+  padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--muted);
+  font: 12px var(--mono);
+  text-align: center;
+}
 .multiplex-table thead th { padding: 8px 10px !important; font-size: 9px !important; }
 .multiplex-table tbody td { padding: 8px 10px !important; }
 .multiplex-table th:first-child, .multiplex-table td:first-child { width: 30px; }
