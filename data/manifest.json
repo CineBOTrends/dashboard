@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-22 19:21",
+  "generated": "2026-09-22 19:46",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -44,7 +44,7 @@
   },
   "upcoming": {
     "the-paradise": "20260923",
-    "avengers-endgame-encore": "20260925"
+    "avengers-endgame-encore": "20260924"
   },
   "movieDates": {
     "daily": {},
@@ -55,6 +55,7 @@
         "20260925"
       ],
       "avengers-endgame-encore": [
+        "20260924",
         "20260925"
       ]
     }
