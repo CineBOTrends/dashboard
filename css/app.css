@@ -1054,6 +1054,10 @@ table.bo .sub { font-size: 11px; color: var(--muted); }
 .multiplex-stat { min-width: 96px; padding: 10px 13px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-sm); }
 .multiplex-stat span { display: block; color: var(--muted); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .06em; }
 .multiplex-stat b { display: block; color: var(--brand); font: 600 14px var(--mono); margin-top: 4px; }
+@media (max-width: 480px) {
+  .multiplex-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .multiplex-stat { min-width: 0; }
+}
 .multiplex-date-stat { cursor: pointer; }
 .multiplex-date-input {
   display: block;
@@ -1104,8 +1108,19 @@ table.bo.multiplex-table { min-width: 0; } /* overrides the mobile forced-scroll
 .multiplex-table th:first-child, .multiplex-table td:first-child { width: 30px; }
 .multiplex-table th:nth-child(2), .multiplex-table td:nth-child(2) { min-width: 150px; }
 @media (max-width: 560px) {
-  .multiplex-grid { grid-template-columns: 1fr; }
-  .multiplex-card-head { align-items: flex-start; flex-direction: column; gap: 3px; }
+  .multiplex-grid { grid-template-columns: 1fr; gap: 8px; }
+  .multiplex-card-head { align-items: flex-start; flex-direction: column; gap: 2px; padding: 8px 10px; }
+  .multiplex-card-head strong { font-size: 11.5px; }
+  .multiplex-card-head span { font-size: 9px; }
+  .multiplex-table { font-size: 10px !important; }
+  .multiplex-table thead th { padding: 6px 8px !important; font-size: 8px !important; }
+  .multiplex-table tbody td { padding: 6px 8px !important; }
+  .multiplex-table th:first-child, .multiplex-table td:first-child { width: 20px; }
+  .multiplex-table-scroll { max-height: 320px; } /* ~10 rows before it scrolls, so a card doesn't dominate the screen */
+  .multiplex-stat { padding: 7px 10px; }
+  .multiplex-stat span { font-size: 9px; }
+  .multiplex-stat b { font-size: 12.5px; }
+  .multiplex-legend { padding: 9px 12px; font-size: 10.5px; }
 }
 /* ============================================================
    Day chips + collapsible breakdown strip (Daily / Advance)

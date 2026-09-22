@@ -1501,10 +1501,10 @@
     const s = String(movie || "");
     const m = s.match(MULTIPLEX_LANG_RE);
     if (!m) return s;
-    const [, title, format, lang] = m;
+    const [, title, , lang] = m;
     const abbr = MULTIPLEX_LANG_ABBR[lang.trim().toLowerCase()];
     if (!abbr) return s;
-    return `${title}(${format.trim()} - ${abbr})`;
+    return `${title.trim()} (${abbr})`;
   }
   // Legend strip, e.g. "(T) Telugu · (H) Hindi · L = Lakhs · Cr = Crore" —
   // only lists language codes actually used in the current report.
@@ -1523,12 +1523,18 @@
     const langBits = order
       .filter((k) => seen.has(k))
       .map((k) => `(${seen.get(k)}) ${k[0].toUpperCase()}${k.slice(1)}`);
-    const bits = [...langBits, "L = Lakhs", "Cr = Crore"];
+    const bits = [...langBits, "L = Lakhs", "K = Thousands", "Cr = Crore"];
     return h("p", { class: "multiplex-legend" }, bits.join(" · "));
   }
 
+  // Always scale to K/L/Cr (never a long raw rupee string) so figures stay
+  // short and line up cleanly on narrow phone screens.
   function multiplexMoney(value) {
-    return Number.isFinite(Number(value)) ? inr(value) : String(value || "₹0");
+    const v = Number(value) || 0;
+    if (v >= 1e7) return "₹" + (v / 1e7).toFixed(2) + "Cr";
+    if (v >= 1e5) return "₹" + (v / 1e5).toFixed(2) + "L";
+    if (v >= 1e3) return "₹" + (v / 1e3).toFixed(2) + "K";
+    return "₹" + grp(v);
   }
 
   // "20260922" -> "2026-09-22" (what <input type="date"> needs)
