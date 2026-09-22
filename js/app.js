@@ -145,8 +145,13 @@
   const Data = {
     manifest: () => getJSON("/data/manifest.json"),
     national: (mode, date) => getJSON(`/data/${mode}/${date}/national.json`),
-    multiplex: (mode, date) =>
-      getJSON(`/data/${mode}/${date}/multiplex.json`),
+    multiplex: (mode, date) => getJSON(`/data/${mode}/${date}/multiplex.json`),
+    // All-India territory-wise report (advance + daily), rebuilt each time
+    // the collector writes a fresh territory_tracked.json — the shared
+    // 5-minute auto-refresh below clears this same cache, so an open tab
+    // picks up an updated file without a manual reload.
+    territory: (mode, date) =>
+      getJSON(`/data/${mode}/${date}/territory_tracked.json`),
     movie: (mode, date, slug) =>
       getJSON(`/data/${mode}/${date}/m/${slug}.json`),
     history: (mode, slug) => getJSON(`/data/${mode}/history/${slug}.json`),

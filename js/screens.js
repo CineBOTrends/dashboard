@@ -492,7 +492,8 @@
         summary:
           merged.length +
           " titles across live tracking and advance booking, ready to explore.",
-        detail: "Browse every title, filter by language or format, and open its complete performance report.",
+        detail:
+          "Browse every title, filter by language or format, and open its complete performance report.",
         metric: num(merged.length) + " tracked",
         action: "Browse all movies",
         path: "/movies",
@@ -507,7 +508,8 @@
         summary:
           latestNews.title ||
           "Stories, announcements and updates from the world of cinema.",
-        detail: "Read the latest movie news and open each story for the full update.",
+        detail:
+          "Read the latest movie news and open each story for the full update.",
         metric: "Latest updates",
         action: "Read movie news",
         path: "/news",
@@ -519,7 +521,8 @@
         summary:
           latestBoxOffice.title ||
           "Collection reports, milestones and key performance movements.",
-        detail: "See the latest box office reports and collection updates in one place.",
+        detail:
+          "See the latest box office reports and collection updates in one place.",
         metric: updated ? "Updated " + updated : "Live reports",
         action: "View box office updates",
         path: "/boxoffice",
@@ -532,7 +535,8 @@
           latestReview.movie ||
           latestReview.title ||
           "Ratings and quick reading before you choose your next film.",
-        detail: "Browse published reviews and open a title for the complete verdict.",
+        detail:
+          "Browse published reviews and open a title for the complete verdict.",
         metric: "Fresh reviews",
         action: "Explore reviews",
         path: "/reviews",
@@ -549,16 +553,8 @@
         h(
           "div",
           { class: "hero-intelligence-copy" },
-          h(
-            "h1",
-            null,
-            "Everything Movies,",
-          ),
-          h(
-            "h1",
-            null,
-            h("span", { class: "gold" }, "One Place."),
-          ),
+          h("h1", null, "Everything Movies,"),
+          h("h1", null, h("span", { class: "gold" }, "One Place.")),
           h(
             "p",
             { class: "sub" },
@@ -950,12 +946,7 @@
       "div",
       { class: "hero-value" },
       icon(iconName),
-      h(
-        "div",
-        null,
-        h("strong", null, title),
-        h("span", null, detail),
-      ),
+      h("div", null, h("strong", null, title), h("span", null, detail)),
     );
   }
   function homeFeatureCarousel(features) {
@@ -1003,12 +994,7 @@
         title,
         summary,
         detail,
-        h(
-          "div",
-          { class: "feature-card-footer" },
-          metric,
-          action,
-        ),
+        h("div", { class: "feature-card-footer" }, metric, action),
       ),
     );
     const carousel = h(
@@ -1456,11 +1442,25 @@
     if (!Array.isArray(groups) || !groups.length) return [];
     return groups
       .map((group) => {
-        const rows = multiplexRows(group.movies || group.items || group.rows || group.data);
+        const rows = multiplexRows(
+          group.movies || group.items || group.rows || group.data,
+        );
         return {
-          name: group.label || group.name || group.theatre || group.multiplex || group.title || "Multiplex",
+          name:
+            group.label ||
+            group.name ||
+            group.theatre ||
+            group.multiplex ||
+            group.title ||
+            "Multiplex",
           gross: group.gross ?? group.totalGross ?? group.collection ?? 0,
-          shows: group.shows ?? group.totalShows ?? rows.reduce((n, row) => n + Number(row.shows || row.showCount || 0), 0),
+          shows:
+            group.shows ??
+            group.totalShows ??
+            rows.reduce(
+              (n, row) => n + Number(row.shows || row.showCount || 0),
+              0,
+            ),
           rows,
         };
       })
@@ -1482,7 +1482,8 @@
     mount(page(h("div", { class: "wrap section" }, loading())));
     try {
       const manifest = await Data.manifest();
-      const dailyDates = (manifest.modes.daily && manifest.modes.daily.dates) || [];
+      const dailyDates =
+        (manifest.modes.daily && manifest.modes.daily.dates) || [];
       const mode = "daily";
       const dates = dailyDates;
       let date = null;
@@ -1497,51 +1498,170 @@
         }
       }
       if (!date || !raw) {
-        mount(page(h("div", { class: "wrap section" }, stateMsg("film", "No multiplex data yet", "Multiplex reports will appear here when data is published."))));
+        mount(
+          page(
+            h(
+              "div",
+              { class: "wrap section" },
+              stateMsg(
+                "film",
+                "No multiplex data yet",
+                "Multiplex reports will appear here when data is published.",
+              ),
+            ),
+          ),
+        );
         return;
       }
       const groups = multiplexGroups(raw);
       const report = raw && typeof raw === "object" ? raw : {};
-      const totalGross = report.totals?.gross ?? report.gross ?? report.totalGross ?? groups.reduce((n, group) => n + Number(group.gross || 0), 0);
-      const totalShows = report.totals?.shows ?? report.shows ?? report.totalShows ?? groups.reduce((n, group) => n + Number(group.shows || 0), 0);
-      mount(page(
-        h("div", { class: "wrap section multiplex-page" },
-          h("div", { class: "eyebrow" }, "Live Tracking"),
-          h("h2", { class: "display multiplex-title" }, "Daily Multiplex Report"),
-          h("p", { class: "multiplex-subtitle" }, "Live tracked collections across select multiplexes."),
-          h("div", { class: "multiplex-meta" },
-            h("div", { class: "multiplex-stat" }, h("span", null, "Date"), h("b", null, postDate(date.slice(0, 4) + "-" + date.slice(4, 6) + "-" + date.slice(6, 8)))),
-            h("div", { class: "multiplex-stat" }, h("span", null, "Theatres"), h("b", null, groups.length)),
-            h("div", { class: "multiplex-stat" }, h("span", null, "Gross"), h("b", null, multiplexMoney(totalGross))),
-            h("div", { class: "multiplex-stat" }, h("span", null, "Shows"), h("b", null, num(totalShows))),
-          ),
-          groups.length
-            ? h("div", { class: "multiplex-grid" }, ...groups.map((group) =>
-                h("section", { class: "multiplex-card" },
-                  h("div", { class: "multiplex-card-head" },
-                    h("strong", null, group.name),
-                    h("span", null, `${multiplexMoney(group.gross)} · ${num(group.shows)} shows`),
-                  ),
-                  h("table", { class: "bo multiplex-table" },
-                    h("thead", null, h("tr", null, h("th", null, "#"), h("th", null, "Movie"), h("th", { class: "num" }, "Gross"), h("th", { class: "num" }, "Shows"))),
-                    h("tbody", null, ...group.rows.map((row, index) => {
-                      const [movie, gross, shows] = multiplexRow(row);
-                      return h("tr", null,
-                        h("td", { class: "rank" + (index < 3 ? " top" : "") }, index + 1),
-                        h("td", null, movie),
-                        h("td", { class: "num gold" }, multiplexMoney(gross)),
-                        h("td", { class: "num" }, shows),
-                      );
-                    })),
+      const totalGross =
+        report.totals?.gross ??
+        report.gross ??
+        report.totalGross ??
+        groups.reduce((n, group) => n + Number(group.gross || 0), 0);
+      const totalShows =
+        report.totals?.shows ??
+        report.shows ??
+        report.totalShows ??
+        groups.reduce((n, group) => n + Number(group.shows || 0), 0);
+      mount(
+        page(
+          h(
+            "div",
+            { class: "wrap section multiplex-page" },
+            h("div", { class: "eyebrow" }, "Live Tracking"),
+            h(
+              "h2",
+              { class: "display multiplex-title" },
+              "Daily Multiplex Report",
+            ),
+            h(
+              "p",
+              { class: "multiplex-subtitle" },
+              "Live tracked collections across select multiplexes.",
+            ),
+            h(
+              "div",
+              { class: "multiplex-meta" },
+              h(
+                "div",
+                { class: "multiplex-stat" },
+                h("span", null, "Date"),
+                h(
+                  "b",
+                  null,
+                  postDate(
+                    date.slice(0, 4) +
+                      "-" +
+                      date.slice(4, 6) +
+                      "-" +
+                      date.slice(6, 8),
                   ),
                 ),
-              ))
-            : stateMsg("film", "No multiplex data for this date", "Try again after the next multiplex report is published."),
+              ),
+              h(
+                "div",
+                { class: "multiplex-stat" },
+                h("span", null, "Theatres"),
+                h("b", null, groups.length),
+              ),
+              h(
+                "div",
+                { class: "multiplex-stat" },
+                h("span", null, "Gross"),
+                h("b", null, multiplexMoney(totalGross)),
+              ),
+              h(
+                "div",
+                { class: "multiplex-stat" },
+                h("span", null, "Shows"),
+                h("b", null, num(totalShows)),
+              ),
+            ),
+            groups.length
+              ? h(
+                  "div",
+                  { class: "multiplex-grid" },
+                  ...groups.map((group) =>
+                    h(
+                      "section",
+                      { class: "multiplex-card" },
+                      h(
+                        "div",
+                        { class: "multiplex-card-head" },
+                        h("strong", null, group.name),
+                        h(
+                          "span",
+                          null,
+                          `${multiplexMoney(group.gross)} · ${num(group.shows)} shows`,
+                        ),
+                      ),
+                      h(
+                        "table",
+                        { class: "bo multiplex-table" },
+                        h(
+                          "thead",
+                          null,
+                          h(
+                            "tr",
+                            null,
+                            h("th", null, "#"),
+                            h("th", null, "Movie"),
+                            h("th", { class: "num" }, "Gross"),
+                            h("th", { class: "num" }, "Shows"),
+                          ),
+                        ),
+                        h(
+                          "tbody",
+                          null,
+                          ...group.rows.map((row, index) => {
+                            const [movie, gross, shows] = multiplexRow(row);
+                            return h(
+                              "tr",
+                              null,
+                              h(
+                                "td",
+                                { class: "rank" + (index < 3 ? " top" : "") },
+                                index + 1,
+                              ),
+                              h("td", null, movie),
+                              h(
+                                "td",
+                                { class: "num gold" },
+                                multiplexMoney(gross),
+                              ),
+                              h("td", { class: "num" }, shows),
+                            );
+                          }),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : stateMsg(
+                  "film",
+                  "No multiplex data for this date",
+                  "Try again after the next multiplex report is published.",
+                ),
+          ),
         ),
-      ));
+      );
     } catch (e) {
       console.error(e);
-      mount(page(h("div", { class: "wrap section" }, stateMsg("triangle-warning", "Couldn't load multiplex data", "Check that the multiplex report exists for the latest tracking date."))));
+      mount(
+        page(
+          h(
+            "div",
+            { class: "wrap section" },
+            stateMsg(
+              "triangle-warning",
+              "Couldn't load multiplex data",
+              "Check that the multiplex report exists for the latest tracking date.",
+            ),
+          ),
+        ),
+      );
     }
   };
 
@@ -2038,9 +2158,15 @@
           h(
             "tr",
             null,
-            ...["State", "Gross", "Tickets", "Shows", "Theatres", "Occupancy"].map(
-              (label, index) =>
-                h("th", { class: index ? "num" : null }, label),
+            ...[
+              "State",
+              "Gross",
+              "Tickets",
+              "Shows",
+              "Theatres",
+              "Occupancy",
+            ].map((label, index) =>
+              h("th", { class: index ? "num" : null }, label),
             ),
           ),
         ),
@@ -2054,10 +2180,14 @@
                 class: "clickable",
                 tabindex: "0",
                 onclick: () =>
-                  go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`),
+                  go(
+                    `/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`,
+                  ),
                 onkeydown: (e) => {
                   if (e.key === "Enter")
-                    go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`);
+                    go(
+                      `/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`,
+                    );
                 },
               },
               h("td", { class: "city-nm" }, st.state),
@@ -2088,10 +2218,12 @@
       { id: "language", label: "Language Wise", icon: "language" },
       { id: "format", label: "Format Wise", icon: "film" },
       { id: "city", label: "City Wise", icon: "city" },
+      { id: "allindia", label: "All India Report", icon: "globe" },
     ];
     let activePerfTab = perfTabs[3];
 
     const contentFor = (key) => {
+      if (key === "allindia") return allIndiaPanel(tab, date);
       if (key === "language") {
         return langGrid
           ? h("div", { class: "perf-panel-body" }, langGrid)
@@ -2153,7 +2285,11 @@
           h(
             "div",
             { class: "perf-status" },
-            h("span", { class: "perf-status-text" }, "Updated : " + fmtUpdated(movie.last_updated || "")),
+            h(
+              "span",
+              { class: "perf-status-text" },
+              "Updated : " + fmtUpdated(movie.last_updated || ""),
+            ),
           ),
           dlBtn(() => activePerfTab.label, "perf-download"),
         ),
@@ -2174,8 +2310,7 @@
     // Do not gate this by today's date: users can still open older advance
     // dates and should see the same Premiere / Opening Day labels.
     const rel = m.releaseDate ? String(m.releaseDate).slice(0, 10) : null;
-    if (rel && /^\d{4}-\d{2}-\d{2}$/.test(rel))
-      return rel.replace(/-/g, "");
+    if (rel && /^\d{4}-\d{2}-\d{2}$/.test(rel)) return rel.replace(/-/g, "");
 
     // Primary signal: build_data flags a film that has advance bookings but has
     // NEVER appeared in daily -> it hasn't released, and its opening day is the
@@ -2310,11 +2445,14 @@
         ? "Premiere Advance · " + ymdLong(date)
         : adv && isOpeningDate(movie, date)
           ? "Opening Day Advance · " + ymdLong(date)
-        : adv
-          ? "Advance for " + ymdLong(date)
-          : isToday
-            ? "Today's Breakdown"
-            : "Day " + dayNumber(date, s.dates, movie) + " · " + ymdLong(date);
+          : adv
+            ? "Advance for " + ymdLong(date)
+            : isToday
+              ? "Today's Breakdown"
+              : "Day " +
+                dayNumber(date, s.dates, movie) +
+                " · " +
+                ymdLong(date);
 
     const strip = h(
       "div",
@@ -3252,6 +3390,192 @@
           ),
         ),
       ),
+    );
+  }
+
+  /* ---- All India Report (territory-wise) ----------------------------
+     Reads /data/<mode>/<date>/territory_tracked.json, a report separate
+     from the per-movie feed: {totals, territories[], groups[]}. Each
+     territory can carry a nested "states" breakup (currently only
+     Rest of India) and a "movies" breakup (version/format/language split
+     for that territory). "groups" roll a run of territories up into a
+     bold subtotal row (Nizam Total, AP Total, ...) — whichever
+     territories the collector lists as a group's members, in whatever
+     order they appear in "territories".
+     Loaded lazily (only once this tab is opened) and cached by app.js's
+     getJSON, so the shared 5-minute auto-refresh keeps it current. */
+  function allIndiaPanel(tab, date) {
+    const holder = h(
+      "div",
+      { class: "perf-panel-body allindia-panel" },
+      loading(),
+    );
+    Data.territory(tab, date)
+      .then((data) => holder.replaceChildren(allIndiaContent(data)))
+      .catch(() => {
+        holder.replaceChildren(
+          stateMsg(
+            "triangle-warning",
+            "All India report not available",
+            "Territory-wise tracking hasn't been published for this date yet.",
+          ),
+        );
+      });
+    return holder;
+  }
+
+  // >=50% strong, 25–49% steady, <25% soft — same thresholds used for
+  // every occupancy cell in this report so the color reads consistently
+  // down the table. Branding-only palette: brand gold for strong/steady,
+  // the app's existing warn-orange for soft.
+  function terrOccTier(p) {
+    p = Number(p) || 0;
+    if (p >= 50) return "hi";
+    if (p >= 25) return "mid";
+    return "lo";
+  }
+
+  function allIndiaContent(data) {
+    const totals = data.totals || {};
+    const territories = data.territories || [];
+    const groups = data.groups || [];
+
+    const lastMemberGroup = new Map();
+    groups.forEach((g) => {
+      const members = g.members || [];
+      if (members.length) lastMemberGroup.set(members[members.length - 1], g);
+    });
+
+    const expanded = new Set(); // territory keys currently showing their movie split
+    let tbody;
+
+    const areaRow = (label, gross, shows, occ, opts) => {
+      opts = opts || {};
+      return h(
+        "tr",
+        {
+          class:
+            "terr-row" +
+            (opts.sub ? " terr-sub-row" : "") +
+            (opts.total ? " terr-total-row" : "") +
+            (opts.clickable ? " clickable" : ""),
+          onclick: opts.onclick || null,
+        },
+        h(
+          "td",
+          { class: "terr-area" + (opts.total ? " totcell" : "") },
+          opts.expandIcon != null ? icon(opts.expandIcon, "terr-caret") : null,
+          label,
+        ),
+        h(
+          "td",
+          { class: "num gold" + (opts.total ? " totcell" : "") },
+          inr(gross),
+        ),
+        h("td", { class: "num" + (opts.total ? " totcell" : "") }, num(shows)),
+        h(
+          "td",
+          {
+            class:
+              "num terr-occ" +
+              (opts.total ? " totcell" : " " + terrOccTier(occ)),
+          },
+          pct(occ),
+        ),
+      );
+    };
+
+    const movieRows = (t) =>
+      (t.movies || []).map((mv) => {
+        const m = String(mv.movie || "").match(/\(([^)]+)\)\s*$/);
+        return areaRow(m ? m[1] : mv.movie, mv.gross, mv.shows, mv.occupancy, {
+          sub: true,
+        });
+      });
+
+    const stateRows = (t) =>
+      (t.states || []).map((st) =>
+        areaRow(st.state, st.gross, st.shows, st.occupancy, { sub: true }),
+      );
+
+    const buildRows = () => {
+      const rows = [];
+      territories.forEach((t) => {
+        const hasMovies = t.movies && t.movies.length > 1;
+        rows.push(
+          areaRow(t.label, t.gross, t.shows, t.occupancy, {
+            clickable: hasMovies,
+            expandIcon: hasMovies
+              ? expanded.has(t.key)
+                ? "angle-down"
+                : "angle-right"
+              : null,
+            onclick: hasMovies
+              ? () => {
+                  expanded.has(t.key)
+                    ? expanded.delete(t.key)
+                    : expanded.add(t.key);
+                  tbody.replaceChildren(...buildRows());
+                }
+              : null,
+          }),
+        );
+        if (hasMovies && expanded.has(t.key)) rows.push(...movieRows(t));
+        if (t.states && t.states.length) rows.push(...stateRows(t));
+        const g = lastMemberGroup.get(t.key);
+        if (g)
+          rows.push(
+            areaRow(g.label, g.gross, g.shows, g.occupancy, { total: true }),
+          );
+      });
+      return rows;
+    };
+
+    tbody = h("tbody", null, ...buildRows());
+
+    const table = h(
+      "div",
+      { class: "table-wrap" },
+      h(
+        "table",
+        { class: "bo allindia" },
+        h(
+          "thead",
+          null,
+          h(
+            "tr",
+            null,
+            h("th", null, "Area"),
+            h("th", { class: "num" }, "Gross"),
+            h("th", { class: "num" }, "Shows"),
+            h("th", { class: "num" }, "Occupancy"),
+          ),
+        ),
+        tbody,
+      ),
+    );
+
+    return frag(
+      h(
+        "div",
+        { class: "kpi-grid allindia-kpis" },
+        kpiCard(
+          "Total Gross",
+          inr(totals.gross),
+          (totals.territories || territories.length) + " territories",
+          "indian-rupee-sign",
+          true,
+        ),
+        kpiCard("Total Shows", num(totals.shows), null, "clapperboard-play"),
+        kpiCard("Occupancy", pct(totals.occupancy), "all-India", "chart-pie"),
+        kpiCard(
+          "Territories",
+          num(totals.territories || territories.length),
+          "tracked",
+          "globe",
+        ),
+      ),
+      table,
     );
   }
 

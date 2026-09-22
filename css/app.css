@@ -1923,3 +1923,62 @@ table.bo.langwise td:nth-child(3) { width: 80px; }
     align-items: flex-start;
   }
 }
+
+/* ============================================================
+   ALL INDIA REPORT (territory-wise) — Performance Breakdown tab
+   Branding palette only: --brand for strong occupancy / subtotal rows,
+   --warn for soft occupancy. No off-brand hues.
+   ============================================================ */
+.allindia-kpis { margin-bottom: 22px; }
+.allindia-panel .loading { padding: 40px 0; }
+
+table.bo.allindia th:nth-child(1),
+table.bo.allindia td:nth-child(1) { width: 42%; }
+table.bo.allindia .terr-area { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+
+/* territory rows that expand into a movie/format split */
+table.bo.allindia tr.clickable { cursor: pointer; }
+table.bo.allindia tr.clickable:hover { background: var(--brand-soft); }
+.terr-caret { font-size: 10px; color: var(--muted); flex: 0 0 auto; }
+
+/* nested rows: Rest-of-India state split, or a territory's movie split */
+tr.terr-sub-row .terr-area {
+  padding-left: 22px;
+  font-weight: 400;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+tr.terr-sub-row .terr-area::before {
+  content: "›";
+  color: var(--muted-2);
+  font-weight: 700;
+}
+tr.terr-sub-row td { padding-top: 8px; padding-bottom: 8px; background: rgba(255,240,214,.02); }
+
+/* occupancy tiers — single hue, three intensities */
+table.bo.allindia .terr-occ.hi {
+  color: var(--brand);
+  font-weight: 700;
+  background: var(--brand-soft);
+  border-radius: 6px;
+}
+table.bo.allindia .terr-occ.mid {
+  color: var(--ink);
+  background: rgba(255, 176, 0, .06);
+  border-radius: 6px;
+}
+table.bo.allindia .terr-occ.lo {
+  color: var(--warn);
+  background: rgba(255, 122, 26, .12);
+  border-radius: 6px;
+}
+
+/* group subtotal rows (Nizam Total, AP Total, ...) — border-left goes on
+   the first cell, not the <tr>, since border-collapse drops tr borders */
+tr.terr-total-row td:first-child { border-left: 3px solid var(--brand); }
+tr.terr-total-row .terr-area { padding-left: 11px; }
+
+@media (max-width: 760px) {
+  table.bo.allindia { min-width: 520px; }
+  tr.terr-sub-row .terr-area { padding-left: 14px; }
+}
