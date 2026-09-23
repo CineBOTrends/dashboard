@@ -1047,14 +1047,59 @@ table.bo .sub { font-size: 11px; color: var(--muted); }
 .ed-back:hover{ text-decoration:underline; }
 
 /* ---------- multiplex report ---------- */
-.multiplex-page { position: relative; }
+
+/* Compact multiplex table cards */
+@media (max-width: 560px) {
+  .multiplex-grid {
+    width: 88%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .multiplex-card {
+    width: 100%;
+    border-radius: 9px;
+  }
+
+  .multiplex-card-head {
+    padding: 6px 8px;
+  }
+
+  .multiplex-card-head strong {
+    font-size: 10px;
+  }
+
+  .multiplex-card-head span {
+    font-size: 7.5px;
+  }
+
+  .multiplex-table {
+    font-size: 9px !important;
+  }
+
+  .multiplex-table thead th {
+    padding: 4px 5px !important;
+    font-size: 6.5px !important;
+  }
+
+  .multiplex-table tbody td {
+    padding: 4px 5px !important;
+  }
+
+  .multiplex-table-scroll {
+    max-height: 320px;
+  }
+}
+
+
+.multiplex-page { position: relative; padding-left: 18px; }
 .multiplex-title { font-size: clamp(30px, 5vw, 48px); margin: 6px 0 2px; }
 .multiplex-subtitle { color: var(--muted); margin: 0 0 20px; }
 .multiplex-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
 .multiplex-stat { min-width: 96px; padding: 10px 13px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-sm); }
 .multiplex-stat span { display: block; color: var(--muted); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .06em; }
 .multiplex-stat b { display: block; color: var(--brand); font: 600 14px var(--mono); margin-top: 4px; }
-@media (max-width: 480px) {
+@media (max-width: 290px) {
   .multiplex-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .multiplex-stat { min-width: 0; padding: 8px 10px; }
 }
@@ -1116,10 +1161,30 @@ table.bo.multiplex-table { min-width: 0; } /* overrides the mobile forced-scroll
   font: 12px var(--mono);
   text-align: center;
 }
-.multiplex-table thead th { padding: 8px 10px !important; font-size: 9px !important; }
-.multiplex-table tbody td { padding: 8px 10px !important; }
-.multiplex-table th:first-child, .multiplex-table td:first-child { width: 30px; }
-.multiplex-table th:nth-child(2), .multiplex-table td:nth-child(2) { min-width: 150px; }
+.multiplex-table thead th {
+  padding: 8px 6px !important;
+  font-size: 9px !important;
+}
+.multiplex-table tbody td {
+  padding: 6px !important;
+}
+.multiplex-table th:first-child,
+.multiplex-table td:first-child {
+  width: 24px;
+}
+.multiplex-table th:nth-child(2),
+.multiplex-table td:nth-child(2) {
+  min-width: 0;
+  width: 52%;
+}
+.multiplex-table th:nth-child(3),
+.multiplex-table td:nth-child(3) {
+  width: 31%;
+}
+.multiplex-table th:nth-child(4),
+.multiplex-table td:nth-child(4) {
+  width: 13%;
+}
 @media (max-width: 560px) {
   .multiplex-grid { grid-template-columns: 1fr; gap: 8px; }
   .multiplex-card-head { align-items: flex-start; flex-direction: column; gap: 2px; padding: 8px 10px; }
@@ -1128,7 +1193,23 @@ table.bo.multiplex-table { min-width: 0; } /* overrides the mobile forced-scroll
   .multiplex-table { font-size: 10px !important; }
   .multiplex-table thead th { padding: 6px 8px !important; font-size: 8px !important; }
   .multiplex-table tbody td { padding: 6px 8px !important; }
-  .multiplex-table th:first-child, .multiplex-table td:first-child { width: 20px; }
+  .multiplex-table th:first-child,
+  .multiplex-table td:first-child {
+    width: 24px;
+  }
+  .multiplex-table th:nth-child(2),
+  .multiplex-table td:nth-child(2) {
+    min-width: 0 !important;
+    width: 52% !important;
+  }
+  .multiplex-table th:nth-child(3),
+  .multiplex-table td:nth-child(3) {
+    width: 31% !important;
+  }
+  .multiplex-table th:nth-child(4),
+  .multiplex-table td:nth-child(4) {
+    width: 13% !important;
+  }
   .multiplex-table-scroll { max-height: 320px; } /* ~10 rows before it scrolls, so a card doesn't dominate the screen */
   .multiplex-stat { padding: 7px 10px; }
   .multiplex-stat span { font-size: 9px; }
@@ -2050,149 +2131,4 @@ tr.terr-total-row .terr-area { padding-left: 11px; }
 @media (max-width: 760px) {
   table.bo.allindia { min-width: 520px; }
   tr.terr-sub-row .terr-area { padding-left: 14px; }
-}
-
-/* ============================================================
-   MULTIPLEX REPORT — MovieMint compact mobile width / no gap
-   ============================================================ */
-
-@media (max-width: 560px) {
-  /* Keep the report/cards at the same compact width as the
-     MovieMint reference instead of stretching across the phone. */
-  .multiplex-page {
-    width: min(100%, 300px);
-    max-width: 300px;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  /* Tight stats */
-  .multiplex-meta {
-    display: flex;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 7px;
-    margin-bottom: 14px;
-  }
-
-  .multiplex-stat {
-    min-width: 0;
-    width: auto;
-    padding: 7px 9px;
-  }
-
-  .multiplex-date-stat {
-    min-width: 125px;
-  }
-
-  .multiplex-stat span {
-    font-size: 7px;
-  }
-
-  .multiplex-stat b,
-  .multiplex-date-input {
-    font-size: 10px;
-  }
-
-  /* Cards fill exactly the report width */
-  .multiplex-grid {
-    width: 100%;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-  }
-
-  .multiplex-card {
-    width: 100%;
-    min-width: 0;
-    border-radius: 11px;
-  }
-
-  /* MovieMint-style single-line card header */
-  .multiplex-card-head {
-    width: 100%;
-    min-width: 0;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-    padding: 8px 10px;
-  }
-
-  .multiplex-card-head strong {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 9.5px;
-  }
-
-  .multiplex-card-head span {
-    flex: 0 0 auto;
-    font-size: 7.5px;
-  }
-
-  /* IMPORTANT:
-     Remove the old 150px movie-column minimum. That minimum was
-     creating the large empty-looking middle area on the phone. */
-  table.bo.multiplex-table {
-    width: 100%;
-    min-width: 0 !important;
-    table-layout: fixed;
-    border-collapse: collapse;
-  }
-
-  .multiplex-table thead th {
-    padding: 5px 6px !important;
-    font-size: 6.5px !important;
-  }
-
-  .multiplex-table tbody td {
-    padding: 4.5px 6px !important;
-    font-size: 8.5px;
-    line-height: 1.15;
-  }
-
-  .multiplex-table th:first-child,
-  .multiplex-table td:first-child {
-    width: 23px !important;
-    min-width: 23px !important;
-  }
-
-  .multiplex-table th:nth-child(2),
-  .multiplex-table td:nth-child(2) {
-    width: auto !important;
-    min-width: 0 !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .multiplex-table th:nth-child(3),
-  .multiplex-table td:nth-child(3) {
-    width: 58px !important;
-    min-width: 58px !important;
-  }
-
-  .multiplex-table th:nth-child(4),
-  .multiplex-table td:nth-child(4) {
-    width: 35px !important;
-    min-width: 35px !important;
-  }
-
-  /* No unnecessary internal horizontal/vertical space */
-  .multiplex-table-scroll {
-    width: 100%;
-    max-height: 495px;
-    overflow-x: hidden;
-  }
-
-  .multiplex-table-scroll::-webkit-scrollbar {
-    display: none;
-  }
-
-  .multiplex-legend {
-    display: none;
-  }
 }
