@@ -2088,8 +2088,16 @@ table.bo.langwise td:nth-child(3) { width: 80px; }
 }
 .allindia-panel .loading { padding: 40px 0; }
 
+/* 4 lean columns: Territory / Gross / Shows / Occ % */
 table.bo.allindia th:nth-child(1),
-table.bo.allindia td:nth-child(1) { width: 42%; }
+table.bo.allindia td:nth-child(1) { width: 40%; }
+table.bo.allindia thead th,
+table.bo.allindia tbody td { padding: 15px 16px; }
+/* the flex layout (icon + label) lives on an inner <span>, never on the
+   <td> itself — setting display:flex directly on a table-cell makes the
+   browser drop its table-cell sizing and lay it out by content width
+   instead, which is what caused the stray colored box stopping partway
+   across the row instead of filling the column. */
 table.bo.allindia .terr-area { display: flex; align-items: center; gap: 8px; font-weight: 600; }
 
 /* territory rows that expand into a movie/format split */
@@ -2099,44 +2107,31 @@ table.bo.allindia tr.clickable:hover { background: var(--brand-soft); }
 
 /* nested rows: Rest-of-India state split, or a territory's movie split */
 tr.terr-sub-row .terr-area {
-  padding-left: 22px;
+  padding-left: 20px;
   font-weight: 400;
-  font-size: 12.5px;
   color: var(--ink-2);
 }
 tr.terr-sub-row .terr-area::before {
-  content: "›";
+  content: "↳";
   color: var(--muted-2);
-  font-weight: 700;
+  font-weight: 400;
 }
-tr.terr-sub-row td { padding-top: 8px; padding-bottom: 8px; background: rgba(255,240,214,.02); }
+tr.terr-sub-row td { color: var(--ink-2); }
+tr.terr-sub-row .num.gold { color: var(--ink-2); font-weight: 400; }
 
-/* occupancy tiers — single hue, three intensities */
-table.bo.allindia .terr-occ.hi {
-  color: var(--brand);
-  font-weight: 700;
-  background: var(--brand-soft);
-  border-radius: 6px;
-}
-table.bo.allindia .terr-occ.mid {
-  color: var(--ink);
-  background: rgba(255, 176, 0, .06);
-  border-radius: 6px;
-}
-table.bo.allindia .terr-occ.lo {
-  color: var(--warn);
-  background: rgba(255, 122, 26, .12);
-  border-radius: 6px;
-}
-
-/* group subtotal rows (Nizam Total, AP Total, ...) — border-left goes on
-   the first cell, not the <tr>, since border-collapse drops tr borders */
+/* group subtotal rows (Nizam, APTG Total, ...) — background goes on the
+   <tr> itself so the tint is one uniform band across the whole row; a
+   background set per-<td> instead only fills each cell's own box and,
+   because the first column is a fixed width, leaves a hard visible seam
+   partway across the row where that box ends. The accent bar still needs
+   to sit on the first cell, since border-collapse drops <tr> borders. */
+tr.terr-total-row { background: var(--brand-soft); }
 tr.terr-total-row td:first-child { border-left: 3px solid var(--brand); }
-tr.terr-total-row .terr-area { padding-left: 11px; }
+tr.terr-total-row .terr-area { padding-left: 13px; }
 
 @media (max-width: 760px) {
-  /* Only 4 lean columns (Area / Gross / Shows / Occupancy) — narrow enough
-     to fit inside the card at full width instead of forcing a side-scroll. */
+  /* Only 4 lean columns — narrow enough to fit inside the card at full
+     width instead of forcing a side-scroll. */
   .allindia-panel .table-wrap { overflow-x: visible; }
   table.bo.allindia {
     min-width: 0;
@@ -2146,16 +2141,14 @@ tr.terr-total-row .terr-area { padding-left: 11px; }
   table.bo.allindia thead th,
   table.bo.allindia tbody td { padding: 9px 6px; font-size: 12px; }
 
-  /* explicit widths for all four columns so Gross sits right after Area
-     instead of floating in the middle of a wide, unclaimed column */
   table.bo.allindia th:nth-child(1),
-  table.bo.allindia td:nth-child(1) { width: 32%; }
+  table.bo.allindia td:nth-child(1) { width: 34%; }
   table.bo.allindia th:nth-child(2),
-  table.bo.allindia td:nth-child(2) { width: 26%; text-align: left; }
+  table.bo.allindia td:nth-child(2) { width: 28%; text-align: left; }
   table.bo.allindia th:nth-child(3),
   table.bo.allindia td:nth-child(3) { width: 18%; }
   table.bo.allindia th:nth-child(4),
-  table.bo.allindia td:nth-child(4) { width: 24%; padding-right: 16px; }
+  table.bo.allindia td:nth-child(4) { width: 20%; padding-right: 16px; }
 
   table.bo.allindia .terr-area { gap: 5px; white-space: normal; line-height: 1.25; }
   table.bo.allindia .terr-caret { font-size: 9px; }

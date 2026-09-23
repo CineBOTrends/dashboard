@@ -3560,17 +3560,6 @@
     return holder;
   }
 
-  // >=50% strong, 25–49% steady, <25% soft — same thresholds used for
-  // every occupancy cell in this report so the color reads consistently
-  // down the table. Branding-only palette: brand gold for strong/steady,
-  // the app's existing warn-orange for soft.
-  function terrOccTier(p) {
-    p = Number(p) || 0;
-    if (p >= 50) return "hi";
-    if (p >= 25) return "mid";
-    return "lo";
-  }
-
   function allIndiaContent(data) {
     const totals = data.totals || {};
     const territories = data.territories || [];
@@ -3620,8 +3609,11 @@
     const expanded = new Set(); // territory keys currently showing their movie split
     let tbody;
 
-    const areaRow = (label, gross, shows, occ, opts) => {
+    const areaRow = (label, t, opts) => {
       opts = opts || {};
+      const gross = t.gross,
+        shows = t.shows,
+        occ = t.occupancy;
       return h(
         "tr",
         {
@@ -3634,9 +3626,15 @@
         },
         h(
           "td",
-          { class: "terr-area" + (opts.total ? " totcell" : "") },
-          opts.expandIcon != null ? icon(opts.expandIcon, "terr-caret") : null,
-          label,
+          { class: opts.total ? "totcell" : "" },
+          h(
+            "span",
+            { class: "terr-area" },
+            opts.expandIcon != null
+              ? icon(opts.expandIcon, "terr-caret")
+              : null,
+            label,
+          ),
         ),
         h(
           "td",
@@ -3644,30 +3642,18 @@
           inr(gross),
         ),
         h("td", { class: "num" + (opts.total ? " totcell" : "") }, num(shows)),
-        h(
-          "td",
-          {
-            class:
-              "num terr-occ" +
-              (opts.total ? " totcell" : " " + terrOccTier(occ)),
-          },
-          pct(occ),
-        ),
+        h("td", { class: "num" + (opts.total ? " totcell" : "") }, pct(occ)),
       );
     };
 
     const movieRows = (t) =>
       (t.movies || []).map((mv) => {
         const m = String(mv.movie || "").match(/\(([^)]+)\)\s*$/);
-        return areaRow(m ? m[1] : mv.movie, mv.gross, mv.shows, mv.occupancy, {
-          sub: true,
-        });
+        return areaRow(m ? m[1] : mv.movie, mv, { sub: true });
       });
 
     const stateRows = (t) =>
-      (t.states || []).map((st) =>
-        areaRow(st.state, st.gross, st.shows, st.occupancy, { sub: true }),
-      );
+      (t.states || []).map((st) => areaRow(st.state, st, { sub: true }));
 
     const buildRows = () => {
       const rows = [];
@@ -3675,15 +3661,9 @@
         // A nested group anchored here replaces this territory's own row.
         const ng = anchorGroup.get(t.key);
         if (ng) {
-          rows.push(
-            areaRow(ng.label, ng.gross, ng.shows, ng.occupancy, {
-              total: true,
-            }),
-          );
+          rows.push(areaRow(ng.label, ng, { total: true }));
           (ng.children || []).forEach((c) => {
-            rows.push(
-              areaRow(c.label, c.gross, c.shows, c.occupancy, { sub: true }),
-            );
+            rows.push(areaRow(c.label, c, { sub: true }));
           });
           return;
         }
@@ -3692,7 +3672,7 @@
 
         const hasMovies = t.movies && t.movies.length > 1;
         rows.push(
-          areaRow(t.label, t.gross, t.shows, t.occupancy, {
+          areaRow(t.label, t, {
             clickable: hasMovies,
             expandIcon: hasMovies
               ? expanded.has(t.key)
@@ -3712,10 +3692,7 @@
         if (hasMovies && expanded.has(t.key)) rows.push(...movieRows(t));
         if (t.states && t.states.length) rows.push(...stateRows(t));
         const g = lastMemberGroup.get(t.key);
-        if (g)
-          rows.push(
-            areaRow(g.label, g.gross, g.shows, g.occupancy, { total: true }),
-          );
+        if (g) rows.push(areaRow(g.label, g, { total: true }));
       });
       return rows;
     };
@@ -3734,10 +3711,10 @@
           h(
             "tr",
             null,
-            h("th", null, "Area"),
+            h("th", null, "Territory"),
             h("th", { class: "num" }, "Gross"),
             h("th", { class: "num" }, "Shows"),
-            h("th", { class: "num" }, "Occupancy"),
+            h("th", { class: "num" }, "Occ %"),
           ),
         ),
         tbody,
