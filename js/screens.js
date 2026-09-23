@@ -3652,9 +3652,6 @@
         return areaRow(m ? m[1] : mv.movie, mv, { sub: true });
       });
 
-    const stateRows = (t) =>
-      (t.states || []).map((st) => areaRow(st.state, st, { sub: true }));
-
     const buildRows = () => {
       const rows = [];
       territories.forEach((t) => {
@@ -3690,18 +3687,40 @@
           }),
         );
         if (hasMovies && expanded.has(t.key)) rows.push(...movieRows(t));
-        if (t.states && t.states.length) rows.push(...stateRows(t));
+        // Rest of India's per-state split is intentionally not shown here —
+        // just the single aggregate "Rest of India" row.
         const g = lastMemberGroup.get(t.key);
         if (g) rows.push(areaRow(g.label, g, { total: true }));
       });
+      rows.push(
+        h(
+          "tr",
+          null,
+          h("td", { class: "totcell" }, "Total"),
+          h("td", { class: "num gold totcell" }, inr(totals.gross)),
+          h("td", { class: "num totcell" }, num(totals.shows)),
+          h("td", { class: "num totcell" }, pct(totals.occupancy)),
+        ),
+      );
       return rows;
     };
 
     tbody = h("tbody", null, ...buildRows());
 
-    const table = h(
+    // Everything — the summary caption and the territory table — lives in
+    // one .table-wrap card, same as the State Wise tab: a single bordered
+    // panel rather than separate KPI tiles stacked above a second card.
+    return h(
       "div",
-      { class: "table-wrap" },
+      { class: "table-wrap allindia-table" },
+      h(
+        "div",
+        { class: "allindia-cap" },
+        num(totals.territories || territories.length) + " territories tracked",
+      ),
+      groupNotes.length
+        ? h("div", { class: "allindia-note" }, groupNotes.join(" "))
+        : null,
       h(
         "table",
         { class: "bo allindia" },
@@ -3719,32 +3738,6 @@
         ),
         tbody,
       ),
-    );
-
-    return frag(
-      h(
-        "div",
-        { class: "kpi-grid allindia-kpis" },
-        kpiCard(
-          "Total Gross",
-          inr(totals.gross),
-          (totals.territories || territories.length) + " territories",
-          "indian-rupee-sign",
-          true,
-        ),
-        kpiCard("Total Shows", num(totals.shows), null, "clapperboard-play"),
-        kpiCard("Occupancy", pct(totals.occupancy), "all-India", "chart-pie"),
-        kpiCard(
-          "Territories",
-          num(totals.territories || territories.length),
-          "tracked",
-          "globe",
-        ),
-      ),
-      groupNotes.length
-        ? h("div", { class: "allindia-note" }, groupNotes.join(" "))
-        : null,
-      table,
     );
   }
 
