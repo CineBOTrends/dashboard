@@ -3596,12 +3596,13 @@
     const lastMemberGroup = new Map();
     trailingGroups.forEach((g) => {
       const members = g.members || [];
-      for (let i = members.length - 1; i >= 0; i--) {
-        if (byKey.has(members[i])) {
-          lastMemberGroup.set(members[i], g);
-          break;
-        }
-      }
+      const present = members.filter((k) => byKey.has(k));
+      // A single-member group's "Total" is just a copy of that one
+      // territory's row (e.g. Rest of India / ROI Total, Kerala / Kerala
+      // Total) — skip the subtotal row in that case so the same numbers
+      // aren't shown twice.
+      if (present.length < 2) return;
+      lastMemberGroup.set(present[present.length - 1], g);
     });
 
     const groupNotes = groups.filter((g) => g.note).map((g) => g.note);
@@ -3718,9 +3719,6 @@
         { class: "allindia-cap" },
         num(totals.territories || territories.length) + " territories tracked",
       ),
-      groupNotes.length
-        ? h("div", { class: "allindia-note" }, groupNotes.join(" "))
-        : null,
       h(
         "table",
         { class: "bo allindia" },
@@ -3738,6 +3736,9 @@
         ),
         tbody,
       ),
+      groupNotes.length
+        ? h("div", { class: "allindia-note" }, groupNotes.join(" "))
+        : null,
     );
   }
 
