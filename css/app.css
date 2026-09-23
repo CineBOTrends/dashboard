@@ -2139,8 +2139,22 @@ tr.terr-total-row .terr-area { padding-left: 11px; }
   }
   table.bo.allindia thead th,
   table.bo.allindia tbody td { padding: 9px 6px; font-size: 12px; }
+
+  /* explicit widths for all four columns so Gross sits right after Area
+     instead of floating in the middle of a wide, unclaimed column */
   table.bo.allindia th:nth-child(1),
-  table.bo.allindia td:nth-child(1) { width: 38%; }
+  table.bo.allindia td:nth-child(1) { width: 32%; }
+  table.bo.allindia th:nth-child(2),
+  table.bo.allindia td:nth-child(2) { width: 26%; text-align: left; }
+  table.bo.allindia th:nth-child(3),
+  table.bo.allindia td:nth-child(3) { width: 18%; }
+  table.bo.allindia th:nth-child(4),
+  table.bo.allindia td:nth-child(4) { width: 24%; }
+
+  /* vertical divider lines between the four columns */
+  table.bo.allindia th:not(:first-child),
+  table.bo.allindia td:not(:first-child) { border-left: 1px solid var(--line); }
+
   table.bo.allindia .terr-area { gap: 5px; white-space: normal; line-height: 1.25; }
   table.bo.allindia .terr-caret { font-size: 9px; }
   tr.terr-sub-row .terr-area { padding-left: 12px; font-size: 11px; }
