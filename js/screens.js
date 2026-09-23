@@ -1560,22 +1560,28 @@
     const today = todayYMD();
     const maxYmd = knownMax && knownMax > today ? knownMax : today;
     const max = ymdToInputVal(maxYmd);
+    const isLatest = !!knownMax && currentDate === knownMax;
     return h(
       "div",
       { class: "multiplex-stat multiplex-date-stat" },
       h("span", null, "Date"),
-      h("input", {
-        type: "date",
-        class: "multiplex-date-input",
-        value: ymdToInputVal(currentDate),
-        min,
-        max,
-        "aria-label": "Choose a report date",
-        onchange: (e) => {
-          const ymd = inputValToYmd(e.target.value);
-          if (ymd.length === 8) go(`/multiplex/${ymd}`);
-        },
-      }),
+      h(
+        "div",
+        { class: "multiplex-date-row" },
+        h("input", {
+          type: "date",
+          class: "multiplex-date-input",
+          value: ymdToInputVal(currentDate),
+          min,
+          max,
+          "aria-label": "Choose a report date",
+          onchange: (e) => {
+            const ymd = inputValToYmd(e.target.value);
+            if (ymd.length === 8) go(`/multiplex/${ymd}`);
+          },
+        }),
+        isLatest && h("span", { class: "multiplex-latest-badge" }, "Latest"),
+      ),
     );
   }
 

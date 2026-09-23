@@ -75,7 +75,7 @@ button { font-family: inherit; }
 *::-webkit-scrollbar { height: 8px; width: 8px; }
 *::-webkit-scrollbar-thumb { background: var(--raise); border-radius: 20px; }
 
-.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(18px, 5vw, 40px); }
 
 /* ---------- type ---------- */
 .display { font-family: var(--display); font-weight: 400; letter-spacing: .5px; line-height: .98; }
@@ -1055,14 +1055,17 @@ table.bo .sub { font-size: 11px; color: var(--muted); }
 .multiplex-stat span { display: block; color: var(--muted); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .06em; }
 .multiplex-stat b { display: block; color: var(--brand); font: 600 14px var(--mono); margin-top: 4px; }
 @media (max-width: 480px) {
-  .multiplex-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .multiplex-stat { min-width: 0; }
+  .multiplex-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .multiplex-stat { min-width: 0; padding: 8px 10px; }
 }
 .multiplex-date-stat { cursor: pointer; }
+.multiplex-date-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
 .multiplex-date-input {
   display: block;
-  width: 100%;
-  margin-top: 4px;
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-top: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -1072,6 +1075,16 @@ table.bo .sub { font-size: 11px; color: var(--muted); }
 }
 .multiplex-date-input:focus { outline: none; }
 .multiplex-date-input::-webkit-calendar-picker-indicator { cursor: pointer; margin-left: 6px; }
+.multiplex-latest-badge {
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font: 600 9px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
 .multiplex-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; align-items: start; }
 .multiplex-card { overflow: hidden; background: var(--panel); border: 1px solid var(--brand-line); border-radius: var(--r); }
 .multiplex-card-head { display: flex; justify-content: space-between; gap: 10px; padding: 11px 13px; background: var(--brand-soft); color: var(--brand); }
@@ -1120,6 +1133,8 @@ table.bo.multiplex-table { min-width: 0; } /* overrides the mobile forced-scroll
   .multiplex-stat { padding: 7px 10px; }
   .multiplex-stat span { font-size: 9px; }
   .multiplex-stat b { font-size: 12.5px; }
+  .multiplex-date-input { font-size: 12.5px; }
+  .multiplex-latest-badge { font-size: 8px; padding: 1px 5px; }
   .multiplex-legend { padding: 9px 12px; font-size: 10.5px; }
 }
 /* ============================================================
@@ -2035,4 +2050,149 @@ tr.terr-total-row .terr-area { padding-left: 11px; }
 @media (max-width: 760px) {
   table.bo.allindia { min-width: 520px; }
   tr.terr-sub-row .terr-area { padding-left: 14px; }
+}
+
+/* ============================================================
+   MULTIPLEX REPORT — MovieMint compact mobile width / no gap
+   ============================================================ */
+
+@media (max-width: 560px) {
+  /* Keep the report/cards at the same compact width as the
+     MovieMint reference instead of stretching across the phone. */
+  .multiplex-page {
+    width: min(100%, 300px);
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Tight stats */
+  .multiplex-meta {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+
+  .multiplex-stat {
+    min-width: 0;
+    width: auto;
+    padding: 7px 9px;
+  }
+
+  .multiplex-date-stat {
+    min-width: 125px;
+  }
+
+  .multiplex-stat span {
+    font-size: 7px;
+  }
+
+  .multiplex-stat b,
+  .multiplex-date-input {
+    font-size: 10px;
+  }
+
+  /* Cards fill exactly the report width */
+  .multiplex-grid {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .multiplex-card {
+    width: 100%;
+    min-width: 0;
+    border-radius: 11px;
+  }
+
+  /* MovieMint-style single-line card header */
+  .multiplex-card-head {
+    width: 100%;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .multiplex-card-head strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 9.5px;
+  }
+
+  .multiplex-card-head span {
+    flex: 0 0 auto;
+    font-size: 7.5px;
+  }
+
+  /* IMPORTANT:
+     Remove the old 150px movie-column minimum. That minimum was
+     creating the large empty-looking middle area on the phone. */
+  table.bo.multiplex-table {
+    width: 100%;
+    min-width: 0 !important;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  .multiplex-table thead th {
+    padding: 5px 6px !important;
+    font-size: 6.5px !important;
+  }
+
+  .multiplex-table tbody td {
+    padding: 4.5px 6px !important;
+    font-size: 8.5px;
+    line-height: 1.15;
+  }
+
+  .multiplex-table th:first-child,
+  .multiplex-table td:first-child {
+    width: 23px !important;
+    min-width: 23px !important;
+  }
+
+  .multiplex-table th:nth-child(2),
+  .multiplex-table td:nth-child(2) {
+    width: auto !important;
+    min-width: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .multiplex-table th:nth-child(3),
+  .multiplex-table td:nth-child(3) {
+    width: 58px !important;
+    min-width: 58px !important;
+  }
+
+  .multiplex-table th:nth-child(4),
+  .multiplex-table td:nth-child(4) {
+    width: 35px !important;
+    min-width: 35px !important;
+  }
+
+  /* No unnecessary internal horizontal/vertical space */
+  .multiplex-table-scroll {
+    width: 100%;
+    max-height: 495px;
+    overflow-x: hidden;
+  }
+
+  .multiplex-table-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .multiplex-legend {
+    display: none;
+  }
 }
