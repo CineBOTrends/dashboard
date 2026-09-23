@@ -2129,6 +2129,24 @@ tr.terr-total-row td:first-child { border-left: 3px solid var(--brand); }
 tr.terr-total-row .terr-area { padding-left: 11px; }
 
 @media (max-width: 760px) {
-  table.bo.allindia { min-width: 520px; }
-  tr.terr-sub-row .terr-area { padding-left: 14px; }
+  /* Only 4 lean columns (Area / Gross / Shows / Occupancy) — narrow enough
+     to fit inside the card at full width instead of forcing a side-scroll. */
+  .allindia-panel .table-wrap { overflow-x: visible; }
+  table.bo.allindia {
+    min-width: 0;
+    width: 100%;
+    table-layout: fixed;
+  }
+  table.bo.allindia thead th,
+  table.bo.allindia tbody td { padding: 9px 6px; font-size: 12px; }
+  table.bo.allindia th:nth-child(1),
+  table.bo.allindia td:nth-child(1) { width: 38%; }
+  table.bo.allindia .terr-area { gap: 5px; white-space: normal; line-height: 1.25; }
+  table.bo.allindia .terr-caret { font-size: 9px; }
+  tr.terr-sub-row .terr-area { padding-left: 12px; font-size: 11px; }
+}
+
+@media (max-width: 400px) {
+  table.bo.allindia thead th,
+  table.bo.allindia tbody td { padding: 8px 4px; font-size: 11px; }
 }
