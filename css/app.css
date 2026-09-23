@@ -2094,8 +2094,9 @@ table.bo.langwise td:nth-child(3) { width: 80px; }
   font-size: 12.5px;
   font-style: italic;
   color: var(--muted);
-  padding: 6px 16px 0;
+  padding: 12px 16px 14px;
   margin: 0;
+  border-top: 1px solid var(--line);
 }
 .allindia-panel .loading { padding: 40px 0; }
 
