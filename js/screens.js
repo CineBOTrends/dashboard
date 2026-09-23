@@ -3526,10 +3526,18 @@
      from the per-movie feed: {totals, territories[], groups[]}. Each
      territory can carry a nested "states" breakup (currently only
      Rest of India) and a "movies" breakup (version/format/language split
-     for that territory). "groups" roll a run of territories up into a
-     bold subtotal row (Nizam Total, AP Total, ...) — whichever
-     territories the collector lists as a group's members, in whatever
-     order they appear in "territories".
+     for that territory). "groups" roll a run of territories (or,
+     chained, other groups) up into a subtotal:
+       - a group with "children" (e.g. Nizam, nesting Hyderabad) replaces
+         its raw-territory members inline — its own row appears where the
+         first of those territories would have, immediately followed by
+         its children as indented sub-rows, with every other member (e.g.
+         Nizam Districts) folded in silently;
+       - a group without "children" (e.g. APTG Total, Karnataka Total)
+         keeps the older behaviour: a bold subtotal row appended right
+         after the last territory/group in its "members" list.
+     A group's optional "note" renders as a small italic line above the
+     table (e.g. the AP/Telangana sub-region disclaimer).
      Loaded lazily (only once this tab is opened) and cached by app.js's
      getJSON, so the shared 5-minute auto-refresh keeps it current. */
   function allIndiaPanel(tab, date) {
@@ -3567,12 +3575,47 @@
     const totals = data.totals || {};
     const territories = data.territories || [];
     const groups = data.groups || [];
+    const byKey = new Map(territories.map((t) => [t.key, t]));
+
+    // Groups carrying a "children" list (e.g. Nizam, with Hyderabad as a
+    // child) replace their raw-territory members inline: the group's own
+    // row takes the position of the first member that's still a raw
+    // territory, immediately followed by its children as nested sub-rows.
+    // Every other raw-territory member (e.g. Nizam Districts) is folded in
+    // silently — it's already counted in the group's totals, it just isn't
+    // shown as its own row. Groups without "children" keep the older
+    // behaviour: a bold subtotal row appended right after the last
+    // territory (or already-built group) that belongs to them.
+    const nestedGroups = groups.filter((g) => g.children && g.children.length);
+    const trailingGroups = groups.filter(
+      (g) => !(g.children && g.children.length),
+    );
+
+    const anchorGroup = new Map(); // territory key -> nested group anchored there
+    const hiddenKeys = new Set(); // territory keys folded in, never shown on their own
+    nestedGroups.forEach((g) => {
+      const memberKeys = (g.members || []).filter((k) => byKey.has(k));
+      if (!memberKeys.length) return;
+      const childKeys = new Set((g.children || []).map((c) => c.key));
+      const anchor = memberKeys[0];
+      anchorGroup.set(anchor, g);
+      memberKeys.forEach((k) => {
+        if (k !== anchor || !childKeys.has(k)) hiddenKeys.add(k);
+      });
+    });
 
     const lastMemberGroup = new Map();
-    groups.forEach((g) => {
+    trailingGroups.forEach((g) => {
       const members = g.members || [];
-      if (members.length) lastMemberGroup.set(members[members.length - 1], g);
+      for (let i = members.length - 1; i >= 0; i--) {
+        if (byKey.has(members[i])) {
+          lastMemberGroup.set(members[i], g);
+          break;
+        }
+      }
     });
+
+    const groupNotes = groups.filter((g) => g.note).map((g) => g.note);
 
     const expanded = new Set(); // territory keys currently showing their movie split
     let tbody;
@@ -3629,6 +3672,24 @@
     const buildRows = () => {
       const rows = [];
       territories.forEach((t) => {
+        // A nested group anchored here replaces this territory's own row.
+        const ng = anchorGroup.get(t.key);
+        if (ng) {
+          rows.push(
+            areaRow(ng.label, ng.gross, ng.shows, ng.occupancy, {
+              total: true,
+            }),
+          );
+          (ng.children || []).forEach((c) => {
+            rows.push(
+              areaRow(c.label, c.gross, c.shows, c.occupancy, { sub: true }),
+            );
+          });
+          return;
+        }
+
+        if (hiddenKeys.has(t.key)) return; // folded silently into a nested group above
+
         const hasMovies = t.movies && t.movies.length > 1;
         rows.push(
           areaRow(t.label, t.gross, t.shows, t.occupancy, {
@@ -3703,6 +3764,9 @@
           "globe",
         ),
       ),
+      groupNotes.length
+        ? h("div", { class: "allindia-note" }, groupNotes.join(" "))
+        : null,
       table,
     );
   }

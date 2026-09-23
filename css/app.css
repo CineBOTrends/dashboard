@@ -2080,6 +2080,12 @@ table.bo.langwise td:nth-child(3) { width: 80px; }
    --warn for soft occupancy. No off-brand hues.
    ============================================================ */
 .allindia-kpis { margin-bottom: 22px; }
+.allindia-note {
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--muted);
+  margin: -8px 0 14px;
+}
 .allindia-panel .loading { padding: 40px 0; }
 
 table.bo.allindia th:nth-child(1),
