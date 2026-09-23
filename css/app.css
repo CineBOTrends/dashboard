@@ -2079,16 +2079,37 @@ table.bo.langwise td:nth-child(3) { width: 80px; }
    Branding palette only: --brand for strong occupancy / subtotal rows,
    --warn for soft occupancy. No off-brand hues.
    ============================================================ */
-.allindia-kpis { margin-bottom: 22px; }
+/* single card: caption + table, same .table-wrap panel the State Wise
+   tab uses — no separate KPI tiles above it. */
+.allindia-table { margin-bottom: 0; }
+.allindia-cap {
+  padding: 14px 16px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
 .allindia-note {
   font-size: 12.5px;
   font-style: italic;
   color: var(--muted);
-  margin: -8px 0 14px;
+  padding: 6px 16px 0;
+  margin: 0;
 }
 .allindia-panel .loading { padding: 40px 0; }
 
-/* 4 lean columns: Territory / Gross / Shows / Occ % */
+/* Fixed layout at every width so the 4 columns always sum to 100% of the
+   card — this is what keeps the table from ever forcing a horizontal
+   scrollbar, on mobile or desktop. */
+.allindia-table.table-wrap { overflow-x: hidden; }
+table.bo.allindia {
+  min-width: 0;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* 4 lean columns: Territory / Gross / Shows / Occupancy */
 table.bo.allindia th:nth-child(1),
 table.bo.allindia td:nth-child(1) { width: 40%; }
 table.bo.allindia thead th,
@@ -2132,12 +2153,6 @@ tr.terr-total-row .terr-area { padding-left: 13px; }
 @media (max-width: 760px) {
   /* Only 4 lean columns — narrow enough to fit inside the card at full
      width instead of forcing a side-scroll. */
-  .allindia-panel .table-wrap { overflow-x: visible; }
-  table.bo.allindia {
-    min-width: 0;
-    width: 100%;
-    table-layout: fixed;
-  }
   table.bo.allindia thead th,
   table.bo.allindia tbody td { padding: 9px 6px; font-size: 12px; }
 
