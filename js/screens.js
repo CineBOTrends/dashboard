@@ -2128,17 +2128,19 @@
 
     // filename + export-card context for section downloads
     const ctxLabel =
-      date && isOpeningDate(movie, date)
-        ? "Opening Day"
-        : tab === "historical"
-          ? "Historical"
-          : !date
-            ? tab === "advance"
-              ? "Advance"
-              : "Today"
-            : tab === "advance"
-              ? "Advance " + ymdShort(date)
-              : "Day " + dayNumber(date, dates, movie);
+      date && isPremiereDate(movie, date)
+        ? "Premiere"
+        : date && isOpeningDate(movie, date)
+          ? "Opening Day"
+          : tab === "historical"
+            ? "Historical"
+            : !date
+              ? tab === "advance"
+                ? "Advance"
+                : "Today"
+              : tab === "advance"
+                ? "Advance " + ymdShort(date)
+                : dayLabel(date, dates, movie);
     const dmeta = (movie && movie.meta) || {};
     DL_META = {
       title,
@@ -2164,7 +2166,9 @@
           ? tab
           : tab === "advance"
             ? "advance_" + ymdShort(date)
-            : "day_" + dayNumber(date, dates, movie));
+            : isPremiereDate(movie, date)
+              ? "premiere"
+              : "day_" + dayNumber(date, dates, movie));
 
     const body = h("div", { class: "tab-body", id: "tabbody" });
 
@@ -2182,7 +2186,7 @@
     );
 
     // fill tab body
-    if (tab === "historical") return renderHistorical(body, hist, title);
+    if (tab === "historical") return renderHistorical(body, hist, title, movie);
     if (!dates.length)
       return body.replaceChildren(
         stateMsg(
@@ -2431,14 +2435,22 @@
   // A film whose release date is still in the future has no "days" to page
   // through — only its opening day matters. So the date chips are hidden and
   // the panel is labelled OPENING DAY ADVANCE instead.
+  // Release date as YYYYMMDD, or null when the film has no usable one.
+  function releaseYMD(movie) {
+    const m = (movie && movie.meta) || {};
+    const raw = m.releaseDate || (movie && movie.releaseDate) || "";
+    const x = String(raw).match(/(\d{4})-(\d{2})-(\d{2})/);
+    return x ? x[1] + x[2] + x[3] : null;
+  }
+
   function openingDay(movie) {
     const m = (movie && movie.meta) || {};
 
     // The explicit release date is the source of truth for opening day.
     // Do not gate this by today's date: users can still open older advance
     // dates and should see the same Premiere / Opening Day labels.
-    const rel = m.releaseDate ? String(m.releaseDate).slice(0, 10) : null;
-    if (rel && /^\d{4}-\d{2}-\d{2}$/.test(rel)) return rel.replace(/-/g, "");
+    const rel = releaseYMD(movie);
+    if (rel) return rel;
 
     // Primary signal: build_data flags a film that has advance bookings but has
     // NEVER appeared in daily -> it hasn't released, and its opening day is the
@@ -2460,19 +2472,13 @@
     return !!open && open === ymd;
   }
 
+  // Premiere = any date BEFORE the release date (bookings / shows that open
+  // ahead of release). It is never counted as a numbered day: the release
+  // date itself is always Day 1.
   function isPremiereDate(movie, ymd) {
     const open = openingDay(movie);
-    if (!open) return false;
-    const premiere = ymdToDate(open);
-    premiere.setDate(premiere.getDate() - 1);
-    const p2 = (n) => String(n).padStart(2, "0");
-    return (
-      ymd ===
-      "" +
-        premiere.getFullYear() +
-        p2(premiere.getMonth() + 1) +
-        p2(premiere.getDate())
-    );
+    if (!open || !/^\d{8}$/.test(String(ymd || ""))) return false;
+    return String(ymd) < open; // YYYYMMDD compares correctly as a string
   }
 
   /* ---- day chips + breakdown strip (Daily / Advance) ---------------- */
@@ -2503,22 +2509,23 @@
 
   // Day number = days since release when we know the release date,
   // otherwise position in the tracked-dates list.
+  // Release day = Day 1. A date before release is a premiere, not a day, so
+  // it returns 0 (callers show "Premiere" via dayLabel).
   function dayNumber(ymd, dates, movie) {
-    const rel =
-      movie && movie.meta && movie.meta.releaseDate
-        ? String(movie.meta.releaseDate).slice(0, 10)
-        : null;
-    if (rel && /^\d{4}-\d{2}-\d{2}$/.test(rel)) {
-      const r = new Date(
-        +rel.slice(0, 4),
-        +rel.slice(5, 7) - 1,
-        +rel.slice(8, 10),
-      );
-      const diff = Math.round((ymdToDate(ymd) - r) / 86400000);
-      if (diff >= 0) return diff + 1;
+    const rel = releaseYMD(movie);
+    if (rel) {
+      const diff = Math.round((ymdToDate(ymd) - ymdToDate(rel)) / 86400000);
+      return diff >= 0 ? diff + 1 : 0;
     }
     const i = dates.indexOf(ymd);
     return i >= 0 ? i + 1 : 1;
+  }
+
+  // "Premiere" for pre-release dates, otherwise "Day N" (release day = Day 1).
+  function dayLabel(ymd, dates, movie) {
+    return isPremiereDate(movie, ymd)
+      ? "Premiere"
+      : "Day " + dayNumber(ymd, dates, movie);
   }
 
   function dayChips(s, movie) {
@@ -2543,7 +2550,7 @@
                 : isOpeningDate(movie, d)
                   ? "Opening Day"
                   : "Advance"
-              : "Day " + dayNumber(d, dates, movie),
+              : dayLabel(d, dates, movie),
           ),
           h("span", { class: "dc-d" }, ymdShort(d)),
           h("span", { class: "dc-w" }, ymdDow(d)),
@@ -2577,10 +2584,7 @@
             ? "Advance for " + ymdLong(date)
             : isToday
               ? "Today's Breakdown"
-              : "Day " +
-                dayNumber(date, s.dates, movie) +
-                " · " +
-                ymdLong(date);
+              : dayLabel(date, s.dates, movie) + " · " + ymdLong(date);
 
     const strip = h(
       "div",
@@ -3988,6 +3992,25 @@
     );
   }
 
+  function relabelHistDays(hist, movie) {
+    const rel = releaseYMD(movie);
+    if (!hist || !hist.days || !rel) return hist;
+    const days = hist.days.map((d) => {
+      const y = dYMD(d);
+      if (!/^\d{8}$/.test(y)) return d;
+      const diff = Math.round((ymdToDate(y) - ymdToDate(rel)) / 86400000);
+      return Object.assign(
+        {},
+        d,
+        diff < 0
+          ? { day: 0, premiere: true }
+          : { day: diff + 1, premiere: false },
+      );
+    });
+    return Object.assign({}, hist, { days });
+  }
+  const histDayTag = (d) => (d.premiere ? "Premiere" : "Day " + d.day);
+
   function histTotals(hist) {
     const days = (hist && hist.days) || [];
     const done = days.filter(isDone);
@@ -4030,8 +4053,7 @@
         "time-past",
         "No completed days yet",
         t.live
-          ? "Day " +
-              t.live.day +
+          ? histDayTag(t.live) +
               " is still running. Totals appear once the day closes."
           : "Totals appear once the first tracked day finishes.",
       );
@@ -4055,7 +4077,7 @@
       t.cities ? bdMetric("Cities", num(t.cities), "peak") : null,
       bdMetric("Occupancy", pct(t.occupancy), t.seats ? "weighted" : "day avg"),
       t.best
-        ? bdMetric("Best Day", "Day " + t.best.day, fmtDate(t.best.date))
+        ? bdMetric("Best Day", histDayTag(t.best), fmtDate(t.best.date))
         : null,
       t.housefull
         ? bdMetric("Housefull", num(t.housefull), "shows", true)
@@ -4084,8 +4106,7 @@
           ? h(
               "div",
               { class: "bd-updated" },
-              "Day " +
-                t.live.day +
+              histDayTag(t.live) +
                 " (" +
                 fmtDate(t.live.date) +
                 ") is still running — excluded until it closes.",
@@ -4140,7 +4161,7 @@
     );
   }
 
-  function renderHistorical(body, hist, title) {
+  function renderHistorical(body, hist, title, movie) {
     if (!hist)
       return body.replaceChildren(
         stateMsg(
@@ -4149,6 +4170,10 @@
           "Historical tables build up as the collector runs across multiple days.",
         ),
       );
+    // Re-number days from the release date (release day = Day 1) and flag
+    // pre-release dates as Premiere, instead of trusting the builder's
+    // position-in-list numbering.
+    hist = relabelHistDays(hist, movie);
     const parts = [];
     const t = histTotals(hist);
     DL_META = Object.assign({}, DL_META, {
@@ -4173,10 +4198,12 @@
 
     // Table 1 — day-wise. TOTAL pinned at the bottom, newest day first,
     // day-over-day change on gross, live day flagged.
-    const asc = hist.days.slice().sort((a, b) => a.day - b.day);
+    const asc = hist.days
+      .slice()
+      .sort((a, b) => dYMD(a).localeCompare(dYMD(b)));
     const prevGross = new Map();
     asc.forEach((d, i) => {
-      if (i) prevGross.set(d.day, +asc[i - 1].gross || 0);
+      if (i) prevGross.set(dYMD(d), +asc[i - 1].gross || 0);
     });
 
     const dayRows = [];
@@ -4186,12 +4213,12 @@
       .forEach((d) =>
         dayRows.push([
           isDone(d)
-            ? "Day " + d.day
-            : frag("Day " + d.day, h("span", { class: "livetag" }, "LIVE")),
+            ? histDayTag(d)
+            : frag(histDayTag(d), h("span", { class: "livetag" }, "LIVE")),
           fmtDate(d.date),
           dow(d.date),
           inr(d.gross),
-          changeCell(+d.gross || 0, prevGross.get(d.day)),
+          changeCell(+d.gross || 0, prevGross.get(dYMD(d))),
           num(d.sold),
           num(d.shows),
           occMeter(d.occupancy),
@@ -4216,7 +4243,7 @@
         "Day-wise Performance",
         t.days +
           " day(s) counted" +
-          (t.live ? " · day " + t.live.day + " still running" : ""),
+          (t.live ? " · " + histDayTag(t.live) + " still running" : ""),
         simpleTable(
           [
             "Day",
@@ -4239,7 +4266,7 @@
     const scope = hist.cumulative
       ? "Cumulative across " + t.days + (t.days === 1 ? " day" : " days")
       : "Live snapshot" +
-        (t.live ? " · day " + t.live.day + " in progress" : "");
+        (t.live ? " · " + histDayTag(t.live) + " in progress" : "");
 
     // Table 2 — city-wise (same shape as Top 20 Cities: state under the city name)
     parts.push(
