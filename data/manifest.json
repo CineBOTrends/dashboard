@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-26 05:05",
+  "generated": "2026-09-26 06:12",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -53,10 +53,12 @@
       "the-paradise": [
         "20260923",
         "20260924",
-        "20260925"
+        "20260925",
+        "20260926"
       ],
       "avengers-endgame-encore": [
-        "20260925"
+        "20260925",
+        "20260926"
       ]
     },
     "advance": {
