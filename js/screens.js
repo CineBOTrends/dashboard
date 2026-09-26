@@ -2355,7 +2355,23 @@
     let activePerfTab = perfTabs[3];
 
     const contentFor = (key) => {
-      if (key === "allindia") return allIndiaPanel(tab, date);
+      if (key === "allindia") {
+        return movie.territory
+          ? h(
+              "div",
+              { class: "perf-panel-body allindia-panel" },
+              allIndiaContent(movie.territory),
+            )
+          : h(
+              "div",
+              { class: "perf-panel-body empty" },
+              stateMsg(
+                "triangle-warning",
+                "All India report not available",
+                "Territory-wise tracking hasn't been published for this movie yet.",
+              ),
+            );
+      }
       if (key === "language") {
         return langGrid
           ? h("div", { class: "perf-panel-body" }, langGrid)
@@ -3526,9 +3542,14 @@
   }
 
   /* ---- All India Report (territory-wise) ----------------------------
-     Reads /data/<mode>/<date>/territory_tracked.json, a report separate
-     from the per-movie feed: {totals, territories[], groups[]}. Each
-     territory can carry a nested "states" breakup (currently only
+     Reads movie.territory — a per-movie {totals, territories[], groups[]}
+     breakdown embedded directly in this movie's own m/<slug>.json by
+     build_data.py (computed with territory_report.py's own aggregation
+     logic, just scoped to this movie's rows instead of every tracked
+     movie). Rendered synchronously alongside the State/Language/Format/
+     City tabs, which are all movie-scoped the same way — no separate
+     fetch needed, unlike the old global territory_tracked.json version.
+     Each territory can carry a nested "states" breakup (currently only
      Rest of India) and a "movies" breakup (version/format/language split
      for that territory). "groups" roll a run of territories (or,
      chained, other groups) up into a subtotal:
@@ -3541,29 +3562,7 @@
          keeps the older behaviour: a bold subtotal row appended right
          after the last territory/group in its "members" list.
      A group's optional "note" renders as a small italic line above the
-     table (e.g. the AP/Telangana sub-region disclaimer).
-     Loaded lazily (only once this tab is opened) and cached by app.js's
-     getJSON, so the shared 5-minute auto-refresh keeps it current. */
-  function allIndiaPanel(tab, date) {
-    const holder = h(
-      "div",
-      { class: "perf-panel-body allindia-panel" },
-      loading(),
-    );
-    Data.territory(tab, date)
-      .then((data) => holder.replaceChildren(allIndiaContent(data)))
-      .catch(() => {
-        holder.replaceChildren(
-          stateMsg(
-            "triangle-warning",
-            "All India report not available",
-            "Territory-wise tracking hasn't been published for this date yet.",
-          ),
-        );
-      });
-    return holder;
-  }
-
+     table (e.g. the AP/Telangana sub-region disclaimer). */
   function allIndiaContent(data) {
     const totals = data.totals || {};
     const territories = data.territories || [];
