@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-27 04:10",
+  "generated": "2026-09-27 04:40",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -61,7 +61,8 @@
       ],
       "avengers-endgame-encore": [
         "20260925",
-        "20260926"
+        "20260926",
+        "20260927"
       ]
     },
     "advance": {
