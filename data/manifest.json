@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-27 23:41",
+  "generated": "2026-10-01 22:36",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -19,7 +19,8 @@
         "20260925",
         "20260926",
         "20260927",
-        "20260928"
+        "20260928",
+        "20261002"
       ]
     },
     "daily": {
@@ -50,34 +51,22 @@
       ]
     }
   },
-  "upcoming": {},
+  "upcoming": {
+    "don-t-trouble-the-trouble": "20261002",
+    "sigma": "20261002",
+    "thella-kaagitham": "20261002"
+  },
   "movieDates": {
-    "daily": {
-      "the-paradise": [
-        "20260923",
-        "20260924",
-        "20260925",
-        "20260926",
-        "20260927"
-      ],
-      "avengers-endgame-encore": [
-        "20260925",
-        "20260926",
-        "20260927"
-      ]
-    },
+    "daily": {},
     "advance": {
-      "the-paradise": [
-        "20260923",
-        "20260924",
-        "20260925",
-        "20260926",
-        "20260927"
+      "don-t-trouble-the-trouble": [
+        "20261002"
       ],
-      "avengers-endgame-encore": [
-        "20260925",
-        "20260926",
-        "20260927"
+      "sigma": [
+        "20261002"
+      ],
+      "thella-kaagitham": [
+        "20261002"
       ]
     }
   }
