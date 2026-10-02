@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-02 23:37",
+  "generated": "2026-10-02 23:57",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -49,7 +49,6 @@
         "20260925",
         "20260926",
         "20260927",
-        "20261001",
         "20261002"
       ]
     }
@@ -58,14 +57,12 @@
   "movieDates": {
     "daily": {
       "don-t-trouble-the-trouble": [
-        "20261001",
-        "20261002"
-      ],
-      "thella-kaagitham": [
-        "20261001",
         "20261002"
       ],
       "sigma": [
+        "20261002"
+      ],
+      "thella-kaagitham": [
         "20261002"
       ]
     },
