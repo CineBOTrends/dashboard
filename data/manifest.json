@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-02 08:11",
+  "generated": "2026-10-02 08:40",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -62,7 +62,8 @@
         "20261002"
       ],
       "thella-kaagitham": [
-        "20261001"
+        "20261001",
+        "20261002"
       ],
       "sigma": [
         "20261002"
