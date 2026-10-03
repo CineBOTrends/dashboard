@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-03 07:36",
+  "generated": "2026-10-03 08:06",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -58,7 +58,8 @@
   "movieDates": {
     "daily": {
       "don-t-trouble-the-trouble": [
-        "20261002"
+        "20261002",
+        "20261003"
       ],
       "sigma": [
         "20261002",
