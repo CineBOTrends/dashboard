@@ -1,0 +1,29 @@
+/* ---------- editorial screens (news / reviews / box office) ---------- */
+.ed-list{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:18px; margin-top:8px; }
+.ed-card{ display:flex; flex-direction:column; background:var(--card,#15120c); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; text-decoration:none; color:inherit; transition:transform .15s ease, border-color .15s ease; }
+.ed-card:hover{ transform:translateY(-3px); border-color:var(--gold,#FFB000); }
+.ed-thumb{ aspect-ratio:16/9; background-size:cover; background-position:center; background-color:#0c0a07; }
+.ed-body{ padding:14px 16px 16px; }
+.ed-date{ font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:var(--muted,#9aa0a6); }
+.ed-title{ font-size:1.05rem; font-weight:600; margin:6px 0; line-height:1.35; }
+.ed-excerpt{ font-size:.9rem; color:var(--muted,#9aa0a6); line-height:1.5; }
+.ed-rating{ display:inline-block; color:var(--gold,#FFB000); font-weight:600; font-size:.9rem; margin:4px 0; }
+.ed-article{
+  width: min(100%, 720px);
+  margin: 0 auto;
+  padding: 0 clamp(28px, 6vw, 56px);
+}
+.ed-article .ed-hero{
+  display: block;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto 20px;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+}
+.ed-article .ed-copy{
+  max-width: 680px;
+  margin: 0 auto;
+}
+.ed-back{ display:inline-block; margin-top:24px; color:var(--gold,#FFB000); text-decoration:none; font-size:.9rem; }
+.ed-back:hover{ text-decoration:underline; }

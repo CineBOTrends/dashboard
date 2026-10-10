@@ -1,0 +1,123 @@
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+/* Large desktop / small desktop — 4 across */
+@media (max-width: 1180px) {
+  .movie-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+}
+@media (max-width: 1080px) {
+  .foot-grid { grid-template-columns: 1fr 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+/* Tablet landscape — 3 across */
+@media (max-width: 960px) {
+  .movie-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+}
+/* Tablet portrait / large phone — 2 across */
+@media (max-width: 720px) {
+  .nav { display: none; position: absolute; top: var(--header-h); left: 0; right: 0; flex-direction: column;
+         background: var(--bg-2); border-bottom: 1px solid var(--line); padding: 10px; gap: 2px; }
+  .nav.open { display: flex; }
+  .nav a { padding: 12px 14px; }
+  .nav-toggle { display: block; }
+  .movie-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  #movies { padding-top: 66px; }
+  .social .kpis { grid-template-columns: 1fr; }
+  .movie-hero { grid-template-columns: 110px 1fr; gap: 16px; }
+  .foot-grid { grid-template-columns: 1fr; }
+  .tabs { top: var(--header-h); overflow-x: auto; }
+  .ticker .track { animation-duration: 36s; }
+  .hero-discovery { padding-top: 46px; }
+  .hero-discovery .bulbs { margin-bottom: 20px; }
+  .hero-actions { gap: 8px; }
+  .hero-actions .btn { flex: 1 1 calc(50% - 4px); justify-content: center; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .hero-stat:nth-child(2) { border-right: 0; }
+  .hero-stat:nth-child(-n + 2) { border-bottom: 1px solid var(--line); }
+  .hero-intelligence {
+    padding: 56px 0 44px;
+  }
+  .hero-intelligence-grid {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+  .hero-intelligence-copy {
+    max-width: none;
+  }
+  .hero-intelligence h1 {
+    font-size: clamp(42px, 12vw, 60px);
+  }
+  .hero-value-list {
+    gap: 12px;
+    margin: 28px 0 20px;
+    padding: 18px 0;
+  }
+  .hero-value {
+    gap: 7px;
+  }
+  .feature-card {
+    min-height: 335px;
+  }
+  .feature-card-content {
+    padding: 24px;
+  }
+}
+/* Small phone — 2 across, tighter, condensed cards */
+@media (max-width: 460px) {
+  .movie-grid { gap: 10px; }
+  .mcard .body { padding: 9px 10px 10px; gap: 6px; }
+  .mcard .ttl { font-size: 12.5px; }
+  .badge { font-size: 7px; padding: 2px 4px; }
+  .hero-discovery h1 { font-size: 36px; }
+  .hero-search { margin-top: 20px; }
+  .hero-actions .btn { font-size: 12px; padding: 10px; }
+  .hero-search-meta { display: none; }
+  .hero-value-list {
+    grid-template-columns: 1fr;
+  }
+  .hero-intelligence-actions .btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+  .feature-card {
+    min-height: 310px;
+    border-radius: 18px;
+  }
+  .feature-card-content {
+    padding: 20px;
+  }
+}
+
+/* a11y */
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  .ticker .track { animation: none; }
+}
+/* Last-updated timestamp on movie detail hero */
+.movie-hero .updated-line{
+  font-size:.78rem;
+  color:var(--muted,#9aa0a6);
+  margin:.15rem 0 .35rem;
+  letter-spacing:.02em;
+}
+
+/* "Updated …" pinned to the movie info card corner */
+.movie-hero .mh-updated{
+  position:absolute; right:0; bottom:8px;
+  font-size:.75rem; color:var(--muted,#9aa0a6);
+  letter-spacing:.02em; white-space:nowrap;
+}
+.movie-hero.has-bg .mh-updated{ right:24px; bottom:18px; }
+@media (max-width:560px){
+  .movie-hero .mh-updated{ position:static; margin-top:10px; right:auto; bottom:auto; }
+}
+
+/* Today's Gross on movie summary card */
+.mcard .card-gross{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:8px; margin-top:7px; padding-top:7px;
+  border-top:1px solid var(--line);
+}
+.mcard .card-gross .cg-label{ font-size:.72rem; color:var(--muted,#9aa0a6); text-transform:uppercase; letter-spacing:.04em; }
+.mcard .card-gross .cg-val{ font-size:1.02rem; font-weight:600; color:var(--gold,#FFB000); }

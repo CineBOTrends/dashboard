@@ -1,0 +1,86 @@
+/* Self-hosted uicons (Flaticon UIcons, regular rounded) - only the glyphs this
+   site uses. Same-origin so the PNG export can inline the font.
+   Uicons by Flaticon - https://www.flaticon.com/uicons (attribution required) */
+@font-face {
+  font-family: "uicons-regular-rounded";
+  src: url("/fonts/uicons-regular-rounded.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+i[class^="fi-rr-"]:before, i[class*=" fi-rr-"]:before, span[class^="fi-rr-"]:before, span[class*=" fi-rr-"]:before {
+  font-family: uicons-regular-rounded !important;
+  font-style: normal;
+  font-weight: normal !important;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.fi-rr-0:before { content: "\f101"; }
+.fi-rr-a:before { content: "\f10c"; }
+.fi-rr-angle-down:before { content: "\f131"; }
+.fi-rr-angle-right:before { content: "\f133"; }
+.fi-rr-arrow-right:before { content: "\f170"; }
+.fi-rr-b:before { content: "\f1a4"; }
+.fi-rr-block:before { content: "\f1f3"; }
+.fi-rr-building:before { content: "\f255"; }
+.fi-rr-calendar:before { content: "\f27c"; }
+.fi-rr-camera:before { content: "\f28a"; }
+.fi-rr-chart-histogram:before { content: "\f2c8"; }
+.fi-rr-chart-pie:before { content: "\f2cd"; }
+.fi-rr-city:before { content: "\f338"; }
+.fi-rr-clapperboard-play:before { content: "\f339"; }
+.fi-rr-comment:before { content: "\f3ae"; }
+.fi-rr-d:before { content: "\f3db"; }
+.fi-rr-download:before { content: "\f423"; }
+.fi-rr-fill:before { content: "\f4c7"; }
+.fi-rr-film:before { content: "\f4ca"; }
+.fi-rr-filters:before { content: "\f4ce"; }
+.fi-rr-g:before { content: "\f500"; }
+.fi-rr-globe:before { content: "\f520"; }
+.fi-rr-grid:before { content: "\f52a"; }
+.fi-rr-h1:before { content: "\f547"; }
+.fi-rr-h2:before { content: "\f548"; }
+.fi-rr-h3:before { content: "\f549"; }
+.fi-rr-h4:before { content: "\f54a"; }
+.fi-rr-heart:before { content: "\f58d"; }
+.fi-rr-i:before { content: "\f5bc"; }
+.fi-rr-indian-rupee-sign:before { content: "\f5cd"; }
+.fi-rr-k:before { content: "\f5e2"; }
+.fi-rr-l:before { content: "\f5f3"; }
+.fi-rr-label:before { content: "\f5f4"; }
+.fi-rr-language:before { content: "\f5f6"; }
+.fi-rr-loading:before { content: "\f62e"; }
+.fi-rr-marker:before { content: "\f650"; }
+.fi-rr-menu-burger:before { content: "\f664"; }
+.fi-rr-money-bill-wave:before { content: "\f68d"; }
+.fi-rr-n:before { content: "\f6ae"; }
+.fi-rr-note:before { content: "\f6bf"; }
+.fi-rr-p:before { content: "\f6d6"; }
+.fi-rr-paper-plane:before { content: "\f6e1"; }
+.fi-rr-picture:before { content: "\f72b"; }
+.fi-rr-play:before { content: "\f740"; }
+.fi-rr-reel:before { content: "\f789"; }
+.fi-rr-s:before { content: "\f7b4"; }
+.fi-rr-search:before { content: "\f7d5"; }
+.fi-rr-share:before { content: "\f7e4"; }
+.fi-rr-sort-amount-down:before { content: "\f83c"; }
+.fi-rr-spinner:before { content: "\f853"; }
+.fi-rr-table:before { content: "\f8d1"; }
+.fi-rr-ticket:before { content: "\f90d"; }
+.fi-rr-time-past:before { content: "\f919"; }
+.fi-rr-triangle-warning:before { content: "\f95e"; }
+.fi-rr-up:before { content: "\f981"; }
+.fi-rr-v:before { content: "\f99b"; }
+
+/* "today isn't tracked yet — showing the last tracked day" */
+.stale-note {
+  display: flex; align-items: center; gap: 9px;
+  margin: 0 0 16px; padding: 10px 14px;
+  background: var(--brand-soft); border: 1px solid var(--brand-line);
+  border-radius: var(--r-sm);
+  font-size: 13px; color: var(--ink-2);
+}
+.stale-note i { color: var(--brand); font-size: 14px; line-height: 1; }

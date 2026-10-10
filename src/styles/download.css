@@ -1,0 +1,41 @@
+/* --- per-section PNG download --- */
+.block-hd {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 14px; margin-bottom: 10px;
+}
+.block-hd-t { min-width: 0; }
+.block-hd h3, .block-hd .hint { margin: 0; }
+.block-hd .hint { margin-top: 3px; }
+
+.dl-btn {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; cursor: pointer;
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  color: var(--ink-2); background: var(--panel-2);
+  border: 1px solid var(--line-2); border-radius: 999px;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.dl-btn:hover:not(:disabled) {
+  background: var(--brand-soft); color: var(--brand); border-color: var(--brand-line);
+}
+.dl-btn:disabled { opacity: .6; cursor: progress; }
+.dl-btn i { font-size: 13px; line-height: 1; }
+
+/* button that sits on the coloured panel header */
+.bd-panel { position: relative; }
+.dl-btn.on-head {
+  position: absolute; top: 11px; right: 54px; z-index: 2;
+  background: rgba(23,19,11,.14); color: var(--bd-ink);
+  border-color: rgba(23,19,11,.28);
+}
+.dl-btn.on-head:hover:not(:disabled) {
+  background: var(--bd-ink); color: var(--bd-accent); border-color: var(--bd-ink);
+}
+.bd-panel.hist .dl-btn.on-head { right: 14px; }
+
+@media (max-width: 560px) {
+  .dl-btn .dl-label { display: none; }
+  .dl-btn { padding: 8px; }
+  .dl-btn.on-head { right: 48px; top: 9px; }
+  .bd-panel.hist .dl-btn.on-head { right: 12px; }
+}

@@ -1,0 +1,20 @@
+/* --- cities tables: fixed columns so City can't hog the free width --- */
+table.bo.cities { table-layout: fixed; }
+table.bo.cities th:nth-child(1), table.bo.cities td:nth-child(1) { width: 54px; }   /* # */
+table.bo.cities th:nth-child(2), table.bo.cities td:nth-child(2) { width: 26%; }    /* city + state */
+table.bo.cities th:nth-child(3), table.bo.cities td:nth-child(3) { width: 15%; }    /* gross */
+table.bo.cities th:nth-child(4), table.bo.cities td:nth-child(4) { width: 11%; }    /* shows */
+table.bo.cities th:nth-child(5), table.bo.cities td:nth-child(5) { width: 18%; }    /* occupancy */
+table.bo.cities th:nth-child(6), table.bo.cities td:nth-child(6) { width: 14%; }    /* sold */
+table.bo.cities .city-nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+table.bo.cities .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* fixed layout ignores width:1%, so restate gross as a normal left cell */
+table.bo.cities .gross-cell { width: 15%; }
+
+/* breathing room between the right-aligned Shows figure and the occupancy bar */
+/* header must carry the same indent as the cells, or 'OCCUPANCY' floats
+   100px left of the bars it labels */
+table.bo.cities th:nth-child(5),
+table.bo.cities td:nth-child(5) { padding-left: 100px; }
+table.bo.cities th:nth-child(4),
+table.bo.cities td:nth-child(4) { padding-right: 4px; }

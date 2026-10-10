@@ -1,0 +1,18 @@
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.site-footer { border-top: 1px solid var(--line); background: var(--bg-2); margin-top: 30px; }
+.foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1.4fr; gap: 30px; padding: 48px 0 30px; }
+.foot-grid h4 { font-family: var(--mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--brand); margin: 0 0 14px; }
+.foot-grid a, .foot-grid p { color: var(--ink-2); font-size: 13.5px; display: block; margin-bottom: 9px; line-height: 1.5; }
+.foot-grid a:hover { color: var(--brand); }
+.foot-brand .name { font-family: var(--display); font-size: 24px; margin-bottom: 12px; }
+.foot-brand .name b { color: var(--brand); font-weight: 400; }
+.news { display: flex; gap: 8px; margin: 10px 0 8px; }
+.news input { flex: 1; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; color: var(--ink); outline: none; font-family: var(--sans); }
+.news input:focus { border-color: var(--brand-line); }
+.social-row { display: flex; gap: 10px; margin-top: 4px; }
+.social-row a { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; background: var(--panel); border: 1px solid var(--line); color: var(--ink-2); }
+.social-row a:hover { color: var(--brand); border-color: var(--brand-line); }
+.foot-bottom { border-top: 1px solid var(--line); padding: 18px 0; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.foot-bottom span { font-size: 12px; color: var(--muted); }

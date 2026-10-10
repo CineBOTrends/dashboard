@@ -1,0 +1,14 @@
+/* ============================================================
+   EMPTY / ERROR / LOADING
+   ============================================================ */
+.state-msg { text-align: center; padding: 70px 20px; }
+.state-msg .ic { font-size: 34px; color: var(--brand); opacity: .8; }
+.state-msg h3 { font-family: var(--display); font-weight: 400; font-size: 22px; margin: 16px 0 8px; }
+.state-msg p { color: var(--muted); max-width: 440px; margin: 0 auto; font-size: 14px; }
+.state-msg code { font-family: var(--mono); background: var(--panel); padding: 2px 7px; border-radius: 6px; color: var(--brand); border: 1px solid var(--line); }
+.spinner {
+  width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--raise);
+  border-top-color: var(--brand); animation: spin .8s linear infinite; margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg) } }
+.loading { padding: 80px 0; }

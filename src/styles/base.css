@@ -1,0 +1,9 @@
+/* ---------- type ---------- */
+html { scrollbar-gutter: stable; }
+.display { font-family: var(--display); font-weight: 400; letter-spacing: .5px; line-height: .98; }
+.eyebrow {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--brand); font-weight: 600;
+}
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }

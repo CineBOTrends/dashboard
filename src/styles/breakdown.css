@@ -1,0 +1,241 @@
+/* ============================================================
+   PERFORMANCE BREAKDOWN (movie page)
+   Stateful tabs showing the same data in a compact, drillable layout.
+   ============================================================ */
+.perf-wrap {
+  margin: 14px 0 30px;
+}
+.perf-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  margin-top: 42px;
+}
+.perf-title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(24px, 2.6vw, 34px);
+  line-height: 1.08;
+  letter-spacing: .02em;
+  font-weight: 400;
+  margin-bottom: 20px;
+}
+.perf-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink-2);
+  font-size: 11px;
+  font-family: var(--mono);
+   margin-bottom: 20px;
+}
+.perf-country {
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: var(--ink);
+}
+.perf-live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 10px var(--brand-glow);
+  margin-right: 2px;
+}
+.perf-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dl-btn.perf-download {
+  box-sizing: border-box;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  margin-bottom: 20px;
+  color: var(--ink-2);
+  background: rgba(255,255,255,.04);
+  border-color: var(--line);
+}
+.dl-btn.perf-download i { font-size: 12px; }
+.dl-btn.perf-download .dl-label { display: none; }
+.perf-status-text {
+  color: var(--ink-2);
+}
+.perf-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 25px;
+}
+.perf-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
+  min-height: 48px;
+  padding: 10px 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+
+  transition: transform .12s ease, border-color .12s ease, background .12s ease, color .12s ease;
+}
+.perf-tab:hover {
+  transform: translateY(-1px);
+  border-color: var(--brand-line);
+}
+.perf-tab.active {
+  background: var(--brand);
+  border-color: transparent;
+  color: #18120a;
+  box-shadow: 0 8px 20px -12px var(--brand-glow);
+}
+.perf-tab i {
+  font-size: 15px;
+}
+.perf-panel-body {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 24px;
+}
+.perf-panel-body.empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (max-width: 760px) {
+  .perf-tabs {
+    gap: 7px;
+  }
+  .perf-tab {
+    flex: 1 1 calc(50% - 4px);
+    padding: 10px 12px;
+  }
+  .perf-title {
+    font-size: 24px;
+  }
+  .perf-head {
+    align-items: flex-start;
+  }
+}
+
+/* ============================================================
+   ALL INDIA REPORT (territory-wise) — Performance Breakdown tab
+   Branding palette only: --brand for strong occupancy / subtotal rows,
+   --warn for soft occupancy. No off-brand hues.
+   ============================================================ */
+/* single card: caption + table, same .table-wrap panel the State Wise
+   tab uses — no separate KPI tiles above it. */
+.allindia-table { margin-bottom: 0; }
+.allindia-cap {
+  padding: 14px 16px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.allindia-note {
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--muted);
+  padding: 12px 16px 14px;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+.allindia-panel .loading { padding: 40px 0; }
+
+/* Fixed layout at every width so the 4 columns always sum to 100% of the
+   card — this is what keeps the table from ever forcing a horizontal
+   scrollbar, on mobile or desktop. */
+.allindia-table.table-wrap { overflow-x: hidden; }
+table.bo.allindia {
+  min-width: 0;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* 4 lean columns: Territory / Gross / Shows / Occupancy */
+table.bo.allindia th:nth-child(1),
+table.bo.allindia td:nth-child(1) { width: 40%; }
+table.bo.allindia thead th,
+table.bo.allindia tbody td { padding: 15px 16px; }
+/* the flex layout (icon + label) lives on an inner <span>, never on the
+   <td> itself — setting display:flex directly on a table-cell makes the
+   browser drop its table-cell sizing and lay it out by content width
+   instead, which is what caused the stray colored box stopping partway
+   across the row instead of filling the column. */
+table.bo.allindia .terr-area { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+
+/* territory rows that expand into a movie/format split */
+table.bo.allindia tr.clickable { cursor: pointer; }
+table.bo.allindia tr.clickable:hover { background: var(--brand-soft); }
+.terr-caret { font-size: 10px; color: var(--muted); flex: 0 0 auto; }
+
+/* nested rows: Rest-of-India state split, or a territory's movie split */
+tr.terr-sub-row .terr-area {
+  padding-left: 20px;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+tr.terr-sub-row .terr-area::before {
+  content: "↳";
+  color: var(--muted-2);
+  font-weight: 400;
+}
+tr.terr-sub-row td { color: var(--ink-2); }
+tr.terr-sub-row .num.gold { color: var(--ink-2); font-weight: 400; }
+
+/* group subtotal rows (Nizam, APTG Total, ...) — background goes on the
+   <tr> itself so the tint is one uniform band across the whole row; a
+   background set per-<td> instead only fills each cell's own box and,
+   because the first column is a fixed width, leaves a hard visible seam
+   partway across the row where that box ends. The accent bar still needs
+   to sit on the first cell, since border-collapse drops <tr> borders. */
+tr.terr-total-row { background: var(--brand-soft); }
+tr.terr-total-row td:first-child { border-left: 3px solid var(--brand); }
+tr.terr-total-row .terr-area { padding-left: 13px; }
+
+@media (max-width: 760px) {
+  /* Only 4 lean columns — narrow enough to fit inside the card at full
+     width instead of forcing a side-scroll. */
+  table.bo.allindia thead th,
+  table.bo.allindia tbody td { padding: 9px 6px; font-size: 12px; }
+
+  table.bo.allindia th:nth-child(1),
+  table.bo.allindia td:nth-child(1) { width: 34%; }
+  table.bo.allindia th:nth-child(2),
+  table.bo.allindia td:nth-child(2) { width: 28%; text-align: left; }
+  table.bo.allindia th:nth-child(3),
+  table.bo.allindia td:nth-child(3) { width: 18%; }
+  table.bo.allindia th:nth-child(4),
+  table.bo.allindia td:nth-child(4) { width: 20%; padding-right: 16px; }
+
+  table.bo.allindia .terr-area { gap: 5px; white-space: normal; line-height: 1.25; }
+  table.bo.allindia .terr-caret { font-size: 9px; }
+  tr.terr-sub-row .terr-area { padding-left: 12px; font-size: 11px; }
+}
+
+@media (max-width: 400px) {
+  table.bo.allindia thead th,
+  table.bo.allindia tbody td { padding: 8px 4px; font-size: 11px; }
+}

@@ -1,0 +1,106 @@
+{
+ "currency": "USD",
+ "country": "USA",
+ "updated": "2026-10-10T01:03:16+00:00",
+ "movies": [
+  {
+   "slug": "jailer-2",
+   "title": "Jailer 2",
+   "poster": {
+    "thumb": "/assets/posters/jailer-2-thumb.jpg",
+    "bg": "/assets/posters/jailer-2-bg.jpg",
+    "slug": "jailer-2"
+   },
+   "entries": {
+    "20261014": {
+     "gross": 641948.45,
+     "admissions": 23204,
+     "shows": 1002,
+     "theatres": 401,
+     "cities": 335,
+     "occupancy": 20.23,
+     "languages": [
+      "Tamil",
+      "Telugu",
+      "Unknown"
+     ],
+     "formats": [
+      "Standard",
+      "RPX",
+      "D-Box",
+      "Sony Digital Cinema"
+     ],
+     "topTerritories": [
+      {
+       "territory": "TX",
+       "gross": 158779.46
+      },
+      {
+       "territory": "CA",
+       "gross": 105874.1
+      },
+      {
+       "territory": "WA",
+       "gross": 43927.36
+      }
+     ],
+     "trackedAt": "2026-10-10T01:02:39+00:00",
+     "report": "/overseas/20261014/jailer-2-report.png?v=202610100102390000"
+    }
+   },
+   "posterSlug": "jailer-2",
+   "dates": [
+    "20261014"
+   ],
+   "latest": "20261014"
+  },
+  {
+   "slug": "ranabaali--2026",
+   "title": "Ranabaali (2026)",
+   "poster": {
+    "thumb": "/assets/posters/ranabaali--2026-thumb.jpg",
+    "bg": "/assets/posters/ranabaali--2026-bg.jpg",
+    "slug": "ranabaali--2026"
+   },
+   "entries": {
+    "20261015": {
+     "gross": 29505.16,
+     "admissions": 1675,
+     "shows": 258,
+     "theatres": 145,
+     "cities": 137,
+     "occupancy": 6.69,
+     "languages": [
+      "Telugu",
+      "Unknown"
+     ],
+     "formats": [
+      "Standard",
+      "Sony Digital Cinema"
+     ],
+     "topTerritories": [
+      {
+       "territory": "TX",
+       "gross": 12502.97
+      },
+      {
+       "territory": "CA",
+       "gross": 3606.04
+      },
+      {
+       "territory": "WA",
+       "gross": 2239.21
+      }
+     ],
+     "trackedAt": "2026-10-10T01:02:27+00:00",
+     "report": "/overseas/20261015/ranabaali--2026-report.png?v=202610100102270000"
+    }
+   },
+   "posterSlug": "ranabaali--2026",
+   "dates": [
+    "20261015"
+   ],
+   "latest": "20261015"
+  }
+ ]
+}

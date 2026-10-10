@@ -1,0 +1,78 @@
+/* ============================================================
+   CineBOTrends — design system
+   Retro cinema marquee  ×  live box-office terminal
+   Single accent: marquee gold (#FFB000) on warm dark ink.
+   ============================================================ */
+
+/* Retroica display face — drop the downloaded font into /fonts.
+   Falls back to Space Grotesk so the wordmark still reads well. */
+@font-face {
+  font-family: "Retroica";
+  src: url("/fonts/Retroica.woff2") format("woff2"),
+       url("/fonts/Retroica.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  /* one brand hue, used like a marquee bulb */
+  --brand: #FFB000;
+  --brand-press: #E59E00;
+  --brand-soft: rgba(255, 176, 0, .14);
+  --brand-line: rgba(255, 176, 0, .22);
+  --brand-glow: rgba(255, 176, 0, .45);
+
+  /* warm dark auditorium neutrals (not blue-black) */
+  --bg: #0E0C09;
+  --bg-2: #141109;
+  --panel: #1A1610;
+  --panel-2: #221C12;
+  --raise: #2A2316;
+  --line: rgba(255, 240, 214, .09);
+  --line-2: rgba(255, 240, 214, .15);
+
+  --ink: #F4EEE0;
+  --ink-2: #C9C1AE;
+  --muted: #948C79;
+  --muted-2: #6E6757;
+
+  --ok: #FFB000;            /* status stays single-hue */
+  --warn: #FF7A1A;
+
+  --display: "Retroica", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --sans: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --r: 14px;
+  --r-sm: 9px;
+  --maxw: 1240px;
+  --header-h: 64px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* faint warm vignette + marquee grain */
+  background-image:
+    radial-gradient(1200px 600px at 50% -10%, rgba(255,176,0,.06), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgba(255,122,26,.05), transparent 55%);
+  background-attachment: fixed;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+::selection { background: var(--brand); color: #1a1407; }
+
+/* scrollbars */
+* { scrollbar-width: thin; scrollbar-color: var(--raise) transparent; }
+*::-webkit-scrollbar { height: 8px; width: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--raise); border-radius: 20px; }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(18px, 5vw, 40px); }

@@ -1,0 +1,23 @@
+/* ============================================================
+   GLOBAL TRACKING (USA) — home strip + /global/<slug> page
+   Reuses the cards, .bd-*, .perf-* and table.bo rules above; only the
+   bits that differ live here.
+   ============================================================ */
+/* six metrics instead of India's eight (desktop only: the <=900px / <=560px
+   rules above still take over on tablets and phones) */
+@media (min-width: 901px) {
+  .bd-strip.g-strip { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+.g-more { display: flex; justify-content: center; margin-top: 16px; }
+
+/* Global > Performance Breakdown > Full Report Card: the collector's PNG, shown as-is */
+.g-report { margin-bottom: 24px; }
+.g-report-link { display: block; line-height: 0; cursor: zoom-in; }
+.g-report-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #13110E;
+}

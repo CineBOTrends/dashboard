@@ -1,0 +1,121 @@
+/* ============================================================
+   Day chips + collapsible breakdown strip (Daily / Advance)
+   Accent is variable-driven: override --bd-accent / --bd-accent-2
+   (e.g. #6D28D9 / #4F46E5) to get the purple look from the mock.
+   ============================================================ */
+.bd-panel {
+  --bd-accent: var(--brand);
+  --bd-accent-2: var(--brand-press);
+  --bd-ink: #17130B;
+}
+.bd-panel.adv { --bd-accent: #E5A100; --bd-accent-2: #C98600; }
+
+/* --- day chips --- */
+.daybar { display: flex; gap: 9px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; margin-bottom: 18px; scrollbar-width: none; }
+.daybar::-webkit-scrollbar { display: none; }
+.daychip {
+  flex: 0 0 auto; min-width: 84px; padding: 10px 14px 9px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-family: var(--sans);
+  background: var(--panel-2); color: var(--ink);
+  border: 1px solid var(--line-2); border-bottom: none;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  transition: background .15s, color .15s, border-color .15s, transform .15s;
+}
+.daychip:hover { background: var(--raise); border-color: var(--brand-line); transform: translateY(-1px); }
+.daychip .dc-t { font-weight: 700; font-size: 14px; letter-spacing: .01em; line-height: 1.2; color: var(--ink); }
+.daychip .dc-d { font-family: var(--mono); font-weight: 500; font-size: 12px; color: var(--ink-2); }
+.daychip .dc-w { font-family: var(--mono); font-weight: 700; font-size: 10px; letter-spacing: .12em; color: var(--muted); }
+.daychip.on {
+  background: var(--brand); border-color: var(--brand);
+  box-shadow: 0 -2px 18px var(--brand-soft);
+}
+.daychip.on .dc-t { color: #17130B; }
+.daychip.on .dc-d { color: rgba(23,19,11,.88); }
+.daychip.on .dc-w { color: rgba(23,19,11,.72); }
+
+/* --- panel --- */
+.bd-panel {
+  border: 1px solid var(--line-2); border-radius: var(--r);
+  background: var(--panel); overflow: hidden;
+}
+.bd-head {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px; cursor: pointer; border: 0; text-align: left;
+  background: linear-gradient(90deg, var(--bd-accent), var(--bd-accent-2));
+  color: var(--bd-ink);
+  font-family: var(--sans); font-weight: 700; font-size: 14px;
+  letter-spacing: .12em; text-transform: uppercase;
+}
+.bd-head > i:first-child { font-size: 15px; }
+.bd-head .bd-title { flex: 1; font-weight: 700; }
+.bd-head .bd-chev {
+  flex: 0 0 auto; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--bd-ink); color: var(--bd-accent);
+  font-size: 14px; font-weight: 700; line-height: 1;
+  transition: transform .25s ease, background .15s;
+}
+.bd-head:hover .bd-chev { background: #000; }
+.bd-panel.closed .bd-chev { transform: rotate(-90deg); }
+
+.bd-body {
+  padding: 16px; display: grid; gap: 10px;
+  overflow: hidden; transition: max-height .28s ease, opacity .2s ease, padding .28s ease;
+  max-height: 460px; opacity: 1;
+}
+.bd-panel.closed .bd-body { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; }
+
+/* --- metric strip --- */
+.bd-strip {
+  display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: var(--r-sm); padding: 16px 18px;
+}
+.bd-m { min-width: 0; }
+.bd-m .v {
+  font-family: var(--mono); font-weight: 700; font-size: 21px; letter-spacing: -.5px;
+  color: var(--ink); white-space: nowrap;
+}
+.bd-m.hot .v { color: var(--brand); }
+.bd-m .l {
+  margin-top: 3px; font-size: 10px; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--ink-2); white-space: nowrap;
+}
+.bd-m .s { font-size: 10.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; }
+.bd-updated { font-family: var(--mono); font-size: 11.5px; color: var(--muted); text-align: right; }
+
+@media (max-width: 900px) {
+  .bd-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 10px; }
+  .bd-m .v { font-size: 18px; }
+}
+@media (max-width: 560px) {
+  .bd-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 14px; }
+  .bd-head { font-size: 13px; letter-spacing: .06em; }
+  .bd-updated { text-align: left; }
+}
+
+/* --- historical: total-tracked panel + table totals row --- */
+.bd-panel.hist { margin-bottom: 22px; }
+.bd-head.static { cursor: default; }
+.livetag {
+  margin-left: 7px; padding: 1px 6px; border-radius: 999px;
+  font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .09em;
+  background: var(--brand-soft); color: var(--brand); border: 1px solid var(--brand-line);
+  vertical-align: middle;
+}
+.totcell { font-weight: 700; color: var(--ink); }
+table.bo tbody tr:has(.totcell) {
+  background: var(--panel-2);
+  border-top: 2px solid var(--brand-line);
+}
+table.bo tbody tr:has(.totcell) td { color: var(--ink); }
+
+/* --- day-wise: total row pinned at the bottom + change column --- */
+table.bo tbody tr:has(.totcell) {
+  border-top: 2px solid var(--brand-line);
+  border-bottom: none;
+}
+.chg { font-family: var(--mono); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.chg.up { color: #46C46A; }
+.chg.dn { color: #E5484D; }
+.chg.flat { color: var(--muted); }
