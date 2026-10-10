@@ -49,8 +49,11 @@ export async function downloadSection(section, sectionTitle, name, btn) {
 
     // iOS caps canvas memory hard: degrade resolution rather than fail
     const cap = isIOS() ? 12e6 : 3e7;
-    let scale = isIOS() ? 1.5 : 2;
-    if (w * hgt * scale * scale > cap) scale = Math.max(1, Math.sqrt(cap / (w * hgt)));
+    // INTEGER scales only. WebKit renders a big foreignObject in tiles, and at
+    // a fractional scale (the old 1.5 on iPhone) the tile edges land between
+    // device pixels and show up as a thin vertical seam running down the card.
+    let scale = 2;
+    if (w * hgt * scale * scale > cap) scale = Math.max(1, Math.floor(Math.sqrt(cap / (w * hgt))));
 
     const opts = {
       bgcolor: bg,

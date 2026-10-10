@@ -96,7 +96,7 @@
 
 /* the stub: poster torn off along a perforation */
 .exp-hero-r {
-  position: relative; z-index: 2; flex: 0 0 34%;
+  position: relative; z-index: 2; flex: 0 0 392px; /* whole px: 34% was 391.68 and put the stub edge between device pixels */
   /* NO border here: inside dom-to-image's foreignObject this element's height
      resolves against the whole frame, so a border-left painted a dashed line
      straight down the card, through the table and footer. */
