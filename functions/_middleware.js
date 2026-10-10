@@ -228,16 +228,23 @@ export async function onRequest({ request, env, next }) {
     `<link rel="canonical" href="${esc(url.origin + url.pathname)}">` +
     `<meta name="description" content="${esc(m.desc)}">` +
     `<meta name="twitter:card" content="summary_large_image">` +
+    `<meta property="twitter:card" content="summary_large_image">` +
     `<meta name="twitter:site" content="@cinebotrends">` +
+    `<meta property="twitter:site" content="@cinebotrends">` +
     `<meta name="twitter:title" content="${esc(m.title)}">` +
+    `<meta property="twitter:title" content="${esc(m.title)}">` +
     `<meta name="twitter:description" content="${esc(m.desc)}">` +
+    `<meta property="twitter:description" content="${esc(m.desc)}">` +
     `<meta name="twitter:image" content="${esc(img)}">` +
-    `<meta name="twitter:image:alt" content="${esc(m.title)}">`;
+    `<meta property="twitter:image" content="${esc(img)}">` +
+    `<meta name="twitter:image:alt" content="${esc(m.title)}">` +
+    `<meta property="twitter:image:alt" content="${esc(m.title)}">`;
 
   return new HTMLRewriter()
     .on("title", { element: (e) => e.setInnerContent(m.title) })
     .on('meta[property^="og:"]', { element: (e) => e.remove() })
     .on('meta[name^="twitter:"]', { element: (e) => e.remove() })
+    .on('meta[property^="twitter:"]', { element: (e) => e.remove() })
     .on('meta[name="description"]', { element: (e) => e.remove() })
     .on('link[rel="canonical"]', { element: (e) => e.remove() })
     .on("head", { element: (e) => e.append(tags, { html: true }) })
