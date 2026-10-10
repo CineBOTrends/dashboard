@@ -1,124 +1,132 @@
 {
   "title": "Ranabaali (2026)",
   "slug": "ranabaali--2026",
-  "gross": 29505.16,
-  "admissions": 1675,
-  "shows": 258,
-  "theatres": 145,
-  "cities": 137,
-  "occupancy": 6.69,
+  "gross": 34301.09,
+  "admissions": 1961,
+  "shows": 262,
+  "theatres": 147,
+  "cities": 139,
+  "occupancy": 7.66,
   "territories": [
     {
       "territory": "TX",
-      "gross": 12502.97,
-      "admissions": 680,
-      "shows": 47,
-      "theatres": 24,
-      "occupancy": 17.03
+      "gross": 13486.07,
+      "admissions": 734,
+      "shows": 49,
+      "theatres": 25,
+      "occupancy": 17.68
     },
     {
       "territory": "CA",
-      "gross": 3606.04,
-      "admissions": 215,
+      "gross": 3950.7,
+      "admissions": 236,
       "shows": 33,
       "theatres": 18,
-      "occupancy": 6.41
-    },
-    {
-      "territory": "WA",
-      "gross": 2239.21,
-      "admissions": 130,
-      "shows": 13,
-      "theatres": 8,
-      "occupancy": 8.84
+      "occupancy": 7.04
     },
     {
       "territory": "GA",
-      "gross": 1683.73,
-      "admissions": 92,
+      "gross": 2845.4,
+      "admissions": 157,
       "shows": 8,
       "theatres": 5,
-      "occupancy": 8.33
+      "occupancy": 14.21
     },
     {
-      "territory": "NC",
-      "gross": 1283.22,
-      "admissions": 78,
-      "shows": 5,
-      "theatres": 3,
-      "occupancy": 19.5
+      "territory": "WA",
+      "gross": 2355.87,
+      "admissions": 137,
+      "shows": 15,
+      "theatres": 9,
+      "occupancy": 7.54
     },
     {
       "territory": "VA",
-      "gross": 1172.66,
-      "admissions": 65,
+      "gross": 1730.42,
+      "admissions": 95,
       "shows": 6,
       "theatres": 2,
-      "occupancy": 5.12
+      "occupancy": 7.48
     },
     {
-      "territory": "MO",
-      "gross": 1013.12,
-      "admissions": 55,
+      "territory": "NC",
+      "gross": 1496.53,
+      "admissions": 91,
       "shows": 5,
-      "theatres": 4,
-      "occupancy": 13.78
+      "theatres": 3,
+      "occupancy": 22.75
     },
     {
       "territory": "FL",
-      "gross": 996.82,
-      "admissions": 61,
+      "gross": 1120.03,
+      "admissions": 69,
       "shows": 17,
       "theatres": 9,
-      "occupancy": 3.75
+      "occupancy": 4.24
     },
     {
-      "territory": "OH",
-      "gross": 816.0,
-      "admissions": 48,
-      "shows": 17,
-      "theatres": 9,
-      "occupancy": 3.02
-    },
-    {
-      "territory": "NJ",
-      "gross": 520.73,
-      "admissions": 33,
-      "shows": 8,
+      "territory": "MO",
+      "gross": 1050.1,
+      "admissions": 57,
+      "shows": 5,
       "theatres": 4,
-      "occupancy": 3.88
+      "occupancy": 14.29
     },
     {
       "territory": "PA",
-      "gross": 492.8,
-      "admissions": 29,
+      "gross": 900.56,
+      "admissions": 53,
       "shows": 5,
       "theatres": 3,
-      "occupancy": 4.68
+      "occupancy": 8.56
     },
     {
-      "territory": "MD",
-      "gross": 383.67,
-      "admissions": 21,
-      "shows": 2,
-      "theatres": 1,
-      "occupancy": 16.15
+      "territory": "OH",
+      "gross": 850.0,
+      "admissions": 50,
+      "shows": 17,
+      "theatres": 9,
+      "occupancy": 3.15
+    },
+    {
+      "territory": "NJ",
+      "gross": 795.09,
+      "admissions": 50,
+      "shows": 8,
+      "theatres": 4,
+      "occupancy": 5.88
     },
     {
       "territory": "NY",
-      "gross": 370.82,
-      "admissions": 26,
+      "gross": 451.76,
+      "admissions": 32,
       "shows": 5,
       "theatres": 3,
-      "occupancy": 4.33
+      "occupancy": 5.33
+    },
+    {
+      "territory": "MD",
+      "gross": 438.48,
+      "admissions": 24,
+      "shows": 2,
+      "theatres": 1,
+      "occupancy": 18.46
     },
     {
       "territory": "OR",
-      "gross": 272.0,
-      "admissions": 16,
+      "gross": 292.98,
+      "admissions": 18,
       "shows": 8,
       "theatres": 5,
-      "occupancy": 2.5
+      "occupancy": 2.81
+    },
+    {
+      "territory": "IL",
+      "gross": 245.65,
+      "admissions": 14,
+      "shows": 16,
+      "theatres": 8,
+      "occupancy": 0.71
     },
     {
       "territory": "NH",
@@ -129,20 +137,20 @@
       "occupancy": 8.59
     },
     {
-      "territory": "IL",
-      "gross": 210.63,
-      "admissions": 12,
-      "shows": 16,
-      "theatres": 8,
-      "occupancy": 0.61
+      "territory": "TN",
+      "gross": 208.24,
+      "admissions": 19,
+      "shows": 1,
+      "theatres": 1,
+      "occupancy": 8.76
     },
     {
       "territory": "CT",
       "gross": 204.0,
       "admissions": 12,
-      "shows": 3,
-      "theatres": 2,
-      "occupancy": 4.18
+      "shows": 2,
+      "theatres": 1,
+      "occupancy": 5.71
     },
     {
       "territory": "IA",
@@ -169,6 +177,22 @@
       "occupancy": 10.48
     },
     {
+      "territory": "DE",
+      "gross": 188.37,
+      "admissions": 13,
+      "shows": 1,
+      "theatres": 1,
+      "occupancy": 12.75
+    },
+    {
+      "territory": "KS",
+      "gross": 149.76,
+      "admissions": 13,
+      "shows": 3,
+      "theatres": 2,
+      "occupancy": 3.1
+    },
+    {
       "territory": "IN",
       "gross": 136.0,
       "admissions": 8,
@@ -177,12 +201,12 @@
       "occupancy": 3.69
     },
     {
-      "territory": "KS",
-      "gross": 122.88,
+      "territory": "AR",
+      "gross": 129.29,
       "admissions": 7,
-      "shows": 3,
-      "theatres": 2,
-      "occupancy": 1.67
+      "shows": 2,
+      "theatres": 1,
+      "occupancy": 4.38
     },
     {
       "territory": "CO",
@@ -193,36 +217,12 @@
       "occupancy": 4.41
     },
     {
-      "territory": "DE",
-      "gross": 86.94,
-      "admissions": 6,
-      "shows": 1,
-      "theatres": 1,
-      "occupancy": 5.88
-    },
-    {
-      "territory": "TN",
-      "gross": 76.72,
-      "admissions": 7,
-      "shows": 1,
-      "theatres": 1,
-      "occupancy": 3.23
-    },
-    {
       "territory": "AZ",
       "gross": 73.64,
       "admissions": 4,
       "shows": 4,
       "theatres": 2,
       "occupancy": 1.33
-    },
-    {
-      "territory": "AR",
-      "gross": 55.41,
-      "admissions": 3,
-      "shows": 2,
-      "theatres": 1,
-      "occupancy": 1.88
     },
     {
       "territory": "NM",
@@ -249,6 +249,14 @@
       "occupancy": 1.49
     },
     {
+      "territory": "MA",
+      "gross": 34.0,
+      "admissions": 2,
+      "shows": 3,
+      "theatres": 2,
+      "occupancy": 0.92
+    },
+    {
       "territory": "OK",
       "gross": 18.47,
       "admissions": 1,
@@ -263,14 +271,6 @@
       "shows": 2,
       "theatres": 1,
       "occupancy": 0.68
-    },
-    {
-      "territory": "MA",
-      "gross": 17.0,
-      "admissions": 1,
-      "shows": 2,
-      "theatres": 1,
-      "occupancy": 1.1
     },
     {
       "territory": "MI",
@@ -356,51 +356,67 @@
   "highestGrossingTheatres": [
     {
       "theatre": "Cinemark Pflugerville 20 and XD",
-      "gross": 2833.6,
+      "gross": 2907.2,
       "totalTickets": 264,
-      "ticketsSold": 154,
+      "ticketsSold": 158,
       "shows": 2,
-      "occupancy": 58.33
-    },
-    {
-      "theatre": "Cinemark Dallas XD and IMAX",
-      "gross": 1619.2,
-      "totalTickets": 210,
-      "ticketsSold": 88,
-      "shows": 3,
-      "occupancy": 41.9
-    },
-    {
-      "theatre": "Cinemark North McKinney and XD",
-      "gross": 1600.8,
-      "totalTickets": 216,
-      "ticketsSold": 87,
-      "shows": 2,
-      "occupancy": 40.28
-    },
-    {
-      "theatre": "Cinemark Lincoln Square",
-      "gross": 1593.41,
-      "totalTickets": 324,
-      "ticketsSold": 91,
-      "shows": 2,
-      "occupancy": 28.09
+      "occupancy": 59.85
     },
     {
       "theatre": "Regal Medlock Crossing",
-      "gross": 1471.87,
+      "gross": 2307.7,
       "totalTickets": 198,
-      "ticketsSold": 79,
+      "ticketsSold": 124,
       "shows": 2,
-      "occupancy": 39.9
+      "occupancy": 62.63
+    },
+    {
+      "theatre": "Cinemark Dallas XD and IMAX",
+      "gross": 1692.8,
+      "totalTickets": 210,
+      "ticketsSold": 92,
+      "shows": 3,
+      "occupancy": 43.81
+    },
+    {
+      "theatre": "Cinemark North McKinney and XD",
+      "gross": 1619.2,
+      "totalTickets": 216,
+      "ticketsSold": 88,
+      "shows": 2,
+      "occupancy": 40.74
+    },
+    {
+      "theatre": "Cinemark Lincoln Square",
+      "gross": 1610.92,
+      "totalTickets": 324,
+      "ticketsSold": 92,
+      "shows": 2,
+      "occupancy": 28.4
     },
     {
       "theatre": "Cinemark West Plano and XD",
-      "gross": 1380.0,
+      "gross": 1416.8,
       "totalTickets": 178,
-      "ticketsSold": 75,
+      "ticketsSold": 77,
       "shows": 2,
-      "occupancy": 42.13
+      "occupancy": 43.26
+    },
+    {
+      "theatre": "Regal Fox 4DX & IMAX",
+      "gross": 1101.42,
+      "totalTickets": 1066,
+      "ticketsSold": 58,
+      "shows": 4,
+      "occupancy": 5.44
+    },
+    {
+      "theatre": "Regal Crossroads - Cary",
+      "gross": 978.5,
+      "totalTickets": 178,
+      "ticketsSold": 60,
+      "shows": 2,
+      "occupancy": 33.71
     },
     {
       "theatre": "Cinemark Frisco Square and XD",
@@ -420,51 +436,59 @@
     },
     {
       "theatre": "Cinemark Legacy and XD",
-      "gross": 772.8,
+      "gross": 809.6,
       "totalTickets": 194,
-      "ticketsSold": 42,
+      "ticketsSold": 44,
       "shows": 2,
-      "occupancy": 21.65
-    },
-    {
-      "theatre": "Regal Crossroads - Cary",
-      "gross": 765.19,
-      "totalTickets": 178,
-      "ticketsSold": 47,
-      "shows": 2,
-      "occupancy": 26.4
-    },
-    {
-      "theatre": "Regal Fox 4DX & IMAX",
-      "gross": 645.66,
-      "totalTickets": 1066,
-      "ticketsSold": 34,
-      "shows": 4,
-      "occupancy": 3.19
+      "occupancy": 22.68
     },
     {
       "theatre": "Galaxy Grandscape",
-      "gross": 640.0,
+      "gross": 780.0,
       "totalTickets": 552,
-      "ticketsSold": 32,
+      "ticketsSold": 39,
       "shows": 2,
-      "occupancy": 5.8
+      "occupancy": 7.07
+    },
+    {
+      "theatre": "Regal Downingtown",
+      "gross": 747.56,
+      "totalTickets": 282,
+      "ticketsSold": 44,
+      "shows": 2,
+      "occupancy": 15.6
     },
     {
       "theatre": "Cinemark Fairfax Corner and XD",
-      "gross": 527.0,
+      "gross": 629.0,
       "totalTickets": 204,
-      "ticketsSold": 31,
+      "ticketsSold": 37,
       "shows": 2,
-      "occupancy": 15.2
+      "occupancy": 18.14
     },
     {
       "theatre": "Apple Cinemas Van Ness",
-      "gross": 493.0,
+      "gross": 527.0,
       "totalTickets": 178,
-      "ticketsSold": 29,
+      "ticketsSold": 31,
       "shows": 2,
-      "occupancy": 16.29
+      "occupancy": 17.42
+    },
+    {
+      "theatre": "Cinemark Polaris 18 and XD",
+      "gross": 510.0,
+      "totalTickets": 250,
+      "ticketsSold": 30,
+      "shows": 2,
+      "occupancy": 12.0
+    },
+    {
+      "theatre": "Regal Hacienda Crossings ScreenX, IMAX & RPX",
+      "gross": 505.69,
+      "totalTickets": 201,
+      "ticketsSold": 31,
+      "shows": 2,
+      "occupancy": 15.42
     },
     {
       "theatre": "Cinemark Tracy 14",
@@ -475,28 +499,52 @@
       "occupancy": 29.0
     },
     {
-      "theatre": "Cinemark Polaris 18 and XD",
-      "gross": 476.0,
-      "totalTickets": 250,
-      "ticketsSold": 28,
-      "shows": 2,
-      "occupancy": 11.2
-    },
-    {
-      "theatre": "Regal Hacienda Crossings ScreenX, IMAX & RPX",
-      "gross": 473.71,
-      "totalTickets": 201,
-      "ticketsSold": 29,
-      "shows": 2,
-      "occupancy": 14.43
-    },
-    {
       "theatre": "Marcus St. Charles Cinema",
       "gross": 458.75,
       "totalTickets": 104,
       "ticketsSold": 25,
       "shows": 1,
       "occupancy": 24.04
+    },
+    {
+      "theatre": "Cinemark Round Rock 14",
+      "gross": 441.6,
+      "totalTickets": 88,
+      "ticketsSold": 24,
+      "shows": 2,
+      "occupancy": 27.27
+    },
+    {
+      "theatre": "Cinemark Egyptian 24 and XD",
+      "gross": 438.48,
+      "totalTickets": 130,
+      "ticketsSold": 24,
+      "shows": 2,
+      "occupancy": 18.46
+    },
+    {
+      "theatre": "Regal Meridian",
+      "gross": 427.02,
+      "totalTickets": 47,
+      "ticketsSold": 22,
+      "shows": 1,
+      "occupancy": 46.81
+    },
+    {
+      "theatre": "Marcus Chesterfield Cinema",
+      "gross": 425.27,
+      "totalTickets": 82,
+      "ticketsSold": 23,
+      "shows": 1,
+      "occupancy": 28.05
+    },
+    {
+      "theatre": "Regal Independence Plaza",
+      "gross": 424.57,
+      "totalTickets": 150,
+      "ticketsSold": 27,
+      "shows": 2,
+      "occupancy": 18.0
     },
     {
       "theatre": "Cinemark Allen 16 and XD",
@@ -507,36 +555,28 @@
       "occupancy": 15.54
     },
     {
-      "theatre": "Cinemark Roanoke and XD",
-      "gross": 404.8,
-      "totalTickets": 144,
-      "ticketsSold": 22,
+      "theatre": "Cinemark Lewisville and XD",
+      "gross": 423.2,
+      "totalTickets": 158,
+      "ticketsSold": 23,
       "shows": 2,
-      "occupancy": 15.28
+      "occupancy": 14.56
     },
     {
-      "theatre": "Marcus Chesterfield Cinema",
-      "gross": 388.29,
-      "totalTickets": 82,
-      "ticketsSold": 21,
+      "theatre": "Regal Perimeter Pointe",
+      "gross": 394.5,
+      "totalTickets": 272,
+      "ticketsSold": 25,
       "shows": 1,
-      "occupancy": 25.61
+      "occupancy": 9.19
     },
     {
-      "theatre": "Cinemark Round Rock 14",
+      "theatre": "Cinemark Roanoke and XD",
       "gross": 386.4,
-      "totalTickets": 88,
+      "totalTickets": 144,
       "ticketsSold": 21,
       "shows": 2,
-      "occupancy": 23.86
-    },
-    {
-      "theatre": "Cinemark Egyptian 24 and XD",
-      "gross": 383.67,
-      "totalTickets": 130,
-      "ticketsSold": 21,
-      "shows": 2,
-      "occupancy": 16.15
+      "occupancy": 14.58
     },
     {
       "theatre": "Cinemark Bistro Raleigh",
@@ -555,14 +595,6 @@
       "occupancy": 13.46
     },
     {
-      "theatre": "Regal Meridian",
-      "gross": 368.79,
-      "totalTickets": 47,
-      "ticketsSold": 19,
-      "shows": 1,
-      "occupancy": 40.43
-    },
-    {
       "theatre": "Cinemark Tinseltown Grapevine and XD",
       "gross": 349.6,
       "totalTickets": 136,
@@ -571,12 +603,12 @@
       "occupancy": 13.97
     },
     {
-      "theatre": "Regal Downingtown",
-      "gross": 339.8,
-      "totalTickets": 282,
+      "theatre": "Cinemark Century Union Landing 25 and XD",
+      "gross": 340.0,
+      "totalTickets": 290,
       "ticketsSold": 20,
       "shows": 2,
-      "occupancy": 7.09
+      "occupancy": 6.9
     },
     {
       "theatre": "Cinemark Denton 14",
@@ -585,6 +617,30 @@
       "ticketsSold": 18,
       "shows": 2,
       "occupancy": 12.77
+    },
+    {
+      "theatre": "Regal Crossgates",
+      "gross": 323.76,
+      "totalTickets": 372,
+      "ticketsSold": 24,
+      "shows": 1,
+      "occupancy": 6.45
+    },
+    {
+      "theatre": "Regal Gateway 4DX & IMAX",
+      "gross": 308.37,
+      "totalTickets": 95,
+      "ticketsSold": 19,
+      "shows": 1,
+      "occupancy": 20.0
+    },
+    {
+      "theatre": "Regal Bella Bottega",
+      "gross": 300.08,
+      "totalTickets": 227,
+      "ticketsSold": 22,
+      "shows": 1,
+      "occupancy": 9.69
     },
     {
       "theatre": "Cinemark Roseville Galleria Mall and XD",
@@ -603,12 +659,12 @@
       "occupancy": 28.07
     },
     {
-      "theatre": "Regal Bella Bottega",
-      "gross": 259.16,
-      "totalTickets": 227,
-      "ticketsSold": 19,
-      "shows": 1,
-      "occupancy": 8.37
+      "theatre": "Regal Edwards Mira Mesa ",
+      "gross": 269.88,
+      "totalTickets": 162,
+      "ticketsSold": 12,
+      "shows": 2,
+      "occupancy": 7.41
     },
     {
       "theatre": "Cinemark Dayton South 16 and XD",
@@ -627,14 +683,6 @@
       "occupancy": 8.7
     },
     {
-      "theatre": "Regal Crossgates",
-      "gross": 242.82,
-      "totalTickets": 372,
-      "ticketsSold": 18,
-      "shows": 1,
-      "occupancy": 4.84
-    },
-    {
       "theatre": "Apple Cinemas Hooksett IMAX",
       "gross": 238.0,
       "totalTickets": 71,
@@ -643,12 +691,20 @@
       "occupancy": 19.72
     },
     {
-      "theatre": "Cinemark Century Union Landing 25 and XD",
-      "gross": 238.0,
-      "totalTickets": 290,
-      "ticketsSold": 14,
+      "theatre": "Regal Hollywood \u2013 Nashville",
+      "gross": 208.24,
+      "totalTickets": 217,
+      "ticketsSold": 19,
+      "shows": 1,
+      "occupancy": 8.76
+    },
+    {
+      "theatre": "Cinemark Buckland Hills 18 XD and IMAX",
+      "gross": 204.0,
+      "totalTickets": 210,
+      "ticketsSold": 12,
       "shows": 2,
-      "occupancy": 4.83
+      "occupancy": 5.71
     },
     {
       "theatre": "Cinemark Century Orange and XD",
@@ -667,12 +723,12 @@
       "occupancy": 6.4
     },
     {
-      "theatre": "Regal Independence Plaza",
-      "gross": 200.85,
-      "totalTickets": 150,
-      "ticketsSold": 13,
+      "theatre": "Cinemark Bistro Boca Raton and XD",
+      "gross": 199.21,
+      "totalTickets": 242,
+      "ticketsSold": 11,
       "shows": 2,
-      "occupancy": 8.67
+      "occupancy": 4.55
     },
     {
       "theatre": "Cinemark Tinseltown Louisville and XD",
@@ -683,6 +739,22 @@
       "occupancy": 9.02
     },
     {
+      "theatre": "Cin\u00e9 Lounge Fremont 7",
+      "gross": 191.25,
+      "totalTickets": 318,
+      "ticketsSold": 15,
+      "shows": 3,
+      "occupancy": 4.72
+    },
+    {
+      "theatre": "Regal Peoples Plaza",
+      "gross": 188.37,
+      "totalTickets": 102,
+      "ticketsSold": 13,
+      "shows": 1,
+      "occupancy": 12.75
+    },
+    {
       "theatre": "Cinemark Central Plano",
       "gross": 184.0,
       "totalTickets": 148,
@@ -691,44 +763,12 @@
       "occupancy": 6.76
     },
     {
-      "theatre": "Cin\u00e9 Lounge Fremont 7",
-      "gross": 181.5,
-      "totalTickets": 318,
-      "ticketsSold": 11,
-      "shows": 3,
-      "occupancy": 3.46
-    },
-    {
-      "theatre": "Regal Gateway 4DX & IMAX",
-      "gross": 178.53,
-      "totalTickets": 95,
-      "ticketsSold": 11,
-      "shows": 1,
-      "occupancy": 11.58
-    },
-    {
       "theatre": "Regal Edwards San Marcos",
-      "gross": 174.87,
+      "gross": 161.88,
       "totalTickets": 358,
-      "ticketsSold": 13,
+      "ticketsSold": 12,
       "shows": 2,
-      "occupancy": 3.63
-    },
-    {
-      "theatre": "Regal Perimeter Pointe",
-      "gross": 157.8,
-      "totalTickets": 272,
-      "ticketsSold": 10,
-      "shows": 1,
-      "occupancy": 3.68
-    },
-    {
-      "theatre": "Cinemark Buckland Hills 18 XD and IMAX",
-      "gross": 153.0,
-      "totalTickets": 210,
-      "ticketsSold": 9,
-      "shows": 2,
-      "occupancy": 4.29
+      "occupancy": 3.35
     },
     {
       "theatre": "Movie Tavern Trexlertown",
@@ -737,6 +777,14 @@
       "ticketsSold": 9,
       "shows": 1,
       "occupancy": 16.36
+    },
+    {
+      "theatre": "Regal Huebner Oaks & RPX",
+      "gross": 143.3,
+      "totalTickets": 74,
+      "ticketsSold": 10,
+      "shows": 2,
+      "occupancy": 13.51
     },
     {
       "theatre": "Marcus Bloomington Cinema + IMAX",
@@ -763,12 +811,12 @@
       "occupancy": 11.11
     },
     {
-      "theatre": "Regal Huebner Oaks & RPX",
-      "gross": 129.24,
-      "totalTickets": 74,
-      "ticketsSold": 9,
+      "theatre": "Cinemark Colonel Glenn and XD",
+      "gross": 129.29,
+      "totalTickets": 160,
+      "ticketsSold": 7,
       "shows": 2,
-      "occupancy": 12.16
+      "occupancy": 4.38
     },
     {
       "theatre": "Cinemark Katy and XD",
@@ -787,12 +835,20 @@
       "occupancy": 16.67
     },
     {
-      "theatre": "Cinemark Merriam and XD",
-      "gross": 112.68,
-      "totalTickets": 208,
-      "ticketsSold": 6,
-      "shows": 2,
-      "occupancy": 2.88
+      "theatre": "Regal Royal Park",
+      "gross": 112.8,
+      "totalTickets": 115,
+      "ticketsSold": 10,
+      "shows": 1,
+      "occupancy": 8.7
+    },
+    {
+      "theatre": "Regal Warren East",
+      "gross": 112.2,
+      "totalTickets": 211,
+      "ticketsSold": 11,
+      "shows": 1,
+      "occupancy": 5.21
     },
     {
       "theatre": "Marcus Mid Rivers Cinema",
@@ -811,12 +867,12 @@
       "occupancy": 4.48
     },
     {
-      "theatre": "Cinemark Bistro Boca Raton and XD",
-      "gross": 108.66,
-      "totalTickets": 242,
+      "theatre": "Cinemark Somerdale 16 and XD",
+      "gross": 108.78,
+      "totalTickets": 94,
       "ticketsSold": 6,
       "shows": 2,
-      "occupancy": 2.48
+      "occupancy": 6.38
     },
     {
       "theatre": "Cinemark Century Aurora and XD",
@@ -825,14 +881,6 @@
       "ticketsSold": 6,
       "shows": 2,
       "occupancy": 4.41
-    },
-    {
-      "theatre": "Regal Royal Park",
-      "gross": 101.52,
-      "totalTickets": 115,
-      "ticketsSold": 9,
-      "shows": 1,
-      "occupancy": 7.83
     },
     {
       "theatre": "Cinemark Movies 16",
@@ -851,20 +899,12 @@
       "occupancy": 4.46
     },
     {
-      "theatre": "Regal Edwards Mira Mesa ",
-      "gross": 89.96,
-      "totalTickets": 162,
-      "ticketsSold": 4,
+      "theatre": "Regal Oviedo Mall",
+      "gross": 85.52,
+      "totalTickets": 308,
+      "ticketsSold": 8,
       "shows": 2,
-      "occupancy": 2.47
-    },
-    {
-      "theatre": "Regal Peoples Plaza",
-      "gross": 86.94,
-      "totalTickets": 102,
-      "ticketsSold": 6,
-      "shows": 1,
-      "occupancy": 5.88
+      "occupancy": 2.6
     },
     {
       "theatre": "Apple Cinemas White Plains",
@@ -875,14 +915,6 @@
       "occupancy": 5.32
     },
     {
-      "theatre": "Regal Hollywood \u2013 Nashville",
-      "gross": 76.72,
-      "totalTickets": 217,
-      "ticketsSold": 7,
-      "shows": 1,
-      "occupancy": 3.23
-    },
-    {
       "theatre": "Cinemark Mesa 16",
       "gross": 73.64,
       "totalTickets": 142,
@@ -891,12 +923,12 @@
       "occupancy": 2.82
     },
     {
-      "theatre": "Cinemark Somerdale 16 and XD",
-      "gross": 72.52,
-      "totalTickets": 94,
+      "theatre": "Regal Cherokee",
+      "gross": 72.72,
+      "totalTickets": 102,
       "ticketsSold": 4,
       "shows": 2,
-      "occupancy": 4.26
+      "occupancy": 3.92
     },
     {
       "theatre": "Marcus Point Cinemas",
@@ -905,22 +937,6 @@
       "ticketsSold": 4,
       "shows": 1,
       "occupancy": 6.35
-    },
-    {
-      "theatre": "Regal Oviedo Mall",
-      "gross": 64.14,
-      "totalTickets": 308,
-      "ticketsSold": 6,
-      "shows": 2,
-      "occupancy": 1.95
-    },
-    {
-      "theatre": "Cinemark Colonel Glenn and XD",
-      "gross": 55.41,
-      "totalTickets": 160,
-      "ticketsSold": 3,
-      "shows": 2,
-      "occupancy": 1.88
     },
     {
       "theatre": "Marcus Ronnie's Cinema + IMAX  ",
@@ -963,12 +979,12 @@
       "occupancy": 3.37
     },
     {
-      "theatre": "Apple Cinemas Brass Mill",
-      "gross": 51.0,
-      "totalTickets": 77,
+      "theatre": "Cinemark Tinseltown USA Aurora",
+      "gross": 52.53,
+      "totalTickets": 310,
       "ticketsSold": 3,
-      "shows": 1,
-      "occupancy": 3.9
+      "shows": 2,
+      "occupancy": 0.97
     },
     {
       "theatre": "Apple Cinemas Westbrook",
@@ -993,6 +1009,14 @@
       "ticketsSold": 3,
       "shows": 2,
       "occupancy": 2.24
+    },
+    {
+      "theatre": "Cinemark Merriam and XD",
+      "gross": 37.56,
+      "totalTickets": 208,
+      "ticketsSold": 2,
+      "shows": 2,
+      "occupancy": 0.96
     },
     {
       "theatre": "Marcus West End Cinema",
@@ -1043,6 +1067,14 @@
       "occupancy": 2.08
     },
     {
+      "theatre": "Regal Movies On TV",
+      "gross": 20.98,
+      "totalTickets": 171,
+      "ticketsSold": 2,
+      "shows": 1,
+      "occupancy": 1.17
+    },
+    {
       "theatre": "Cinemark Tinseltown Oklahoma City and XD",
       "gross": 18.47,
       "totalTickets": 178,
@@ -1075,12 +1107,12 @@
       "occupancy": 0.39
     },
     {
-      "theatre": "Cinemark Tinseltown USA Aurora",
-      "gross": 17.51,
-      "totalTickets": 310,
+      "theatre": "Cinemark At Hampshire Mall and XD",
+      "gross": 17.0,
+      "totalTickets": 127,
       "ticketsSold": 1,
-      "shows": 2,
-      "occupancy": 0.32
+      "shows": 1,
+      "occupancy": 0.79
     },
     {
       "theatre": "Apple Cinemas Cambridge",
@@ -1123,6 +1155,14 @@
       "occupancy": 0.82
     },
     {
+      "theatre": "Regal Mall of Georgia",
+      "gross": 16.42,
+      "totalTickets": 444,
+      "ticketsSold": 1,
+      "shows": 2,
+      "occupancy": 0.23
+    },
+    {
       "theatre": "Apple Cinemas Warwick",
       "gross": 16.0,
       "totalTickets": 110,
@@ -1131,12 +1171,12 @@
       "occupancy": 0.91
     },
     {
-      "theatre": "Regal Warren East",
-      "gross": 10.2,
-      "totalTickets": 211,
+      "theatre": "Regal Burlington",
+      "gross": 14.38,
+      "totalTickets": 422,
       "ticketsSold": 1,
-      "shows": 1,
-      "occupancy": 0.47
+      "shows": 2,
+      "occupancy": 0.24
     },
     {
       "theatre": "Apple Cinemas Merrimack",
@@ -1155,33 +1195,9 @@
       "occupancy": 0.0
     },
     {
-      "theatre": "Regal Burlington",
-      "gross": 0.0,
-      "totalTickets": 422,
-      "ticketsSold": 0,
-      "shows": 2,
-      "occupancy": 0.0
-    },
-    {
       "theatre": "Cinemark Tinseltown Erie",
       "gross": 0.0,
       "totalTickets": 282,
-      "ticketsSold": 0,
-      "shows": 2,
-      "occupancy": 0.0
-    },
-    {
-      "theatre": "Regal Mall of Georgia",
-      "gross": 0.0,
-      "totalTickets": 444,
-      "ticketsSold": 0,
-      "shows": 2,
-      "occupancy": 0.0
-    },
-    {
-      "theatre": "Regal Cherokee",
-      "gross": 0.0,
-      "totalTickets": 102,
       "ticketsSold": 0,
       "shows": 2,
       "occupancy": 0.0
@@ -1227,14 +1243,6 @@
       "occupancy": 0.0
     },
     {
-      "theatre": "Cinemark Oakley Station and XD",
-      "gross": 0.0,
-      "totalTickets": 96,
-      "ticketsSold": 0,
-      "shows": 2,
-      "occupancy": 0.0
-    },
-    {
       "theatre": "Cinemark Milford 16",
       "gross": 0.0,
       "totalTickets": 266,
@@ -1243,9 +1251,9 @@
       "occupancy": 0.0
     },
     {
-      "theatre": "Cinemark Franklin Park 16 and XD",
+      "theatre": "Cinemark Oakley Station and XD",
       "gross": 0.0,
-      "totalTickets": 238,
+      "totalTickets": 96,
       "ticketsSold": 0,
       "shows": 2,
       "occupancy": 0.0
@@ -1254,6 +1262,14 @@
       "theatre": "Cinemark Strongsville at Southpark Mall",
       "gross": 0.0,
       "totalTickets": 124,
+      "ticketsSold": 0,
+      "shows": 2,
+      "occupancy": 0.0
+    },
+    {
+      "theatre": "Cinemark Franklin Park 16 and XD",
+      "gross": 0.0,
+      "totalTickets": 238,
       "ticketsSold": 0,
       "shows": 2,
       "occupancy": 0.0
@@ -1315,17 +1331,17 @@
       "occupancy": 0.0
     },
     {
-      "theatre": "Marcus Village Pointe Cinema",
+      "theatre": "Marcus Majestic Cinema of Omaha",
       "gross": 0.0,
-      "totalTickets": 90,
+      "totalTickets": 70,
       "ticketsSold": 0,
       "shows": 1,
       "occupancy": 0.0
     },
     {
-      "theatre": "Marcus Majestic Cinema of Omaha",
+      "theatre": "Marcus Village Pointe Cinema",
       "gross": 0.0,
-      "totalTickets": 70,
+      "totalTickets": 90,
       "ticketsSold": 0,
       "shows": 1,
       "occupancy": 0.0
@@ -1419,19 +1435,19 @@
       "occupancy": 0.0
     },
     {
-      "theatre": "Regal Oceanside",
-      "gross": 0.0,
-      "totalTickets": 117,
-      "ticketsSold": 0,
-      "shows": 1,
-      "occupancy": 0.0
-    },
-    {
       "theatre": "Regal Escondido",
       "gross": 0.0,
       "totalTickets": 262,
       "ticketsSold": 0,
       "shows": 2,
+      "occupancy": 0.0
+    },
+    {
+      "theatre": "Regal Oceanside",
+      "gross": 0.0,
+      "totalTickets": 117,
+      "ticketsSold": 0,
+      "shows": 1,
       "occupancy": 0.0
     },
     {
@@ -1456,14 +1472,6 @@
       "totalTickets": 198,
       "ticketsSold": 0,
       "shows": 2,
-      "occupancy": 0.0
-    },
-    {
-      "theatre": "Regal Movies On TV",
-      "gross": 0.0,
-      "totalTickets": 171,
-      "ticketsSold": 0,
-      "shows": 1,
       "occupancy": 0.0
     },
     {
@@ -1507,6 +1515,14 @@
       "occupancy": 0.0
     },
     {
+      "theatre": "Regal Martin Village",
+      "gross": 0.0,
+      "totalTickets": 345,
+      "ticketsSold": 0,
+      "shows": 2,
+      "occupancy": 0.0
+    },
+    {
       "theatre": "Cinemark Century Anchorage 16 and XD",
       "gross": 0.0,
       "totalTickets": 88,
@@ -1518,29 +1534,29 @@
   "formatBreakdown": [
     {
       "format": "Standard",
-      "gross": 28865.16,
-      "totalTickets": 24491,
-      "ticketsSold": 1643,
-      "shows": 256,
-      "occupancy": 6.71
+      "gross": 33521.09,
+      "totalTickets": 25044,
+      "ticketsSold": 1922,
+      "shows": 260,
+      "occupancy": 7.67
     },
     {
       "format": "Sony Digital Cinema",
-      "gross": 640.0,
+      "gross": 780.0,
       "totalTickets": 552,
-      "ticketsSold": 32,
+      "ticketsSold": 39,
       "shows": 2,
-      "occupancy": 5.8
+      "occupancy": 7.07
     }
   ],
   "languageBreakdown": [
     {
       "language": "Telugu",
-      "gross": 29505.16,
-      "totalTickets": 24685,
-      "ticketsSold": 1675,
-      "shows": 256,
-      "occupancy": 6.79
+      "gross": 34301.09,
+      "totalTickets": 25238,
+      "ticketsSold": 1961,
+      "shows": 260,
+      "occupancy": 7.77
     },
     {
       "language": "Unknown",
@@ -1554,25 +1570,25 @@
   "chainBreakdown": [
     {
       "chain": "Cinemark",
-      "gross": 19757.02,
-      "totalTickets": 12353,
-      "ticketsSold": 1098,
-      "shows": 150
+      "gross": 20995.13,
+      "totalTickets": 12638,
+      "ticketsSold": 1167,
+      "shows": 153
     },
     {
       "chain": "Regal",
-      "gross": 6252.41,
-      "totalTickets": 8462,
-      "ticketsSold": 382,
-      "shows": 61
+      "gross": 9640.5,
+      "totalTickets": 8807,
+      "ticketsSold": 587,
+      "shows": 63
     },
     {
       "chain": "Others",
-      "gross": 3495.73,
-      "totalTickets": 4228,
-      "ticketsSold": 195,
-      "shows": 47
+      "gross": 3665.46,
+      "totalTickets": 4151,
+      "ticketsSold": 207,
+      "shows": 46
     }
   ],
-  "trackedAt": "2026-10-10T01:02:27+00:00"
+  "trackedAt": "2026-10-10T04:36:01+00:00"
 }
