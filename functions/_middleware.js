@@ -3,7 +3,10 @@
 // plus a real 404 status for paths the app does not route.
 // No bot detection: crawlers and browsers get the same tags instantly.
 const SITE = "https://cinebotrends.com";
-const DEFAULT_IMAGE = SITE + "/public/assets/cbot_card.jpg";
+// 1200x630 (2:1), ~100 KB. The old default pointed at /public/assets/..., which
+// does not exist on the deployed site (SPA fallback returned HTML), and the file
+// itself was a 3000x3000 / 2 MB square that X refuses to render reliably.
+const DEFAULT_IMAGE = SITE + "/assets/cbot_og.jpg";
 // /bundle/ holds the hashed Vite output; /assets/ is brand + poster images.
 const STATIC_PREFIXES = ["/data/", "/assets/", "/bundle/", "/fonts/", "/overseas/"];
 const KNOWN_ROUTES = new Set([
@@ -43,30 +46,31 @@ const getJson = async (env, url, path) => {
 };
 
 // With SPA fallback a missing file returns index.html with 200, so the
-// content-type check is what proves an image really exists.
-const imageExists = async (env, url, path) => {
+// content-type check is what proves an image really exists. Returns the etag
+// too, so the og:image URL can carry a version and X re-fetches a changed poster.
+const imageInfo = async (env, url, path) => {
   try {
     const r = await env.ASSETS.fetch(new URL(path, url.origin).toString(), {
       method: "HEAD",
     });
-    return r.ok && (r.headers.get("content-type") || "").startsWith("image/");
+    if (!r.ok || !(r.headers.get("content-type") || "").startsWith("image/")) return null;
+    const tag = (r.headers.get("etag") || r.headers.get("last-modified") || "")
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .slice(-10);
+    return { path, tag };
   } catch {
-    return false;
+    return null;
   }
 };
 
-// Poster rule: <slug>-bg.jpg first, else <slug>-og.jpg, else null (default).
-// `og` tells the caller whether the 1200x630 dimensions may be advertised.
+// Poster rule: ONLY assets/posters/<slug>-bg.jpg (1280x640). No -og fallback;
+// when the file is missing the site default card is used instead.
 const posterFor = async (env, url, slug) => {
-  for (const [kind, og] of [["bg", false], ["og", true]]) {
-    const path = `/assets/posters/${slug}-${kind}.jpg`;
-    if (await imageExists(env, url, path)) return { path, og };
-  }
-  return null;
+  const bg = await imageInfo(env, url, `/assets/posters/${slug}-bg.jpg`);
+  return bg ? { ...bg, og: false } : null;
 };
 
-const titleCase = (slug) =>
-  slug.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const titleCase = (slug) => slug.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 // movies-index.json: real titles and slug aliases. Optional - falls back to slug.
 async function lookupMovie(env, url, slug) {
@@ -84,19 +88,13 @@ const DATA_FILES = {
 };
 
 const SECTION_DEFAULTS = {
-  movies: [
-    "All Movies — CineBOTrends",
-    "Browse every movie currently tracked on CineBOTrends.",
-  ],
+  movies: ["All Movies — CineBOTrends", "Browse every movie currently tracked on CineBOTrends."],
   boxoffice: [
     "Box Office Updates — CineBOTrends",
     "Live and historical Indian box office collection updates.",
   ],
   news: ["Movie News — CineBOTrends", "The latest Indian movie industry news."],
-  reviews: [
-    "Movie Reviews — CineBOTrends",
-    "Movie reviews and ratings from CineBOTrends.",
-  ],
+  reviews: ["Movie Reviews — CineBOTrends", "Movie reviews and ratings from CineBOTrends."],
 };
 
 async function getMeta(url, env) {
@@ -112,13 +110,13 @@ async function getMeta(url, env) {
   // ---- Global tracking: /global/<slug>/<date> ----
   if (section === "global" && slug) {
     const man = await getJson(env, url, "/overseas/manifest.json");
-    const m = man && (man.movies || []).find((x) => x.slug === slug);
-    if (!m) return null;
+    const found = man && (man.movies || []).find((x) => x.slug === slug);
+    // Not in the manifest (yet): still give crawlers a titled card + poster,
+    // instead of the generic site card that then gets cached by X.
+    const m = found || { slug, title: titleCase(slug), entries: {} };
     const entries = m.entries || {};
     const cur = entries[third] || entries[m.latest] || {};
-    const gross = cur.gross
-      ? ` · $${Math.round(cur.gross).toLocaleString("en-US")} gross`
-      : "";
+    const gross = cur.gross ? ` · $${Math.round(cur.gross).toLocaleString("en-US")} gross` : "";
     return {
       title: `${m.title} — USA Box Office | CineBOTrends`,
       desc: `Global tracking for ${m.title}${gross}. State, theatre, format, language and chain-wise breakdown.`,
@@ -139,9 +137,7 @@ async function getMeta(url, env) {
   // ---- News / reviews / boxoffice item ----
   if (slug && DATA_FILES[section]) {
     const json = await getJson(env, url, DATA_FILES[section]);
-    const list = Array.isArray(json)
-      ? json
-      : (json && (json.items || json.list)) || [];
+    const list = Array.isArray(json) ? json : (json && (json.items || json.list)) || [];
     const item = list.find((it) => it && it.slug === slug);
     if (item) {
       // item image: the movie's poster when linked, else the item's own image
@@ -150,9 +146,7 @@ async function getMeta(url, env) {
       if (!image && typeof item.image === "string" && item.image)
         image = { path: item.image, og: false };
       return {
-        title:
-          pick(item, ["title", "name", "headline"]) ||
-          SECTION_DEFAULTS[section][0],
+        title: pick(item, ["title", "name", "headline"]) || SECTION_DEFAULTS[section][0],
         desc:
           pick(item, ["description", "summary", "excerpt", "subtitle"]) ||
           SECTION_DEFAULTS[section][1],
@@ -184,8 +178,7 @@ export async function onRequest({ request, env, next }) {
   }
 
   const res = await next();
-  if (!(res.headers.get("content-type") || "").includes("text/html"))
-    return res;
+  if (!(res.headers.get("content-type") || "").includes("text/html")) return res;
 
   // Unknown first segment: serve the shell (the app shows its not-found view)
   // but with a real 404 status so search engines don't index soft-404s.
@@ -206,15 +199,19 @@ export async function onRequest({ request, env, next }) {
   }
   if (!m) return res;
 
+  const ver = m.image && m.image.tag ? "?v=" + m.image.tag : "";
   const img = m.image
     ? m.image.path.startsWith("http")
       ? m.image.path
-      : url.origin + m.image.path
+      : url.origin + m.image.path + ver
     : DEFAULT_IMAGE;
-  // Only the generated 1200x630 og image may advertise its dimensions.
-  const dims = m.image && m.image.og
-    ? `<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">`
-    : "";
+  // Advertise 1200x630 only for images known to be that size (the default
+  // card and generated og images). Poster -bg files are 1280x640 (2:1) and
+  // need no declared size.
+  const dims =
+    !m.image || m.image.og
+      ? `<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">`
+      : "";
 
   const tags =
     `<meta property="og:type" content="website">` +
@@ -225,6 +222,7 @@ export async function onRequest({ request, env, next }) {
     `<meta property="og:image" content="${esc(img)}">` +
     `<meta property="og:image:secure_url" content="${esc(img)}">` +
     dims +
+    `<meta property="og:image:type" content="image/jpeg">` +
     `<meta property="og:image:alt" content="${esc(m.title)}">` +
     `<meta property="og:url" content="${esc(url.origin + url.pathname)}">` +
     `<link rel="canonical" href="${esc(url.origin + url.pathname)}">` +

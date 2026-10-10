@@ -33,17 +33,11 @@ export function buildExportCard(section, sectionTitle, A) {
       h(
         "div",
         { class: "exp-hero-top" },
-        h(
-          "div",
-          { class: "exp-brand" },
-          h("span", null, "Cine", h("b", null, "BO"), "Trends"),
-        ),
+        h("div", { class: "exp-brand" }, h("span", null, "Cine", h("b", null, "BO"), "Trends")),
         h("div", { class: "exp-mode" }, m.ctxLabel || ""),
       ),
       h("h1", { class: "exp-movie" }, m.title || ""),
-      metaBits.length
-        ? h("div", { class: "exp-submeta" }, metaBits.join("  ·  "))
-        : null,
+      metaBits.length ? h("div", { class: "exp-submeta" }, metaBits.join("  ·  ")) : null,
       h("h2", { class: "exp-headline" }, (m.ctxLabel || "") + " breakdown"),
       h("div", { class: "exp-section" }, sectionTitle),
       k.gross != null
@@ -58,10 +52,7 @@ export function buildExportCard(section, sectionTitle, A) {
       h(
         "div",
         { class: "exp-meta" },
-        [
-          m.date ? fmtDate(m.date) : null,
-          m.updated ? "Last Updated: " + m.updated : null,
-        ]
+        [m.date ? fmtDate(m.date) : null, m.updated ? "Last Updated: " + m.updated : null]
           .filter(Boolean)
           .join("  •  "),
       ),
@@ -71,6 +62,11 @@ export function buildExportCard(section, sectionTitle, A) {
           "div",
           { class: "exp-hero-r" },
           h("img", { src: A.poster, alt: "" }),
+          // perforation: a real element with an explicit pixel height (set in
+          // exportImage.js once laid out) instead of a top:0/bottom:0 pseudo
+          h("div", { class: "exp-perf" }),
+          h("div", { class: "exp-notch exp-notch-t" }),
+          h("div", { class: "exp-notch exp-notch-b" }),
         )
       : null,
   );
@@ -87,12 +83,7 @@ export function buildExportCard(section, sectionTitle, A) {
       "div",
       { class: "exp-card" },
       hero,
-      h(
-        "div",
-        { class: "exp-inner" },
-        h("div", { class: "exp-body" }, clone),
-        watermarkFooter(),
-      ),
+      h("div", { class: "exp-inner" }, h("div", { class: "exp-body" }, clone), watermarkFooter()),
     ),
   );
 }

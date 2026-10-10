@@ -1,6 +1,14 @@
 import { TRANSPARENT_PX, ensureLib, exportAssets } from "./assets.js";
 import { buildExportCard } from "./card.js";
-import { anchorDownload, decodeAll, errSheet, iosSheet, isIOS, progressSheet, withTimeout } from "./sheets.js";
+import {
+  anchorDownload,
+  decodeAll,
+  errSheet,
+  iosSheet,
+  isIOS,
+  progressSheet,
+  withTimeout,
+} from "./sheets.js";
 
 export async function downloadSection(section, sectionTitle, name, btn) {
   const label = btn.querySelector(".dl-label");
@@ -29,19 +37,20 @@ export async function downloadSection(section, sectionTitle, name, btn) {
     // must happen AFTER the card is in the DOM, before we rasterise
     await withTimeout(decodeAll(card), 8000, "decoding images");
 
+    pinStub(card);
+    // let the browser actually paint the decoded images before serialising
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
     await withTimeout(ensureLib(), 10000, "loading the renderer");
 
-    const bg = (
-      getComputedStyle(document.body).getPropertyValue("--bg") || "#0E0C09"
-    ).trim();
+    const bg = (getComputedStyle(document.body).getPropertyValue("--bg") || "#0E0C09").trim();
     const w = card.offsetWidth || 1180;
     const hgt = card.offsetHeight || 800;
 
     // iOS caps canvas memory hard: degrade resolution rather than fail
     const cap = isIOS() ? 12e6 : 3e7;
     let scale = isIOS() ? 1.5 : 2;
-    if (w * hgt * scale * scale > cap)
-      scale = Math.max(1, Math.sqrt(cap / (w * hgt)));
+    if (w * hgt * scale * scale > cap) scale = Math.max(1, Math.sqrt(cap / (w * hgt)));
 
     const opts = {
       bgcolor: bg,
@@ -81,13 +90,18 @@ export async function downloadSection(section, sectionTitle, name, btn) {
         "preparing images",
       );
 
-    const dataUrl = await withTimeout(
-      window.domtoimage.toPng(card, opts),
-      25000,
-      "rendering",
-    );
-    if (!dataUrl || dataUrl.length < 2000)
-      throw new Error("renderer returned an empty image");
+    // On a cold page Safari/iOS can still rasterise the poster/backdrop empty
+    // on the first full render (it only worked on the second tap, because that
+    // render had warmed the image cache). Check the poster region of the
+    // result and re-render automatically instead of making the user tap twice.
+    let dataUrl = "";
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      dataUrl = await withTimeout(window.domtoimage.toPng(card, opts), 25000, "rendering");
+      if (!dataUrl || dataUrl.length < 2000) break;
+      if (await posterPainted(card, dataUrl, scale)) break;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+    if (!dataUrl || dataUrl.length < 2000) throw new Error("renderer returned an empty image");
 
     if (ios) {
       if (prog) prog.done();
@@ -124,13 +138,8 @@ export async function downloadImageFile(url, name, btn) {
   btn.disabled = true;
   if (label) label.textContent = "Saving…";
   try {
-    const res = await withTimeout(
-      fetch(url, { cache: "force-cache" }),
-      30000,
-      "downloading",
-    );
-    if (!res.ok)
-      throw new Error("report image not found (HTTP " + res.status + ")");
+    const res = await withTimeout(fetch(url, { cache: "force-cache" }), 30000, "downloading");
+    if (!res.ok) throw new Error("report image not found (HTTP " + res.status + ")");
     const blob = await res.blob();
     if (!blob.size || !/^image\//.test(blob.type || "image/png"))
       throw new Error("report image is empty");
@@ -157,5 +166,52 @@ export async function downloadImageFile(url, name, btn) {
     }, 2200);
   } finally {
     btn.disabled = false;
+  }
+}
+
+// Perforation + notches get explicit pixel geometry from the laid-out hero.
+function pinStub(card) {
+  const stub = card.querySelector(".exp-hero-r");
+  if (!stub) return;
+  const hh = stub.offsetHeight || card.querySelector(".exp-hero").offsetHeight;
+  const perf = stub.querySelector(".exp-perf");
+  if (perf) perf.style.height = hh + "px";
+  const nb = stub.querySelector(".exp-notch-b");
+  if (nb) nb.style.top = hh - 19 + "px";
+}
+
+// True when the poster area of the rendered PNG actually contains the poster
+// (i.e. is not a flat fill). Returns true when there is no poster to check, or
+// when the check itself can't run, so it can never block a download.
+async function posterPainted(card, dataUrl, scale) {
+  try {
+    const img = card.querySelector(".exp-hero-r img");
+    if (!img) return true;
+    const fr = card.getBoundingClientRect();
+    const r = img.getBoundingClientRect();
+    const im = new Image();
+    im.src = dataUrl;
+    await im.decode();
+    const N = 24;
+    const c = document.createElement("canvas");
+    c.width = c.height = N;
+    const ctx = c.getContext("2d", { willReadFrequently: true });
+    // sample the middle of the poster, clear of the perforation and notches
+    const sx = (r.left - fr.left + r.width * 0.2) * scale;
+    const sy = (r.top - fr.top + r.height * 0.2) * scale;
+    ctx.drawImage(im, sx, sy, r.width * 0.6 * scale, r.height * 0.6 * scale, 0, 0, N, N);
+    const d = ctx.getImageData(0, 0, N, N).data;
+    let sum = 0;
+    let sum2 = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      const l = 0.3 * d[i] + 0.59 * d[i + 1] + 0.11 * d[i + 2];
+      sum += l;
+      sum2 += l * l;
+    }
+    const n = d.length / 4;
+    const sd = Math.sqrt(Math.max(0, sum2 / n - (sum / n) * (sum / n)));
+    return sd > 6;
+  } catch (e) {
+    return true;
   }
 }
