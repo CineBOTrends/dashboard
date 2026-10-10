@@ -52,9 +52,8 @@ export function buildExportCard(section, sectionTitle, A) {
       h(
         "div",
         { class: "exp-meta" },
-        [m.date ? fmtDate(m.date) : null, m.updated ? "Last Updated: " + m.updated : null]
-          .filter(Boolean)
-          .join("  •  "),
+        // "Last Updated" intentionally omitted from the exported image
+        [m.date ? fmtDate(m.date) : null].filter(Boolean).join("  •  "),
       ),
     ),
     A.poster

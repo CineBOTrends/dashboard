@@ -187,7 +187,8 @@ async function bakeStub(card) {
     const iw = img.naturalWidth;
     const ih = img.naturalHeight;
     if (!w || !h || !iw || !ih) return;
-    const PAD = 22;
+    const PERF = false; // compact header: no cut strip / notches
+    const PAD = PERF ? 22 : 0;
     const S = 2;
     const bgc = (getComputedStyle(document.body).getPropertyValue("--bg") || "#0E0C09").trim();
     const c = document.createElement("canvas");
@@ -195,32 +196,63 @@ async function bakeStub(card) {
     c.height = h * S;
     const ctx = c.getContext("2d");
     ctx.scale(S, S);
-    // poster, object-fit: cover, clipped to the stub
-    const k = Math.max(w / iw, h / ih);
+    // poster card: 3:4, inset from the stub edges, rounded, with a soft shadow.
+    // The rest of the stub stays transparent so the backdrop shows through.
+    // FIXED-size 3:4 card, vertically centred: the hero can be any height and
+    // the poster stays the same size (it used to stretch with the hero).
+    const CARD_W = 270; // bigger poster: fills most of the 300px stub (3:4)
+    const CARD_H = 340;
+    const pw = Math.min(CARD_W, w - 24);
+    const ph = Math.min(Math.round((pw * CARD_H) / CARD_W), h - 24);
+    const px = PAD + Math.round((w - pw) / 2) + (PERF ? 4 : 0);
+    const py = Math.round((h - ph) / 2);
+    const rr = (x, y, ww, hh, r) => {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + ww, y, x + ww, y + hh, r);
+      ctx.arcTo(x + ww, y + hh, x, y + hh, r);
+      ctx.arcTo(x, y + hh, x, y, r);
+      ctx.arcTo(x, y, x + ww, y, r);
+      ctx.closePath();
+    };
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,.6)";
+    ctx.shadowBlur = 26;
+    ctx.shadowOffsetY = 10;
+    rr(px, py, pw, ph, 14);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.restore();
+    ctx.save();
+    rr(px, py, pw, ph, 14);
+    ctx.clip();
+    const k = Math.max(pw / iw, ph / ih); // object-fit: cover
     const dw = iw * k;
     const dh = ih * k;
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(PAD, 0, w, h);
-    ctx.clip();
-    ctx.drawImage(img, PAD + (w - dw) / 2, (h - dh) / 2, dw, dh);
+    ctx.drawImage(img, px + (pw - dw) / 2, py + (ph - dh) / 2, dw, dh);
     ctx.restore();
-    // perforation
-    ctx.strokeStyle = "rgba(233,176,45,.55)";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([6, 5]);
-    ctx.beginPath();
-    ctx.moveTo(PAD + 1, 0);
-    ctx.lineTo(PAD + 1, h);
+    rr(px + 0.5, py + 0.5, pw - 1, ph - 1, 14);
+    ctx.strokeStyle = "rgba(255,176,0,.55)";
+    ctx.lineWidth = 1.5;
     ctx.stroke();
-    // notches
-    ctx.setLineDash([]);
-    ctx.fillStyle = bgc;
-    [0, h].forEach((y) => {
+    if (PERF) {
+      // perforation
+      ctx.strokeStyle = "rgba(233,176,45,.6)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 5]);
       ctx.beginPath();
-      ctx.arc(PAD - 1, y, 20, 0, Math.PI * 2);
-      ctx.fill();
-    });
+      ctx.moveTo(PAD + 1, 0);
+      ctx.lineTo(PAD + 1, h);
+      ctx.stroke();
+      // notches
+      ctx.setLineDash([]);
+      ctx.fillStyle = bgc;
+      [0, h].forEach((y) => {
+        ctx.beginPath();
+        ctx.arc(PAD - 1, y, 20, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
     img.src = c.toDataURL("image/png");
     img.style.cssText =
       "position:relative;left:-" +
