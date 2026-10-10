@@ -37,7 +37,7 @@ export async function downloadSection(section, sectionTitle, name, btn) {
     // must happen AFTER the card is in the DOM, before we rasterise
     await withTimeout(decodeAll(card), 8000, "decoding images");
 
-    pinStub(card);
+    await bakeStub(card);
     // let the browser actually paint the decoded images before serialising
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
 
@@ -169,15 +169,69 @@ export async function downloadImageFile(url, name, btn) {
   }
 }
 
-// Perforation + notches get explicit pixel geometry from the laid-out hero.
-function pinStub(card) {
-  const stub = card.querySelector(".exp-hero-r");
-  if (!stub) return;
-  const hh = stub.offsetHeight || card.querySelector(".exp-hero").offsetHeight;
-  const perf = stub.querySelector(".exp-perf");
-  if (perf) perf.style.height = hh + "px";
-  const nb = stub.querySelector(".exp-notch-b");
-  if (nb) nb.style.top = hh - 19 + "px";
+// Paint the ticket-stub look (poster, dashed perforation, two notches) into ONE
+// image. Doing it with extra DOM elements / pseudo-elements is what made iOS
+// draw a dashed line down the whole card: with a single <img> there is nothing
+// left to mis-position. The image is PAD px wider than the stub and shifted
+// left by PAD, so the notch circles can bite into the hero beside it.
+async function bakeStub(card) {
+  try {
+    const stub = card.querySelector(".exp-hero-r");
+    const img = stub && stub.querySelector("img");
+    if (!img) return;
+    const w = stub.offsetWidth;
+    const h = stub.offsetHeight;
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+    if (!w || !h || !iw || !ih) return;
+    const PAD = 22;
+    const S = 2;
+    const bgc = (getComputedStyle(document.body).getPropertyValue("--bg") || "#0E0C09").trim();
+    const c = document.createElement("canvas");
+    c.width = (w + PAD) * S;
+    c.height = h * S;
+    const ctx = c.getContext("2d");
+    ctx.scale(S, S);
+    // poster, object-fit: cover, clipped to the stub
+    const k = Math.max(w / iw, h / ih);
+    const dw = iw * k;
+    const dh = ih * k;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(PAD, 0, w, h);
+    ctx.clip();
+    ctx.drawImage(img, PAD + (w - dw) / 2, (h - dh) / 2, dw, dh);
+    ctx.restore();
+    // perforation
+    ctx.strokeStyle = "rgba(233,176,45,.55)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 5]);
+    ctx.beginPath();
+    ctx.moveTo(PAD + 1, 0);
+    ctx.lineTo(PAD + 1, h);
+    ctx.stroke();
+    // notches
+    ctx.setLineDash([]);
+    ctx.fillStyle = bgc;
+    [0, h].forEach((y) => {
+      ctx.beginPath();
+      ctx.arc(PAD - 1, y, 20, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    img.src = c.toDataURL("image/png");
+    img.style.cssText =
+      "position:relative;left:-" +
+      PAD +
+      "px;width:" +
+      (w + PAD) +
+      "px;" +
+      "height:" +
+      h +
+      "px;max-width:none;object-fit:fill;display:block";
+    await (img.decode ? img.decode().catch(() => {}) : Promise.resolve());
+  } catch (err) {
+    console.warn("stub bake skipped", err);
+  }
 }
 
 // True when the poster area of the rendered PNG actually contains the poster

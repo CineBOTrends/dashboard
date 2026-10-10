@@ -62,11 +62,8 @@ export function buildExportCard(section, sectionTitle, A) {
           "div",
           { class: "exp-hero-r" },
           h("img", { src: A.poster, alt: "" }),
-          // perforation: a real element with an explicit pixel height (set in
-          // exportImage.js once laid out) instead of a top:0/bottom:0 pseudo
-          h("div", { class: "exp-perf" }),
-          h("div", { class: "exp-notch exp-notch-t" }),
-          h("div", { class: "exp-notch exp-notch-b" }),
+          // the perforation + notches are painted INTO the poster image
+          // (bakeStub in exportImage.js): no extra elements to mis-position
         )
       : null,
   );
