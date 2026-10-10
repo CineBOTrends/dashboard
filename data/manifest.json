@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-10 15:22",
+  "generated": "2026-10-10 18:39",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -41,27 +41,12 @@
     }
   },
   "upcoming": {
-    "jailer-2": "20261015",
-    "sigma": "20261015",
-    "thella-kaagitham": "20261015"
+    "jailer-2": "20261015"
   },
   "movieDates": {
-    "daily": {
-      "drishyam-the-conclusion": [
-        "20261010"
-      ]
-    },
+    "daily": {},
     "advance": {
-      "drishyam-the-conclusion": [
-        "20261015"
-      ],
       "jailer-2": [
-        "20261015"
-      ],
-      "sigma": [
-        "20261015"
-      ],
-      "thella-kaagitham": [
         "20261015"
       ]
     }
