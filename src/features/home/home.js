@@ -12,17 +12,14 @@ import { Data } from "../../core/store.js";
 import { heroValue, homeFeatureCarousel, social_kpi } from "./featureCarousel.js";
 import { globalSection, safeGlobal } from "./globalStrip.js";
 import { overseasSection, safeEditorial, safeOverseas } from "./overseas.js";
+import { comingSoonSection, safeComingSoon } from "../movie/comingSoon.js";
 
 export const home = async function () {
   mount(page(h("div", { class: "wrap" }, loading())));
   let c, nat;
   try {
     c = await ctx();
-    const mode = c.advDates.length
-      ? "advance"
-      : c.dayDates.length
-        ? "daily"
-        : null;
+    const mode = c.advDates.length ? "advance" : c.dayDates.length ? "daily" : null;
     if (!mode)
       return mount(
         page(
@@ -81,6 +78,7 @@ export const home = async function () {
       advNat,
       { news, boxoffice, reviews },
       globalTracking,
+      await safeComingSoon([]),
     );
   } catch (e) {
     console.error(e);
@@ -101,12 +99,11 @@ function renderHome(
   advNat,
   editorial,
   globalTracking,
+  soonAll,
 ) {
   // Advance batch minus anything now live in daily, plus the live titles â€”
   // daily cards win. Sorted by gross.
-  const merged = mergeFeeds(advFeeds, daily, dailyDate).sort(
-    (a, b) => b.mv.gross - a.mv.gross,
-  );
+  const merged = mergeFeeds(advFeeds, daily, dailyDate).sort((a, b) => b.mv.gross - a.mv.gross);
   const updated =
     (daily && daily.last_updated) ||
     (advNat && advNat.last_updated) ||
@@ -122,24 +119,19 @@ function renderHome(
       eyebrow: "Discover",
       title: "All Movies",
       summary:
-        merged.length +
-        " titles across live tracking and advance booking, ready to explore.",
+        merged.length + " titles across live tracking and advance booking, ready to explore.",
       detail:
         "Browse every title, filter by language or format, and open its complete performance report.",
       metric: num(merged.length) + " tracked",
       action: "Browse all movies",
       path: "/movies",
-      image:
-        leadMovie && posterUrl(leadMovie.mv.slug, "bg"),
+      image: leadMovie && posterUrl(leadMovie.mv.slug, "bg"),
     },
     {
       eyebrow: "Stay informed",
       title: "Movie News",
-      summary:
-        latestNews.title ||
-        "Stories, announcements and updates from the world of cinema.",
-      detail:
-        "Read the latest movie news and open each story for the full update.",
+      summary: latestNews.title || "Stories, announcements and updates from the world of cinema.",
+      detail: "Read the latest movie news and open each story for the full update.",
       metric: "Latest updates",
       action: "Read movie news",
       path: "/news",
@@ -149,10 +141,8 @@ function renderHome(
       eyebrow: "Follow the numbers",
       title: "Box Office Updates",
       summary:
-        latestBoxOffice.title ||
-        "Collection reports, milestones and key performance movements.",
-      detail:
-        "See the latest box office reports and collection updates in one place.",
+        latestBoxOffice.title || "Collection reports, milestones and key performance movements.",
+      detail: "See the latest box office reports and collection updates in one place.",
       metric: updated ? "Updated " + updated : "Live reports",
       action: "View box office updates",
       path: "/boxoffice",
@@ -165,8 +155,7 @@ function renderHome(
         latestReview.movie ||
         latestReview.title ||
         "Ratings and quick reading before you choose your next film.",
-      detail:
-        "Browse published reviews and open a title for the complete verdict.",
+      detail: "Browse published reviews and open a title for the complete verdict.",
       metric: "Fresh reviews",
       action: "Explore reviews",
       path: "/reviews",
@@ -193,21 +182,9 @@ function renderHome(
         h(
           "div",
           { class: "hero-value-list" },
-          heroValue(
-            "globe",
-            "India-wide coverage",
-            "Cities, states and theatres",
-          ),
-          heroValue(
-            "time-past",
-            "Regular updates",
-            "Live and advance tracking",
-          ),
-          heroValue(
-            "chart-histogram",
-            "Performance insights",
-            "Collections, occupancy and sales",
-          ),
+          heroValue("globe", "India-wide coverage", "Cities, states and theatres"),
+          heroValue("time-past", "Regular updates", "Live and advance tracking"),
+          heroValue("chart-histogram", "Performance insights", "Collections, occupancy and sales"),
         ),
         h(
           "div",
@@ -218,9 +195,7 @@ function renderHome(
               class: "btn",
               type: "button",
               onclick: () =>
-                document
-                  .getElementById("live")
-                  ?.scrollIntoView({ behavior: "smooth" }),
+                document.getElementById("live")?.scrollIntoView({ behavior: "smooth" }),
             },
             "Explore live tracking",
             icon("arrow-right"),
@@ -244,9 +219,7 @@ function renderHome(
   const grid = h(
     "div",
     { class: "movie-grid" },
-    ...topMovies.map((e) =>
-      movieCard(e.mv, e.mode, e.date, { advance: !e.live }),
-    ),
+    ...topMovies.map((e) => movieCard(e.mv, e.mode, e.date, { advance: !e.live })),
   );
 
   const moviesSection = h(
@@ -311,9 +284,7 @@ function renderHome(
         h(
           "div",
           { class: "movie-grid" },
-          ...dayTop.map((mv) =>
-            movieCard(mv, "daily", dailyDate, { live: true }),
-          ),
+          ...dayTop.map((mv) => movieCard(mv, "daily", dailyDate, { live: true })),
         ),
       ),
     );
@@ -368,6 +339,9 @@ function renderHome(
         liveSection,
         overseasSection(overseas),
         moviesSection,
+        // titles whose bookings haven't opened (data/coming_soon.json), unless
+        // they already have tracking data and show up above
+        comingSoonSection((soonAll || []).filter((m) => !merged.some((e) => e.mv.slug === m.slug))),
         globalSection(globalTracking),
         social,
       ),

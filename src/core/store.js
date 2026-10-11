@@ -1,8 +1,4 @@
-import {
-  DATA_TTL_MS,
-  NEW_DATA_LAYOUT,
-  SUPPORTED_SCHEMA_MAJOR,
-} from "./config.js";
+import { DATA_TTL_MS, NEW_DATA_LAYOUT, SUPPORTED_SCHEMA_MAJOR } from "./config.js";
 
 const cache = new Map(); // path -> { at, promise }
 
@@ -56,6 +52,14 @@ export const Data = {
       throw new SchemaError(m.schemaVersion);
     return m;
   },
+  // titles whose advance bookings haven't opened (optional file -> null)
+  comingSoon: async () => {
+    try {
+      return await getJSON("/data/coming_soon.json");
+    } catch (e) {
+      return null;
+    }
+  },
   national: (mode, date) => getJSON(`/data/${mode}/${date}/national.json`),
   multiplex: (mode, date) => getJSON(`/data/${mode}/${date}/multiplex.json`),
 
@@ -66,8 +70,7 @@ export const Data = {
       `/data/${mode}/${date}/m/${slug}.json`,
     ),
   // detail = state.detail from the summary, e.g. "theatres/gujarat.json"
-  theatres: (mode, date, slug, detail) =>
-    getJSON(`/data/${mode}/${date}/movies/${slug}/${detail}`),
+  theatres: (mode, date, slug, detail) => getJSON(`/data/${mode}/${date}/movies/${slug}/${detail}`),
 
   // One history file per movie. When the daily and advance histories differ
   // the shared file carries a `mode`; use it only if it matches, otherwise
@@ -94,6 +97,5 @@ export const Data = {
   // They may not exist yet: callers treat a rejection as "no data".
   overseas: () => getJSON("/overseas/latest.json"),
   globalManifest: () => getJSON("/overseas/manifest.json"),
-  globalSummary: (date, slug) =>
-    getJSON(`/overseas/${date}/${slug}-summary.json`),
+  globalSummary: (date, slug) => getJSON(`/overseas/${date}/${slug}-summary.json`),
 };

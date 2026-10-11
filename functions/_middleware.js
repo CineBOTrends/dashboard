@@ -156,6 +156,23 @@ async function getMeta(url, env) {
     const md = (man && man.movieDates) || {};
     const advDates = (md.advance && md.advance[mv.slug]) || [];
     const dayDates = (md.daily && md.daily[mv.slug]) || [];
+    // Bookings not open yet (data/coming_soon.json): a "Coming Soon" card with
+    // the collector's message instead of a misleading historical card.
+    if (!dayDates.length && !advDates.length) {
+      const cs = await getJson(env, url, "/data/coming_soon.json");
+      const it = cs && (cs.movies || []).find((x) => x.slug === mv.slug);
+      if (it) {
+        const rel = fmtYmd(String(it.releaseDate || "").replace(/-/g, ""));
+        const name = it.title || mv.title;
+        return {
+          title: `${name} — Coming Soon | CineBOTrends`,
+          desc:
+            (it.message || cs.message || "Advance bookings yet to open. Check back soon.") +
+            (rel ? ` Releases ${rel}.` : ""),
+          image: await posterFor(env, url, mv.slug),
+        };
+      }
+    }
     if (!tab) tab = dayDates.length ? "daily" : advDates.length ? "advance" : "historical";
     if (tab === "advance" && !date) date = upcomingOf(advDates);
     if (tab === "daily" && !date && dayDates.length) date = [...dayDates].map(String).sort().pop();

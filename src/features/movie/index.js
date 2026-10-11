@@ -18,6 +18,7 @@ import { fmtUpdated, inr, num, pct } from "../../core/format.js";
 import { enc, go } from "../../core/router.js";
 import { Data } from "../../core/store.js";
 import { renderTrackTab } from "./breakdown.js";
+import { safeComingSoon, showComingSoonPage } from "./comingSoon.js";
 import { renderHistorical } from "./historicalTab.js";
 
 export const movie = async function (p) {
@@ -57,6 +58,13 @@ export const movie = async function (p) {
     // a later show). Both are real, selectable dates — only the LABELLING
     // of each one changes (see openingDay/isOpeningDate below), so we no
     // longer collapse advDates down to a single date here.
+
+    // No tracking data for this film yet, but the collector lists it as coming
+    // soon (advance bookings not open): show its message instead of "Not tracked".
+    if (Object.keys(md).length && !(mineAdv && mineAdv.length) && !(mineDay && mineDay.length)) {
+      const soon = (await safeComingSoon([])).find((m) => m.slug === slug);
+      if (soon) return showComingSoonPage(soon);
+    }
 
     const hasAdv = c.advDates.length,
       hasDay = c.dayDates.length;

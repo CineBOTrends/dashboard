@@ -2,22 +2,26 @@ import { mount, page } from "../../components/chrome.js";
 import { movieCard } from "../../components/movieCard.js";
 import { fetchError, loading, stateMsg } from "../../components/states.js";
 import { h, icon } from "../../core/dom.js";
-import { FORMAT_ORDER, ctx, latest, loadAdvanceFeeds, mergeFeeds, modeLabel } from "../../core/feeds.js";
+import {
+  FORMAT_ORDER,
+  ctx,
+  latest,
+  loadAdvanceFeeds,
+  mergeFeeds,
+  modeLabel,
+} from "../../core/feeds.js";
 import { fmtDate } from "../../core/format.js";
 import { Data } from "../../core/store.js";
 import { cap } from "../home/featureCarousel.js";
 import { globalCard, safeGlobal } from "../home/globalStrip.js";
+import { comingSoonCard, safeComingSoon } from "../movie/comingSoon.js";
 
 // ---- Dedicated All Movies page (#/movies) with full list + filters ----
 export const movies = async function () {
   mount(page(h("div", { class: "wrap" }, loading())));
   try {
     const c = await ctx();
-    const mode = c.advDates.length
-      ? "advance"
-      : c.dayDates.length
-        ? "daily"
-        : null;
+    const mode = c.advDates.length ? "advance" : c.dayDates.length ? "daily" : null;
     if (!mode)
       return mount(
         page(
@@ -34,10 +38,7 @@ export const movies = async function () {
       );
     const dailyDate = c.dayDates.length ? latest(c.dayDates) : null;
     // every advance date, so films opening on different days all appear
-    const [advFeeds, global] = await Promise.all([
-      loadAdvanceFeeds(c),
-      safeGlobal(),
-    ]);
+    const [advFeeds, global] = await Promise.all([loadAdvanceFeeds(c), safeGlobal()]);
     let daily = null;
     if (dailyDate) {
       try {
@@ -46,18 +47,18 @@ export const movies = async function () {
         daily = null;
       }
     }
-    renderAllMovies(c, advFeeds, daily, dailyDate, global);
+    const soon = await safeComingSoon([]);
+    renderAllMovies(c, advFeeds, daily, dailyDate, global, soon);
   } catch (e) {
     console.error(e);
     mount(fetchError(e));
   }
 };
 
-function renderAllMovies(c, advFeeds, daily, dailyDate, global) {
+function renderAllMovies(c, advFeeds, daily, dailyDate, global, soon) {
   // advFeeds is oldest -> newest; the last one is the most recent advance
   // date, used only for the "updated" line in the header.
-  const lastFeed =
-    advFeeds && advFeeds.length ? advFeeds[advFeeds.length - 1] : null;
+  const lastFeed = advFeeds && advFeeds.length ? advFeeds[advFeeds.length - 1] : null;
   const advNat = lastFeed ? lastFeed.nat : null;
   const advDate = lastFeed ? lastFeed.date : null;
 
@@ -65,25 +66,23 @@ function renderAllMovies(c, advFeeds, daily, dailyDate, global) {
   const entries = mergeFeeds(advFeeds, daily, dailyDate);
   const movies = entries.map((e) => e.mv);
   const langs = [...new Set(movies.flatMap((m) => m.languages))].sort();
-  const fmts = FORMAT_ORDER.filter((f) =>
-    movies.some((m) => m.formats.includes(f)),
-  );
+  const fmts = FORMAT_ORDER.filter((f) => movies.some((m) => m.formats.includes(f)));
   const st = { q: "", lang: "", fmt: "", sort: "gross" };
 
   const globalMovies = global ? global.movies : [];
+  // coming soon (bookings not open): only titles not already tracked
+  const soonList = (soon || []).filter((m) => !entries.some((e) => e.mv.slug === m.slug));
   const grid = h("div", { class: "movie-grid", id: "grid" });
   function paint() {
     let list = entries.filter(({ mv: m }) => {
-      if (st.q && !m.title.toLowerCase().includes(st.q.toLowerCase()))
-        return false;
+      if (st.q && !m.title.toLowerCase().includes(st.q.toLowerCase())) return false;
       if (st.lang && !m.languages.includes(st.lang)) return false;
       if (st.fmt && !m.formats.includes(st.fmt)) return false;
       return true;
     });
     // Global titles always follow the Indian ones.
     const gList = globalMovies.filter((m) => {
-      if (st.q && !m.title.toLowerCase().includes(st.q.toLowerCase()))
-        return false;
+      if (st.q && !m.title.toLowerCase().includes(st.q.toLowerCase())) return false;
       if (st.lang && !(m.cur.languages || []).includes(st.lang)) return false;
       if (st.fmt && !(m.cur.formats || []).includes(st.fmt)) return false;
       return true;
@@ -98,7 +97,12 @@ function renderAllMovies(c, advFeeds, daily, dailyDate, global) {
             ? b.mv.shows - a.mv.shows
             : b.mv.gross - a.mv.gross,
       );
-    if (!list.length && !gList.length) {
+    // coming soon follows the tracked titles; hidden by language/format filters
+    // (it has neither) but searchable by title
+    const sList = soonList.filter(
+      (m) => !st.lang && !st.fmt && (!st.q || m.title.toLowerCase().includes(st.q.toLowerCase())),
+    );
+    if (!list.length && !gList.length && !sList.length) {
       grid.replaceChildren(
         h(
           "div",
@@ -109,10 +113,9 @@ function renderAllMovies(c, advFeeds, daily, dailyDate, global) {
       return;
     }
     grid.replaceChildren(
-      ...list.map((e) =>
-        movieCard(e.mv, e.mode, e.date, { advance: !e.live }),
-      ),
+      ...list.map((e) => movieCard(e.mv, e.mode, e.date, { advance: !e.live })),
       ...gList.map((m) => globalCard(m, global.currency)),
+      ...sList.map(comingSoonCard),
     );
   }
 
