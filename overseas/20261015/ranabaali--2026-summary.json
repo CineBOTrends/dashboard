@@ -1,11 +1,11 @@
 {
   "title": "Ranabaali (2026)",
   "slug": "ranabaali--2026",
-  "gross": 45554.01,
-  "admissions": 2617,
-  "shows": 264,
-  "theatres": 148,
-  "cities": 140,
+  "gross": 45686.98,
+  "admissions": 2625,
+  "shows": 265,
+  "theatres": 149,
+  "cities": 141,
   "occupancy": 10.11,
   "territories": [
     {
@@ -34,11 +34,11 @@
     },
     {
       "territory": "VA",
-      "gross": 3561.59,
-      "admissions": 193,
+      "gross": 3580.58,
+      "admissions": 194,
       "shows": 7,
       "theatres": 2,
-      "occupancy": 13.62
+      "occupancy": 13.69
     },
     {
       "territory": "WA",
@@ -138,11 +138,19 @@
     },
     {
       "territory": "DE",
-      "gross": 304.29,
-      "admissions": 21,
+      "gross": 333.27,
+      "admissions": 23,
       "shows": 1,
       "theatres": 1,
-      "occupancy": 20.59
+      "occupancy": 22.55
+    },
+    {
+      "territory": "CT",
+      "gross": 306.0,
+      "admissions": 18,
+      "shows": 3,
+      "theatres": 2,
+      "occupancy": 6.27
     },
     {
       "territory": "OR",
@@ -153,20 +161,12 @@
       "occupancy": 2.81
     },
     {
-      "territory": "CT",
-      "gross": 255.0,
-      "admissions": 15,
-      "shows": 2,
-      "theatres": 1,
-      "occupancy": 7.14
-    },
-    {
       "territory": "NH",
-      "gross": 255.0,
-      "admissions": 15,
+      "gross": 289.0,
+      "admissions": 17,
       "shows": 4,
       "theatres": 2,
-      "occupancy": 9.2
+      "occupancy": 10.43
     },
     {
       "territory": "IA",
@@ -372,11 +372,11 @@
     },
     {
       "theatre": "Regal Fox 4DX & IMAX",
-      "gross": 2677.59,
+      "gross": 2696.58,
       "totalTickets": 1213,
-      "ticketsSold": 141,
+      "ticketsSold": 142,
       "shows": 5,
-      "occupancy": 11.62
+      "occupancy": 11.71
     },
     {
       "theatre": "Cinemark North McKinney and XD",
@@ -683,6 +683,14 @@
       "occupancy": 6.9
     },
     {
+      "theatre": "Regal Peoples Plaza",
+      "gross": 333.27,
+      "totalTickets": 102,
+      "ticketsSold": 23,
+      "shows": 1,
+      "occupancy": 22.55
+    },
+    {
       "theatre": "Regal Bella Bottega",
       "gross": 327.36,
       "totalTickets": 227,
@@ -697,14 +705,6 @@
       "ticketsSold": 25,
       "shows": 3,
       "occupancy": 7.86
-    },
-    {
-      "theatre": "Regal Peoples Plaza",
-      "gross": 304.29,
-      "totalTickets": 102,
-      "ticketsSold": 21,
-      "shows": 1,
-      "occupancy": 20.59
     },
     {
       "theatre": "Cinemark Tinseltown Jacksonville and XD",
@@ -1027,6 +1027,22 @@
       "occupancy": 0.97
     },
     {
+      "theatre": "Apple Cinemas Merrimack",
+      "gross": 51.0,
+      "totalTickets": 92,
+      "ticketsSold": 3,
+      "shows": 2,
+      "occupancy": 3.26
+    },
+    {
+      "theatre": "Apple Cinemas Brass Mill",
+      "gross": 51.0,
+      "totalTickets": 77,
+      "ticketsSold": 3,
+      "shows": 1,
+      "occupancy": 3.9
+    },
+    {
       "theatre": "Apple Cinemas Westbrook",
       "gross": 51.0,
       "totalTickets": 41,
@@ -1171,28 +1187,20 @@
       "occupancy": 0.75
     },
     {
-      "theatre": "Cinemark At Hampshire Mall and XD",
-      "gross": 17.0,
-      "totalTickets": 127,
-      "ticketsSold": 1,
-      "shows": 1,
-      "occupancy": 0.79
-    },
-    {
-      "theatre": "Apple Cinemas Merrimack",
-      "gross": 17.0,
-      "totalTickets": 92,
-      "ticketsSold": 1,
-      "shows": 2,
-      "occupancy": 1.09
-    },
-    {
       "theatre": "Apple Cinemas Cambridge",
       "gross": 17.0,
       "totalTickets": 91,
       "ticketsSold": 1,
       "shows": 2,
       "occupancy": 1.1
+    },
+    {
+      "theatre": "Cinemark At Hampshire Mall and XD",
+      "gross": 17.0,
+      "totalTickets": 127,
+      "ticketsSold": 1,
+      "shows": 1,
+      "occupancy": 0.79
     },
     {
       "theatre": "Ann Arbor 20 + IMAX",
@@ -1275,17 +1283,17 @@
       "occupancy": 0.0
     },
     {
-      "theatre": "Cinemark Oakley Station and XD",
+      "theatre": "Cinemark Western Hills 14",
       "gross": 0.0,
-      "totalTickets": 96,
+      "totalTickets": 170,
       "ticketsSold": 0,
       "shows": 2,
       "occupancy": 0.0
     },
     {
-      "theatre": "Cinemark Western Hills 14",
+      "theatre": "Cinemark Oakley Station and XD",
       "gross": 0.0,
-      "totalTickets": 170,
+      "totalTickets": 96,
       "ticketsSold": 0,
       "shows": 2,
       "occupancy": 0.0
@@ -1299,17 +1307,17 @@
       "occupancy": 0.0
     },
     {
-      "theatre": "Cinemark Franklin Park 16 and XD",
+      "theatre": "Cinemark Strongsville at Southpark Mall",
       "gross": 0.0,
-      "totalTickets": 238,
+      "totalTickets": 124,
       "ticketsSold": 0,
       "shows": 2,
       "occupancy": 0.0
     },
     {
-      "theatre": "Cinemark Strongsville at Southpark Mall",
+      "theatre": "Cinemark Franklin Park 16 and XD",
       "gross": 0.0,
-      "totalTickets": 124,
+      "totalTickets": 238,
       "ticketsSold": 0,
       "shows": 2,
       "occupancy": 0.0
@@ -1339,6 +1347,14 @@
       "occupancy": 0.0
     },
     {
+      "theatre": "Marcus Gurnee Mills Cinema",
+      "gross": 0.0,
+      "totalTickets": 42,
+      "ticketsSold": 0,
+      "shows": 1,
+      "occupancy": 0.0
+    },
+    {
       "theatre": "Marcus West Acres Cinema",
       "gross": 0.0,
       "totalTickets": 92,
@@ -1350,14 +1366,6 @@
       "theatre": "Cinemark Helena and XD",
       "gross": 0.0,
       "totalTickets": 122,
-      "ticketsSold": 0,
-      "shows": 1,
-      "occupancy": 0.0
-    },
-    {
-      "theatre": "Marcus Gurnee Mills Cinema",
-      "gross": 0.0,
-      "totalTickets": 42,
       "ticketsSold": 0,
       "shows": 1,
       "occupancy": 0.0
@@ -1483,17 +1491,17 @@
       "occupancy": 0.0
     },
     {
-      "theatre": "Cinemark Clackamas Town Center and XD",
+      "theatre": "Cinemark Century Eastport Plaza 16",
       "gross": 0.0,
-      "totalTickets": 198,
+      "totalTickets": 76,
       "ticketsSold": 0,
       "shows": 2,
       "occupancy": 0.0
     },
     {
-      "theatre": "Cinemark Century Eastport Plaza 16",
+      "theatre": "Cinemark Clackamas Town Center and XD",
       "gross": 0.0,
-      "totalTickets": 76,
+      "totalTickets": 198,
       "ticketsSold": 0,
       "shows": 2,
       "occupancy": 0.0
@@ -1515,17 +1523,17 @@
       "occupancy": 0.0
     },
     {
-      "theatre": "Regal Martin Village",
+      "theatre": "Cinemark Century Olympia",
       "gross": 0.0,
-      "totalTickets": 345,
+      "totalTickets": 94,
       "ticketsSold": 0,
       "shows": 2,
       "occupancy": 0.0
     },
     {
-      "theatre": "Cinemark Century Olympia",
+      "theatre": "Regal Martin Village",
       "gross": 0.0,
-      "totalTickets": 94,
+      "totalTickets": 345,
       "ticketsSold": 0,
       "shows": 2,
       "occupancy": 0.0
@@ -1542,10 +1550,10 @@
   "formatBreakdown": [
     {
       "format": "Standard",
-      "gross": 44554.01,
-      "totalTickets": 25341,
-      "ticketsSold": 2567,
-      "shows": 262,
+      "gross": 44686.98,
+      "totalTickets": 25418,
+      "ticketsSold": 2575,
+      "shows": 263,
       "occupancy": 10.13
     },
     {
@@ -1560,10 +1568,10 @@
   "languageBreakdown": [
     {
       "language": "Telugu",
-      "gross": 45554.01,
-      "totalTickets": 25535,
-      "ticketsSold": 2617,
-      "shows": 262,
+      "gross": 45686.98,
+      "totalTickets": 25612,
+      "ticketsSold": 2625,
+      "shows": 263,
       "occupancy": 10.25
     },
     {
@@ -1585,18 +1593,18 @@
     },
     {
       "chain": "Regal",
-      "gross": 16819.85,
+      "gross": 16867.82,
       "totalTickets": 9022,
-      "ticketsSold": 1012,
+      "ticketsSold": 1015,
       "shows": 64
     },
     {
       "chain": "Others",
-      "gross": 4296.35,
-      "totalTickets": 4151,
-      "ticketsSold": 244,
-      "shows": 46
+      "gross": 4381.35,
+      "totalTickets": 4228,
+      "ticketsSold": 249,
+      "shows": 47
     }
   ],
-  "trackedAt": "2026-10-11T09:52:47+00:00"
+  "trackedAt": "2026-10-11T12:50:21+00:00"
 }

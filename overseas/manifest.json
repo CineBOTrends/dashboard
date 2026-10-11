@@ -1,7 +1,7 @@
 {
  "currency": "USD",
  "country": "USA",
- "updated": "2026-10-11T09:55:14+00:00",
+ "updated": "2026-10-11T12:50:50+00:00",
  "movies": [
   {
    "slug": "jailer-2",
@@ -58,17 +58,17 @@
    "slug": "ranabaali--2026",
    "title": "Ranabaali (2026)",
    "poster": {
-    "thumb": "/assets/posters/ranabaali--2026-thumb.jpg",
-    "bg": "/assets/posters/ranabaali--2026-bg.jpg",
-    "slug": "ranabaali--2026"
+    "thumb": "/assets/posters/ranabaali-thumb.jpg",
+    "bg": "/assets/posters/ranabaali-bg.jpg",
+    "slug": "ranabaali"
    },
    "entries": {
     "20261015": {
-     "gross": 45554.01,
-     "admissions": 2617,
-     "shows": 264,
-     "theatres": 148,
-     "cities": 140,
+     "gross": 45686.98,
+     "admissions": 2625,
+     "shows": 265,
+     "theatres": 149,
+     "cities": 141,
      "occupancy": 10.11,
      "languages": [
       "Telugu",
@@ -92,11 +92,11 @@
        "gross": 4160.93
       }
      ],
-     "trackedAt": "2026-10-11T09:52:47+00:00",
-     "report": "/overseas/20261015/ranabaali--2026-report.png?v=202610110952470000"
+     "trackedAt": "2026-10-11T12:50:21+00:00",
+     "report": "/overseas/20261015/ranabaali--2026-report.png?v=202610111250210000"
     }
    },
-   "posterSlug": "ranabaali--2026",
+   "posterSlug": "ranabaali",
    "dates": [
     "20261015"
    ],
