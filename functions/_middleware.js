@@ -70,6 +70,24 @@ const posterFor = async (env, url, slug) => {
   return bg ? { ...bg, og: false } : null;
 };
 
+// Earliest tracked date AFTER today (IST), else the newest: opening day until
+// it arrives, then each following day. Mirrors upcomingDate() in
+// src/core/dates.js.
+const upcomingOf = (list, fallback) => {
+  const ds = (list || [])
+    .map(String)
+    .filter((d) => /^\d{8}$/.test(d))
+    .sort();
+  if (!ds.length) return fallback || null;
+  const today = new Date(Date.now() + 330 * 60000).toISOString().slice(0, 10).replace(/-/g, "");
+  return ds.find((d) => d > today) || ds[ds.length - 1];
+};
+const upcoming = (m) => upcomingOf(m.dates || Object.keys(m.entries || {}), m.latest);
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const fmtYmd = (ymd) =>
+  ymd ? `${+ymd.slice(6, 8)} ${MONTHS[+ymd.slice(4, 6) - 1]} ${ymd.slice(0, 4)}` : "";
+
 const titleCase = (slug) => slug.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 // movies-index.json: real titles and slug aliases. Optional - falls back to slug.
@@ -115,7 +133,7 @@ async function getMeta(url, env) {
     // instead of the generic site card that then gets cached by X.
     const m = found || { slug, title: titleCase(slug), entries: {} };
     const entries = m.entries || {};
-    const cur = entries[third] || entries[m.latest] || {};
+    const cur = entries[third] || entries[upcoming(m)] || {};
     const gross = cur.gross ? ` · $${Math.round(cur.gross).toLocaleString("en-US")} gross` : "";
     return {
       title: `${m.title} — USA Box Office | CineBOTrends`,
@@ -124,14 +142,38 @@ async function getMeta(url, env) {
     };
   }
 
-  // ---- Movie: /movie/<slug>/... ----
+  // ---- Movie: /movie/<slug>/[advance|daily|historical]/[date]/... ----
+  // Same default the app uses: no tab -> daily, else advance, else historical;
+  // no date -> advance opens the earliest date AFTER today (opening day until
+  // it arrives, then the next tracked day), daily opens the newest day.
   if (section === "movie" && slug) {
     const mv = await lookupMovie(env, url, slug);
-    return {
-      title: `${mv.title} — Box Office | CineBOTrends`,
-      desc: `Daily, advance and historical box office collections for ${mv.title}.`,
-      image: await posterFor(env, url, mv.slug),
-    };
+    const rest = p.slice(2);
+    let tab = rest.find((x) => ["advance", "daily", "historical"].includes(x));
+    let date = rest.find((x) => /^\d{8}$/.test(x)) || null;
+
+    const man = await getJson(env, url, "/data/manifest.json");
+    const md = (man && man.movieDates) || {};
+    const advDates = (md.advance && md.advance[mv.slug]) || [];
+    const dayDates = (md.daily && md.daily[mv.slug]) || [];
+    if (!tab) tab = dayDates.length ? "daily" : advDates.length ? "advance" : "historical";
+    if (tab === "advance" && !date) date = upcomingOf(advDates);
+    if (tab === "daily" && !date && dayDates.length) date = [...dayDates].map(String).sort().pop();
+
+    const when = date ? fmtYmd(date) : "";
+    let title;
+    let desc;
+    if (tab === "advance") {
+      title = `${mv.title} — Advance Booking${when ? " · " + when : ""} | CineBOTrends`;
+      desc = `Advance booking collection for ${mv.title}${when ? " for " + when : ""}: state, city, format and language wise breakdown.`;
+    } else if (tab === "daily") {
+      title = `${mv.title} — Daily Box Office${when ? " · " + when : ""} | CineBOTrends`;
+      desc = `Day-wise box office collection for ${mv.title}${when ? " on " + when : ""}: state, city, format and language wise breakdown.`;
+    } else {
+      title = `${mv.title} — Historical Box Office | CineBOTrends`;
+      desc = `Day-by-day historical box office collections for ${mv.title}.`;
+    }
+    return { title, desc, image: await posterFor(env, url, mv.slug) };
   }
 
   // ---- News / reviews / boxoffice item ----

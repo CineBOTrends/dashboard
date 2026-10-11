@@ -3,7 +3,14 @@ import { mount, page } from "../../components/chrome.js";
 import { mi } from "../../components/kv.js";
 import { posterEl } from "../../components/movieCard.js";
 import { fetchError, loading, stateMsg } from "../../components/states.js";
-import { dayLabel, dayNumber, isOpeningDate, isPremiereDate, ymdShort } from "../../core/dates.js";
+import {
+  dayLabel,
+  dayNumber,
+  isOpeningDate,
+  isPremiereDate,
+  upcomingDate,
+  ymdShort,
+} from "../../core/dates.js";
 import { frag, h, icon } from "../../core/dom.js";
 import { DL } from "../../core/exportState.js";
 import { ctx, latest, modeLabel } from "../../core/feeds.js";
@@ -59,14 +66,15 @@ export const movie = async function (p) {
     // history file both come from the daily feed (advance only as a fallback).
     let mode = tab === "historical" ? (hasDay ? "daily" : "advance") : tab;
     let dates = mode === "advance" ? c.advDates : c.dayDates;
+    // Advance: open the earliest date AFTER today (opening day until it
+    // arrives, then 15th -> 16th, 16th -> 17th). Daily keeps the newest day.
     if (tab !== "historical" && (!date || !dates.includes(date)))
-      date = latest(dates);
+      date = mode === "advance" ? upcomingDate(dates) : latest(dates);
 
     // load movie (need a representative date for hero/meta even on historical)
     // NOTE: the date must come from the SAME feed as `mode`, or we ask for
     // e.g. daily/<an-advance-date>/<slug>, get a 404, and render an empty hero.
-    const metaDate =
-      date || latest(mode === "advance" ? c.advDates : c.dayDates);
+    const metaDate = date || latest(mode === "advance" ? c.advDates : c.dayDates);
     let movie = null,
       hist = null,
       staleDate = null;
@@ -115,11 +123,7 @@ export const movie = async function (p) {
       if (movie && date !== wanted) staleDate = wanted;
     } else {
       try {
-        movie = await Data.movie(
-          hasAdv ? "advance" : "daily",
-          metaDate,
-          slug,
-        );
+        movie = await Data.movie(hasAdv ? "advance" : "daily", metaDate, slug);
       } catch (e) {
         movie = null;
       }
@@ -145,18 +149,7 @@ export const movie = async function (p) {
 };
 
 function renderMovie(s) {
-  const {
-    c,
-    slug,
-    tab,
-    mode,
-    date,
-    dates,
-    stateName,
-    cityName,
-    movie,
-    hist,
-  } = s;
+  const { c, slug, tab, mode, date, dates, stateName, cityName, movie, hist } = s;
   const title = (movie && movie.title) || (hist && hist.title) || slug;
 
   // breadcrumb
@@ -196,9 +189,7 @@ function renderMovie(s) {
   const meta = (movie && movie.meta) || {};
   const poster = posterEl(title, slug);
   const langs =
-    (meta.languages && meta.languages.length
-      ? meta.languages
-      : movie && movie.languages) || [];
+    (meta.languages && meta.languages.length ? meta.languages : movie && movie.languages) || [];
   const fmts = (movie && movie.formats) || [];
   const genres = meta.genres || [];
   const hero = h(
@@ -219,39 +210,20 @@ function renderMovie(s) {
         { class: "chips" },
         ...langs.map((l) => h("span", { class: "chip" }, l)),
         ...fmts.map((f) => h("span", { class: "chip plain" }, f)),
-        meta.likes
-          ? h(
-              "span",
-              { class: "chip solid" },
-              icon("heart"),
-              " " + meta.likes,
-            )
-          : null,
+        meta.likes ? h("span", { class: "chip solid" }, icon("heart"), " " + meta.likes) : null,
       ),
       h(
         "div",
         { class: "meta-grid" },
-        mi(
-          "Genre",
-          genres.length ? genres.join(", ") : "Not in dataset",
-          !genres.length,
-        ),
+        mi("Genre", genres.length ? genres.join(", ") : "Not in dataset", !genres.length),
         mi("Runtime", meta.runTime || "Not in dataset", !meta.runTime),
-        mi(
-          "Certification",
-          meta.certification || "Not in dataset",
-          !meta.certification,
-        ),
+        mi("Certification", meta.certification || "Not in dataset", !meta.certification),
         mi("Languages", langs.join(", ") || "—"),
         mi("Formats", fmts.join(", ") || "—"),
       ),
     ),
     movie && movie.last_updated
-      ? h(
-          "div",
-          { class: "mh-updated" },
-          "Updated " + fmtUpdated(movie.last_updated),
-        )
+      ? h("div", { class: "mh-updated" }, "Updated " + fmtUpdated(movie.last_updated))
       : null,
   );
 
@@ -294,14 +266,12 @@ function renderMovie(s) {
     ctxLabel,
     date,
     langs:
-      (dmeta.languages && dmeta.languages.length
-        ? dmeta.languages
-        : movie && movie.languages) || [],
+      (dmeta.languages && dmeta.languages.length ? dmeta.languages : movie && movie.languages) ||
+      [],
     genres: dmeta.genres || [],
     runtime: dmeta.runTime || dmeta.runtime || "",
     poster: { thumb: posterUrl(slug, "thumb"), bg: posterUrl(slug, "bg") },
-    updated:
-      movie && movie.last_updated ? fmtUpdated(movie.last_updated) : "",
+    updated: movie && movie.last_updated ? fmtUpdated(movie.last_updated) : "",
     kpi: movie && movie.kpi ? movie.kpi : null,
   };
   DL.ctx =
@@ -322,16 +292,7 @@ function renderMovie(s) {
   body.dataset.slug = slug;
 
   mount(
-    page(
-      h(
-        "div",
-        { class: "wrap" },
-        h("div", { class: "back-bar" }, crumb),
-        hero,
-        tabs,
-        body,
-      ),
-    ),
+    page(h("div", { class: "wrap" }, h("div", { class: "back-bar" }, crumb), hero, tabs, body)),
     { keepScroll: !!prevBody && prevBody.dataset.slug === slug },
   );
 
@@ -341,8 +302,7 @@ function renderMovie(s) {
     return body.replaceChildren(
       stateMsg(
         "calendar",
-        (mode === "daily" ? "Today's" : "Advance") +
-          " tracking hasn't started",
+        (mode === "daily" ? "Today's" : "Advance") + " tracking hasn't started",
         mode === "daily"
           ? "Today's collections appear here once the collector runs in daily mode."
           : "No advance data is available yet.",
@@ -350,11 +310,7 @@ function renderMovie(s) {
     );
   if (!movie)
     return body.replaceChildren(
-      stateMsg(
-        "film",
-        "Not tracked",
-        "This title has no detail for the selected date.",
-      ),
+      stateMsg("film", "Not tracked", "This title has no detail for the selected date."),
     );
 
   renderTrackTab(body, s, movie);

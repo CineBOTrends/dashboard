@@ -1,5 +1,5 @@
 import { posterEl } from "../../components/movieCard.js";
-import { ymdShort } from "../../core/dates.js";
+import { upcomingDate, ymdShort } from "../../core/dates.js";
 import { h, icon } from "../../core/dom.js";
 
 import { enc, go } from "../../core/router.js";
@@ -30,9 +30,9 @@ function normalizeGlobalManifest(raw) {
         .map(String)
         .sort();
       if (!dates.length) return null;
-      const latest = dates.includes(m.latest)
-        ? m.latest
-        : dates[dates.length - 1];
+      // earliest date after today (opening day until it arrives, then the
+      // next tracked day); newest date when nothing later is tracked
+      const latest = upcomingDate(dates);
       return {
         slug: m.slug,
         title: m.title || m.slug,
@@ -109,19 +109,13 @@ export function globalCard(m, currency) {
       "div",
       { class: "body" },
       h("div", { class: "ttl" }, m.title),
-      langs || fmts
-        ? h("div", { class: "langs" }, langs + (fmts ? "  •  " + fmts : ""))
-        : null,
+      langs || fmts ? h("div", { class: "langs" }, langs + (fmts ? "  •  " + fmts : "")) : null,
       c.admissions || c.shows
         ? h(
             "div",
             { class: "cardmeta" },
-            c.admissions
-              ? h("span", { class: "g" }, usn(c.admissions) + " tickets")
-              : null,
-            c.shows
-              ? h("span", { class: "rt" }, usn(c.shows) + " shows")
-              : null,
+            c.admissions ? h("span", { class: "g" }, usn(c.admissions) + " tickets") : null,
+            c.shows ? h("span", { class: "rt" }, usn(c.shows) + " shows") : null,
           )
         : null,
       h(
@@ -153,16 +147,9 @@ export function globalSection(g) {
         h(
           "div",
           null,
-          h(
-            "div",
-            { class: "eyebrow" },
-            h("span", { class: "live-dot" }),
-            "Global Tracking",
-          ),
+          h("div", { class: "eyebrow" }, h("span", { class: "live-dot" }), "Global Tracking"),
         ),
-        newest
-          ? h("div", { class: "meta" }, "Updated " + fmtTracked(newest))
-          : null,
+        newest ? h("div", { class: "meta" }, "Updated " + fmtTracked(newest)) : null,
       ),
       h(
         "div",

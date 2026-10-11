@@ -1,20 +1,11 @@
+import { upcomingDate } from "./dates.js";
 import { Data } from "./store.js";
 
 // The "daily" feed is presented as TODAY everywhere in the UI. The token
 // itself stays "daily" (routes, data paths, manifest keys).
 export const modeLabel = (c, mode) =>
-  mode === "daily"
-    ? "Today"
-    : (c && c.m && c.m.modes[mode] && c.m.modes[mode].label) || "Advance";
-export const FORMAT_ORDER = [
-  "2D",
-  "3D",
-  "IMAX",
-  "4DX",
-  "ICE",
-  "Dolby Cinema",
-  "Others",
-];
+  mode === "daily" ? "Today" : (c && c.m && c.m.modes[mode] && c.m.modes[mode].label) || "Advance";
+export const FORMAT_ORDER = ["2D", "3D", "IMAX", "4DX", "ICE", "Dolby Cinema", "Others"];
 
 /* helper: pick the modes/dates we actually have */
 export async function ctx() {
@@ -53,16 +44,23 @@ export async function loadAdvanceFeeds(c) {
 
 export function mergeFeeds(advFeeds, daily, dailyDate) {
   const bySlug = new Map();
-  // oldest first, so a later date overwrites an earlier one for the same film
+  // A film can have several advance dates (opening day + the days after).
+  // The card must open the one the movie page opens by default: the earliest
+  // date AFTER today (opening day until it arrives, then the next day) -
+  // NOT simply the newest one, which sent everyone to the 16th while the 15th
+  // was still the opening day.
+  const perSlug = new Map(); // slug -> [{ mv, date }] (oldest -> newest)
   for (const f of advFeeds || []) {
     if (!f || !f.nat || !f.nat.movies) continue;
-    for (const mv of f.nat.movies)
-      bySlug.set(mv.slug, {
-        mv,
-        mode: "advance",
-        date: f.date,
-        live: false,
-      });
+    for (const mv of f.nat.movies) {
+      if (!perSlug.has(mv.slug)) perSlug.set(mv.slug, []);
+      perSlug.get(mv.slug).push({ mv, date: f.date });
+    }
+  }
+  for (const [slug, list] of perSlug) {
+    const want = upcomingDate(list.map((x) => x.date));
+    const hit = list.find((x) => x.date === want) || list[list.length - 1];
+    bySlug.set(slug, { mv: hit.mv, mode: "advance", date: hit.date, live: false });
   }
   // a film that is actually running wins over its advance entry
   if (daily && daily.movies)

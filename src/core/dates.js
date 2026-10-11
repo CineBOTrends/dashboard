@@ -1,5 +1,3 @@
-
-
 /* ---- upcoming releases: opening day only ---------------------------- */
 // A film whose release date is still in the future has no "days" to page
 // through — only its opening day matters. So the date chips are hidden and
@@ -58,9 +56,7 @@ export const ymdShort = (ymd) =>
     month: "short",
   });
 export const ymdDow = (ymd) =>
-  ymdToDate(ymd)
-    .toLocaleDateString("en-IN", { weekday: "short" })
-    .toUpperCase();
+  ymdToDate(ymd).toLocaleDateString("en-IN", { weekday: "short" }).toUpperCase();
 export const ymdLong = (ymd) =>
   ymdToDate(ymd).toLocaleDateString("en-IN", {
     day: "numeric",
@@ -89,7 +85,26 @@ export function dayNumber(ymd, dates, movie) {
 
 // "Premiere" for pre-release dates, otherwise "Day N" (release day = Day 1).
 export function dayLabel(ymd, dates, movie) {
-  return isPremiereDate(movie, ymd)
-    ? "Premiere"
-    : "Day " + dayNumber(ymd, dates, movie);
+  return isPremiereDate(movie, ymd) ? "Premiere" : "Day " + dayNumber(ymd, dates, movie);
+}
+
+// Today's date in IST as YYYYMMDD (the tracker's day boundary is IST, whatever
+// timezone the visitor is in).
+export const istTodayYMD = () =>
+  new Date(Date.now() + 330 * 60000).toISOString().slice(0, 10).replace(/-/g, "");
+
+// Which tracked date to open by default for ADVANCE data: the earliest date
+// AFTER today. Until opening day arrives that is the opening day itself; on
+// opening day it moves to the next tracked day (advance for tomorrow), on the
+// day after to the one after that, and so on:
+//   today 11 Oct -> 15 Oct   today 15 Oct -> 16 Oct   today 16 Oct -> 17 Oct
+// When no later date is tracked (or all are past) it falls back to the newest.
+export function upcomingDate(dates, today) {
+  const list = (dates || [])
+    .filter((x) => /^\d{8}$/.test(String(x)))
+    .map(String)
+    .sort();
+  if (!list.length) return null;
+  const t = today || istTodayYMD();
+  return list.find((x) => x > t) || list[list.length - 1];
 }
