@@ -1,7 +1,7 @@
 import { h } from "../../core/dom.js";
 import { DL } from "../../core/exportState.js";
 import { fmtDate, inr, num } from "../../core/format.js";
-import { summaryChip, watermarkFooter } from "./assets.js";
+import { watermarkFooter } from "./assets.js";
 
 export function buildExportCard(section, sectionTitle, A) {
   const m = DL.meta || {};
@@ -12,11 +12,25 @@ export function buildExportCard(section, sectionTitle, A) {
   clone.querySelectorAll(".block-hd").forEach((b) => b.remove());
   clone.classList.remove("closed");
 
-  const metaBits = [
-    (m.langs || []).join(" · "),
-    m.runtime || "",
-    (m.genres || []).slice(0, 2).join(", "),
-  ].filter(Boolean);
+  const sc = m.scope || null; // state / city drill-down
+  const pills = [...(m.langs || []), m.runtime || "", ...(m.genres || []).slice(0, 2)]
+    .filter((x) => x && !/^unknown$/i.test(String(x).trim()))
+    .map((t) => ({ t }));
+  if (sc) pills.unshift({ t: sc.name, accent: true });
+
+  // stat tiles: explicit stats (global, in $) or the rupee KPI of a movie
+  const stats =
+    sc && sc.stats
+      ? sc.stats
+      : m.stats && m.stats.length
+        ? m.stats
+        : k.gross != null
+          ? [
+              { label: "Gross", value: inr(k.gross), accent: true },
+              { label: "Tickets", value: num(k.sold) },
+              { label: "Shows", value: num(k.shows) },
+            ]
+          : [];
 
   const hero = h(
     "div",
@@ -37,23 +51,38 @@ export function buildExportCard(section, sectionTitle, A) {
         h("div", { class: "exp-mode" }, m.ctxLabel || ""),
       ),
       h("h1", { class: "exp-movie" }, m.title || ""),
-      metaBits.length ? h("div", { class: "exp-submeta" }, metaBits.join("  ·  ")) : null,
-      h("h2", { class: "exp-headline" }, (m.ctxLabel || "") + " breakdown"),
-      h("div", { class: "exp-section" }, sectionTitle),
-      k.gross != null
+      pills.length
         ? h(
             "div",
-            { class: "exp-chips" },
-            summaryChip("money-bill-wave", inr(k.gross)),
-            summaryChip("ticket", num(k.sold)),
-            summaryChip("clapperboard-play", num(k.shows)),
+            { class: "exp-pills" },
+            ...pills.map((p) =>
+              h("span", { class: "exp-pill" + (p.accent ? " accent" : "") }, p.t),
+            ),
+          )
+        : null,
+      h("h2", { class: "exp-headline" }, (m.ctxLabel || "") + " breakdown"),
+      h("div", { class: "exp-section" }, sc ? sc.name + "  ›  " + sectionTitle : sectionTitle),
+      sc && stats.length ? h("div", { class: "exp-stats-cap" }, sc.name + " · total") : null,
+      stats.length
+        ? h(
+            "div",
+            { class: "exp-stats" },
+            ...stats.map((s) =>
+              h(
+                "div",
+                { class: "exp-stat" + (s.accent ? " accent" : "") },
+                h("span", { class: "exp-stat-l" }, s.label),
+                h("b", { class: "exp-stat-v" }, s.value),
+              ),
+            ),
           )
         : null,
       h(
         "div",
         { class: "exp-meta" },
-        // "Last Updated" intentionally omitted from the exported image
-        [m.date ? fmtDate(m.date) : null].filter(Boolean).join("  •  "),
+        [m.date ? fmtDate(m.date) : null, m.updated ? "Last Updated: " + m.updated : null]
+          .filter(Boolean)
+          .join("  •  "),
       ),
     ),
     A.poster
@@ -61,8 +90,8 @@ export function buildExportCard(section, sectionTitle, A) {
           "div",
           { class: "exp-hero-r" },
           h("img", { src: A.poster, alt: "" }),
-          // the perforation + notches are painted INTO the poster image
-          // (bakeStub in exportImage.js): no extra elements to mis-position
+          // perforation, notches and the poster card are painted INTO this
+          // image (bakeStub in exportImage.js): no extra elements to mis-position
         )
       : null,
   );

@@ -14,7 +14,7 @@ import {
 import { frag, h, icon } from "../../core/dom.js";
 import { DL } from "../../core/exportState.js";
 import { ctx, latest, modeLabel } from "../../core/feeds.js";
-import { fmtUpdated } from "../../core/format.js";
+import { fmtUpdated, inr, num, pct } from "../../core/format.js";
 import { enc, go } from "../../core/router.js";
 import { Data } from "../../core/store.js";
 import { renderTrackTab } from "./breakdown.js";
@@ -274,6 +274,26 @@ function renderMovie(s) {
     updated: movie && movie.last_updated ? fmtUpdated(movie.last_updated) : "",
     kpi: movie && movie.kpi ? movie.kpi : null,
   };
+  // Drill-down (state / city): the export card must describe THAT area (name +
+  // its own totals), not the whole movie.
+  if (stateName && movie && movie.states) {
+    const st = movie.states.find((x) => x.state === stateName);
+    const ct = st && cityName ? (st.cityList || []).find((x) => x.city === cityName) : null;
+    const a = ct || st;
+    if (a) {
+      DL.meta.scope = {
+        name: ct ? ct.city + ", " + st.state : st.state,
+        stats: [
+          { label: "Gross", value: inr(a.gross), accent: true },
+          { label: "Tickets", value: num(a.sold) },
+          { label: "Shows", value: num(a.shows) },
+          { label: "Theatres", value: num(a.theatres) },
+          { label: "Occupancy", value: pct(a.occupancy) },
+        ],
+      };
+      DL.meta.kpi = null;
+    }
+  }
   DL.ctx =
     slug +
     "_" +
@@ -286,6 +306,8 @@ function renderMovie(s) {
           : isPremiereDate(movie, date)
             ? "premiere"
             : "day_" + dayNumber(date, dates, movie));
+  // file name carries the area too: cbt_<movie>_<day>_telangana_top-cities.png
+  if (stateName) DL.ctx += "_" + stateName + (cityName ? "_" + cityName : "");
 
   const prevBody = document.getElementById("tabbody");
   const body = h("div", { class: "tab-body", id: "tabbody" });

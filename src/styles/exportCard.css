@@ -259,8 +259,8 @@ table.bo.cities td:nth-child(2) { width: 32%; }   /* give city the room back */
 .exp-hero .exp-meta { padding-top: 18px; }
 
 /* ---------- hero v3: compact, BookMyShow-style (poster left, info, backdrop right) ---------- */
-.exp-hero-l { padding: 12px 22px 10px 3px; }
-.exp-hero:not(:has(.exp-hero-r)) .exp-hero-l { padding-left: 12px; }
+.exp-hero-l { padding: 22px 32px 20px 6px; }
+.exp-hero:not(:has(.exp-hero-r)) .exp-hero-l { padding-left: 32px; }
 .exp-pills { margin-top: 10px; }
 .exp-headline { font-size: 24px; padding-top: 14px; }
 .exp-section { margin-top: 4px; }
@@ -277,17 +277,6 @@ table.bo.cities td:nth-child(2) { width: 32%; }   /* give city the room back */
 .exp-headline { margin: 0; padding-top: 18px; }
 .exp-hero .exp-meta { margin-top: 0; padding-top: 14px; }
 
-/* hero v5: bigger poster (270x360, set in bakeStub) nearly fills the 300px
-   stub, so the poster-to-text gap is now only ~18px with no negative margin. */
-
-/* "Language wise" / section label: larger and easier to read */
-.exp-section {
-  margin-top: 8px;
-  font-size: 16px;
-  letter-spacing: .16em;
-  color: var(--muted);
-}
-
 /* ---------- export body v2: Performance Breakdown -> table ----------
    The live page's spacing (42px top margin, 20px bottom margins that line the
    title up with a download button, a clamp() title size tied to the phone's
@@ -303,3 +292,14 @@ table.bo.cities td:nth-child(2) { width: 32%; }   /* give city the room back */
 .exp-body .perf-panel-body { margin-bottom: 0; }
 .exp-body table.bo th,
 .exp-body table.bo td { vertical-align: middle; }
+
+/* drill-down (state / city) header */
+.exp-pill.accent {
+  color: var(--brand); font-weight: 700;
+  background: rgba(255,176,0,.12); border-color: rgba(255,176,0,.5);
+}
+.exp-stats-cap {
+  margin-top: 14px; font-family: var(--mono); font-size: 10px; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--brand);
+}
+.exp-stats-cap + .exp-stats { margin-top: 8px; }
