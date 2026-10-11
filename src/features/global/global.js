@@ -1,11 +1,11 @@
-import { posterUrl } from "../../core/poster.js";
+import { posterSlugsOf, posterUrl, resolvePosterSlug } from "../../core/poster.js";
 import "../../styles/global.css";
 import { mount, page } from "../../components/chrome.js";
 import { bdMetric } from "../../components/dateChips.js";
 import { dlBtn } from "../../components/dlBtn.js";
 import { posterEl } from "../../components/movieCard.js";
 import { fetchError, loading, stateMsg } from "../../components/states.js";
-import { ymdDow, ymdLong, ymdShort } from "../../core/dates.js";
+import { upcomingDate, ymdDow, ymdLong, ymdShort } from "../../core/dates.js";
 import { h, icon } from "../../core/dom.js";
 import { DL } from "../../core/exportState.js";
 import { pct } from "../../core/format.js";
@@ -35,21 +35,21 @@ export const global = async function (p) {
           ),
         ),
       );
-    const date = m.dates.includes(reqDate) ? reqDate : m.latest;
+    const date = m.dates.includes(reqDate) ? reqDate : upcomingDate(m.dates);
     const sum = normalizeGlobalSummary(await Data.globalSummary(date, slug));
     if (!sum) throw new Error("Global summary for " + slug + " is empty");
-    renderGlobal(m, date, sum);
+    await renderGlobal(m, date, sum);
   } catch (e) {
     console.error(e);
     mount(fetchError(e));
   }
 };
 
-function renderGlobal(m, date, sum) {
+async function renderGlobal(m, date, sum) {
   const title = m.title;
   // poster files may be named differently from the overseas slug (ranabaali--2026 -> ranabaali);
   // publish_to_dashboard.py puts the matching name in the manifest as posterSlug
-  const pslug = m.posterSlug || m.slug;
+  const pslug = await resolvePosterSlug(posterSlugsOf(m));
   const t = sum.total;
   const cur = m.entries[date] || {};
   const trackedIso = sum.trackedAt || cur.trackedAt || "";
@@ -69,6 +69,14 @@ function renderGlobal(m, date, sum) {
     poster: { thumb: posterUrl(pslug, "thumb"), bg: posterUrl(pslug, "bg") },
     updated: tracked,
     kpi: null,
+    // export hero stat tiles (dollars, so not the rupee kpi chips)
+    stats: [
+      { label: "Gross", value: usd(t.gross), accent: true },
+      { label: "Tickets", value: usn(t.sold) },
+      { label: "Shows", value: usn(t.shows) },
+      { label: "Locations", value: usn(t.theatres) },
+      { label: "Occupancy", value: pct(t.occupancy) },
+    ],
   };
 
   const crumb = h(

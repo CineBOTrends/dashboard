@@ -1,4 +1,5 @@
 import { posterEl } from "../../components/movieCard.js";
+import { posterSlugsOf } from "../../core/poster.js";
 import { upcomingDate, ymdShort } from "../../core/dates.js";
 import { h, icon } from "../../core/dom.js";
 
@@ -35,6 +36,9 @@ function normalizeGlobalManifest(raw) {
       const latest = upcomingDate(dates);
       return {
         slug: m.slug,
+        // poster files can be named differently from the overseas slug; this
+        // field used to be dropped here, so the card never found its poster
+        posterSlug: m.posterSlug || "",
         title: m.title || m.slug,
         dates,
         latest,
@@ -76,7 +80,7 @@ export function fmtTracked(iso) {
 
 export function globalCard(m, currency) {
   const c = m.cur;
-  const poster = posterEl(m.title, m.slug);
+  const poster = posterEl(m.title, posterSlugsOf(m));
   poster.append(
     h(
       "div",

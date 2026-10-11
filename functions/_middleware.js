@@ -138,7 +138,13 @@ async function getMeta(url, env) {
     return {
       title: `${m.title} — USA Box Office | CineBOTrends`,
       desc: `Global tracking for ${m.title}${gross}. State, theatre, format, language and chain-wise breakdown.`,
-      image: await posterFor(env, url, slug),
+      // poster files may be named differently from the overseas slug
+      // (ranabaali--2026 -> ranabaali): manifest posterSlug, else strip "--<suffix>"
+      image: await posterFor(
+        env,
+        url,
+        m.posterSlug || String(slug).replace(/--[^-]+$|-+\d{4}$/, ""),
+      ),
     };
   }
 

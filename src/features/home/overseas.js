@@ -1,4 +1,5 @@
 import { posterEl } from "../../components/movieCard.js";
+import { posterSlugsOf } from "../../core/poster.js";
 import { h, icon } from "../../core/dom.js";
 import { grp } from "../../core/format.js";
 import { Data } from "../../core/store.js";
@@ -62,15 +63,12 @@ function normalizeOverseas(raw) {
     .map((m) => {
       const title = _pick(m, ["title", "name", "movie"], "");
       if (!title) return null;
-      const terrRaw =
-        _pick(m, ["territories", "countries", "markets"], []) || [];
+      const terrRaw = _pick(m, ["territories", "countries", "markets"], []) || [];
       const territories = (Array.isArray(terrRaw) ? terrRaw : [])
         .map((t) => ({
           name: _pick(t, ["territory", "country", "market", "name"], "—"),
           gross: _num(_pick(t, ["gross", "grossUsd", "total", "amount"], 0)),
-          admissions: _num(
-            _pick(t, ["admissions", "admits", "tickets", "sold"], 0),
-          ),
+          admissions: _num(_pick(t, ["admissions", "admits", "tickets", "sold"], 0)),
           shows: _num(_pick(t, ["shows", "screens", "showCount"], 0)),
         }))
         .sort((a, b) => b.gross - a.gross);
@@ -128,17 +126,12 @@ export function money(v, cur) {
 // and routing to /movie/<slug> would show INDIA figures under an Overseas
 // card. The territory split is shown inline instead.
 function overseasCard(m, currency) {
-  const poster = posterEl(m.title, m.slug);
+  const poster = posterEl(m.title, posterSlugsOf(m));
   poster.append(
     h(
       "div",
       { class: "badges" },
-      h(
-        "span",
-        { class: "badge overseastrack" },
-        h("span", { class: "live-dot" }),
-        "Overseas",
-      ),
+      h("span", { class: "badge overseastrack" }, h("span", { class: "live-dot" }), "Overseas"),
       m.territories.length
         ? h(
             "span",
@@ -171,12 +164,8 @@ function overseasCard(m, currency) {
         ? h(
             "div",
             { class: "cardmeta" },
-            m.admissions
-              ? h("span", { class: "g" }, grp(m.admissions) + " admissions")
-              : null,
-            m.shows
-              ? h("span", { class: "rt" }, grp(m.shows) + " shows")
-              : null,
+            m.admissions ? h("span", { class: "g" }, grp(m.admissions) + " admissions") : null,
+            m.shows ? h("span", { class: "rt" }, grp(m.shows) + " shows") : null,
           )
         : null,
       h(
@@ -250,9 +239,7 @@ export function overseasSection(ov) {
             h("span", { class: "beta-tag" }, "Beta"),
           ),
         ),
-        ov.updated
-          ? h("div", { class: "meta" }, "Updated " + ov.updated)
-          : null,
+        ov.updated ? h("div", { class: "meta" }, "Updated " + ov.updated) : null,
       ),
       h(
         "div",

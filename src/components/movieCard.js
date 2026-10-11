@@ -1,11 +1,14 @@
-
 import { h, icon } from "../core/dom.js";
 import { inr } from "../core/format.js";
 import { posterUrl } from "../core/poster.js";
 import { enc, go } from "../core/router.js";
 
+// `slug` may be a single slug or a list of candidates (tried in order until
+// one image loads - see posterSlugsOf()).
 export function posterEl(title, slug) {
-  const initials = title
+  const initials = String(title || "")
+    .replace(/\([^)]*\)/g, " ") // "Ranabaali (2026)" -> "R", not "R("
+    .trim()
     .split(/\s+/)
     .slice(0, 2)
     .map((w) => w[0] || "")
@@ -13,15 +16,21 @@ export function posterEl(title, slug) {
     .toUpperCase();
   const el = h("div", { class: "poster" }, h("div", { class: "reel" }));
   const initial = h("div", { class: "initial" }, initials || "★");
-  const url = posterUrl(slug, "thumb");
-  if (url) {
+  const cands = (Array.isArray(slug) ? slug : [slug]).filter(Boolean);
+  const urlAt = (i) => posterUrl(cands[i], "thumb");
+  if (cands.length) {
+    let i = 0;
     const img = h("img", {
       class: "poster-img",
       loading: "lazy",
       alt: title,
-      src: url,
+      src: urlAt(0),
     });
     img.addEventListener("error", () => {
+      if (++i < cands.length) {
+        img.src = urlAt(i);
+        return;
+      }
       img.remove();
       el.classList.remove("hasimg");
       el.append(initial);
@@ -78,8 +87,7 @@ export function movieCard(mv, mode, date, opts) {
       h(
         "div",
         { class: "langs" },
-        mv.languages.join(" · ") +
-          (mv.formats.length ? "  •  " + mv.formats.join("/") : ""),
+        mv.languages.join(" · ") + (mv.formats.length ? "  •  " + mv.formats.join("/") : ""),
       ),
       (mv.genres && mv.genres.length) || mv.certification || mv.runTime
         ? h(
@@ -88,9 +96,7 @@ export function movieCard(mv, mode, date, opts) {
             mv.genres && mv.genres.length
               ? h("span", { class: "g" }, mv.genres.slice(0, 2).join(", "))
               : null,
-            mv.certification
-              ? h("span", { class: "cert" }, mv.certification)
-              : null,
+            mv.certification ? h("span", { class: "cert" }, mv.certification) : null,
             mv.runTime ? h("span", { class: "rt" }, mv.runTime) : null,
           )
         : null,
@@ -98,17 +104,11 @@ export function movieCard(mv, mode, date, opts) {
         ? h(
             "div",
             { class: "card-gross" },
-            h(
-              "span",
-              { class: "cg-label" },
-              mode === "daily" ? "Today's Gross" : "Gross",
-            ),
+            h("span", { class: "cg-label" }, mode === "daily" ? "Today's Gross" : "Gross"),
             h("span", { class: "cg-val" }, inr(mv.gross || 0)),
           )
         : null,
-      mv.eventCode
-        ? h("div", { class: "evcode" }, icon("ticket"), mv.eventCode)
-        : null,
+      mv.eventCode ? h("div", { class: "evcode" }, icon("ticket"), mv.eventCode) : null,
     ),
   );
 }
