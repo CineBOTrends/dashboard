@@ -79,7 +79,9 @@ function performanceBreakdown(s, movie) {
     }),
     { gross: 0, sold: 0, shows: 0, theatres: 0, seats: 0 },
   );
-  const stateOccupancy = stateTotals.seats ? (stateTotals.sold / stateTotals.seats) * 100 : 0;
+  const stateOccupancy = stateTotals.seats
+    ? (stateTotals.sold / stateTotals.seats) * 100
+    : 0;
   const stateGrid = h(
     "div",
     { class: "table-wrap statewise-table" },
@@ -92,7 +94,14 @@ function performanceBreakdown(s, movie) {
         h(
           "tr",
           null,
-          ...["State", "Gross", "Tickets", "Shows", "Theatres", "Occupancy"].map((label, index) =>
+          ...[
+            "State",
+            "Gross",
+            "Tickets",
+            "Shows",
+            "Theatres",
+            "Occupancy",
+          ].map((label, index) =>
             h("th", { class: index ? "num" : null }, label),
           ),
         ),
@@ -106,10 +115,15 @@ function performanceBreakdown(s, movie) {
             {
               class: "clickable",
               tabindex: "0",
-              onclick: () => go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`),
+              onclick: () =>
+                go(
+                  `/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`,
+                ),
               onkeydown: (e) => {
                 if (e.key === "Enter")
-                  go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`);
+                  go(
+                    `/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`,
+                  );
               },
             },
             h("td", { class: "city-nm" }, st.state),
@@ -147,7 +161,11 @@ function performanceBreakdown(s, movie) {
   const contentFor = (key) => {
     if (key === "allindia") {
       return movie.territory
-        ? h("div", { class: "perf-panel-body allindia-panel" }, allIndiaContent(movie.territory))
+        ? h(
+            "div",
+            { class: "perf-panel-body allindia-panel" },
+            allIndiaContent(movie.territory),
+          )
         : h(
             "div",
             { class: "perf-panel-body empty" },
@@ -161,13 +179,25 @@ function performanceBreakdown(s, movie) {
     if (key === "language") {
       return langGrid
         ? h("div", { class: "perf-panel-body" }, langGrid)
-        : h("div", { class: "perf-panel-body empty" }, "No language-wise breakdown available.");
+        : h(
+            "div",
+            { class: "perf-panel-body empty" },
+            "No language-wise breakdown available.",
+          );
     }
     if (key === "format") {
-      return h("div", { class: "perf-panel-body" }, formatGrid(movie.formatSummary));
+      return h(
+        "div",
+        { class: "perf-panel-body" },
+        formatGrid(movie.formatSummary),
+      );
     }
     if (key === "city") {
-      return h("div", { class: "perf-panel-body" }, citiesTable(cities, slug, tab, date));
+      return h(
+        "div",
+        { class: "perf-panel-body" },
+        citiesTable(cities, slug, tab, date),
+      );
     }
     return h("div", { class: "perf-panel-body" }, stateGrid);
   };
@@ -180,8 +210,12 @@ function performanceBreakdown(s, movie) {
         type: "button",
         onclick: () => {
           activePerfTab = t;
-          tabButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.key === t.id));
+          tabButtons.forEach((btn) =>
+            btn.classList.toggle("active", btn.dataset.key === t.id),
+          );
+          // new table fades in and its rows cascade in one after another
           panel.replaceChildren(contentFor(t.id));
+          animateIn();
         },
         "data-key": t.id,
       },
@@ -191,6 +225,22 @@ function performanceBreakdown(s, movie) {
   );
 
   const panel = h("div", { class: "perf-panel-body" }, contentFor("city"));
+
+  // Tab switch: the new table fades in and its rows cascade in one after the
+  // other. The class is removed afterwards so nothing animated is left behind
+  // (the PNG export must never catch rows mid-animation).
+  let animTimer = 0;
+  function animateIn() {
+    panel.classList.remove("perf-enter");
+    void panel.offsetWidth; // restart the animation
+    panel
+      .querySelectorAll("tbody tr")
+      .forEach((tr, i) => tr.style.setProperty("--i", Math.min(i, 18)));
+    panel.classList.add("perf-enter");
+    clearTimeout(animTimer);
+    animTimer = setTimeout(() => panel.classList.remove("perf-enter"), 1500);
+  }
+  animateIn();
 
   return h(
     "section",

@@ -1,8 +1,10 @@
 import { X_URL } from "../core/config.js";
 import { frag, h, icon } from "../core/dom.js";
 import { go } from "../core/router.js";
+import { buildFocusMenu } from "./focusMenu.js";
 
 function header() {
+  const fm = buildFocusMenu();
   const nav = h(
     "nav",
     { class: "nav", id: "nav" },
@@ -16,7 +18,7 @@ function header() {
     h("a", { href: "/reviews", onclick: closeNav }, "Movie Reviews"),
     // About and Contact remain available by direct route but are hidden from the header.
   );
-  return h(
+  const bar = h(
     "header",
     { class: "site-header" },
     h(
@@ -29,13 +31,12 @@ function header() {
         h("span", { class: "name", html: "Cine<b>BOTrends</b>" }),
       ),
       nav,
-      h(
-        "button",
-        { class: "nav-toggle", "aria-label": "Menu", onclick: toggleNav },
-        icon("menu-burger"),
-      ),
+      fm.toggle,
     ),
   );
+  // the overlay is a sibling (not a child) of the blurred header, so its
+  // position:fixed is relative to the screen
+  return frag(bar, fm.overlay);
 }
 function toggleNav() {
   document.getElementById("nav")?.classList.toggle("open");
@@ -173,6 +174,7 @@ function footer() {
 
 export function mount(node, { keepScroll = false } = {}) {
   const y = window.scrollY;
+  document.documentElement.style.overflow = ""; // an open menu locks scroll
   document.getElementById("app").replaceChildren(node);
   window.scrollTo(0, keepScroll ? y : 0);
 }

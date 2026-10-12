@@ -1,0 +1,58 @@
+/* Mobile focus-picker menu (see components/focusMenu.js) */
+.fp-toggle { display: none; margin-left: auto; width: 48px; height: 48px; place-items: center; background: none; border: 0; color: var(--ink); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.fp-toggle .x { display: none; }
+.fp-toggle[aria-expanded="true"] .x { display: block; animation: fpSpin .5s cubic-bezier(.2, .8, .2, 1) both; }
+.fp-toggle[aria-expanded="true"] .burger { display: none; }
+.fp-menu { display: none; }
+
+@media (max-width: 980px) {
+  /* the horizontal nav gives way to the full-screen menu */
+  .nav { display: none !important; }
+  .fp-toggle { display: grid; }
+  .fp-menu {
+    display: flex; flex-direction: column; justify-content: center;
+    position: fixed; inset: 0; z-index: 40;
+    padding: calc(var(--header-h) + 12px) 28px 40px; background: var(--bg);
+    opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s linear .3s;
+  }
+  .fp-menu.is-open { opacity: 1; visibility: visible; transition-delay: 0s; }
+}
+
+.fp-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; touch-action: none; }
+.fp-item { opacity: 0; }
+.fp-menu.is-open .fp-item { animation: fpFadeUp .6s cubic-bezier(.16, 1, .3, 1) forwards; animation-delay: calc(80ms + var(--i) * 60ms); }
+
+.fp-pick {
+  white-space: nowrap; display: inline-flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none;
+  font-family: var(--sans); font-weight: 700; line-height: 1.08; letter-spacing: -.045em;
+  transform-origin: left center; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: font-size .45s cubic-bezier(.16, 1, .3, 1), opacity .45s ease;
+}
+.fp-pick[data-d="0"] { font-size: max(11px, calc(52px * var(--fp-k, 1))); opacity: 1; }
+.fp-pick[data-d="1"] { font-size: max(11px, calc(36px * var(--fp-k, 1))); opacity: .6; }
+.fp-pick[data-d="2"] { font-size: max(11px, calc(28px * var(--fp-k, 1))); opacity: .42; }
+.fp-pick[data-d="3"] { font-size: max(11px, calc(23px * var(--fp-k, 1))); opacity: .32; }
+.fp-pick[data-d="4"] { font-size: max(11px, calc(20px * var(--fp-k, 1))); opacity: .25; }
+.fp-pick[data-d="5"] { font-size: max(11px, calc(18px * var(--fp-k, 1))); opacity: .2; }
+.fp-pick[data-d="6"] { font-size: max(11px, calc(17px * var(--fp-k, 1))); opacity: .17; }
+.fp-pick[data-d="7"] { font-size: max(11px, calc(16px * var(--fp-k, 1))); opacity: .15; }
+.fp-pick:focus-visible { outline: 2px solid var(--brand); outline-offset: 6px; border-radius: 6px; }
+/* the bulge: a quick overshoot on the touched link */
+.fp-pick.bulge { animation: fpBulge .42s cubic-bezier(.34, 1.56, .64, 1); }
+
+/* hidden ruler used by fit() to measure the longest label at full size */
+.fp-probe {
+  position: absolute; visibility: hidden; white-space: nowrap; pointer-events: none;
+  font: 700 52px var(--sans); letter-spacing: -.045em;
+}
+.fp-dot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--brand); color: var(--brand); animation: fpPulse 1.6s infinite; }
+
+@keyframes fpFadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes fpSpin { from { opacity: 0; transform: rotate(-90deg) scale(.6); } to { opacity: 1; transform: none; } }
+@keyframes fpBulge { 0% { transform: scale(.94); } 55% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes fpPulse { 0% { box-shadow: 0 0 0 0 currentColor; } 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  .fp-menu, .fp-pick { transition: none; }
+  .fp-menu.is-open .fp-item { animation: none; opacity: 1; }
+  .fp-pick.bulge, .fp-dot, .fp-toggle .x { animation: none; }
+}
