@@ -54,7 +54,12 @@ export function renderTrackTab(body, s, movie) {
   }
 
   // ---- main tab view: collapsible breakdown strip ----
-  parts.push(breakdownPanel(s, movie));
+  // banner layout: the strip lives in the hero (.mh-kpis); fall back to the
+  // body if the slot isn't there
+  const panel = breakdownPanel(s, movie);
+  const slot = document.querySelector(".movie-hero .mh-kpis");
+  if (slot) slot.replaceChildren(panel);
+  else parts.push(panel);
 
   parts.push(performanceBreakdown(s, movie));
 
@@ -74,9 +79,7 @@ function performanceBreakdown(s, movie) {
     }),
     { gross: 0, sold: 0, shows: 0, theatres: 0, seats: 0 },
   );
-  const stateOccupancy = stateTotals.seats
-    ? (stateTotals.sold / stateTotals.seats) * 100
-    : 0;
+  const stateOccupancy = stateTotals.seats ? (stateTotals.sold / stateTotals.seats) * 100 : 0;
   const stateGrid = h(
     "div",
     { class: "table-wrap statewise-table" },
@@ -89,14 +92,7 @@ function performanceBreakdown(s, movie) {
         h(
           "tr",
           null,
-          ...[
-            "State",
-            "Gross",
-            "Tickets",
-            "Shows",
-            "Theatres",
-            "Occupancy",
-          ].map((label, index) =>
+          ...["State", "Gross", "Tickets", "Shows", "Theatres", "Occupancy"].map((label, index) =>
             h("th", { class: index ? "num" : null }, label),
           ),
         ),
@@ -110,15 +106,10 @@ function performanceBreakdown(s, movie) {
             {
               class: "clickable",
               tabindex: "0",
-              onclick: () =>
-                go(
-                  `/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`,
-                ),
+              onclick: () => go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`),
               onkeydown: (e) => {
                 if (e.key === "Enter")
-                  go(
-                    `/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`,
-                  );
+                  go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`);
               },
             },
             h("td", { class: "city-nm" }, st.state),
@@ -156,11 +147,7 @@ function performanceBreakdown(s, movie) {
   const contentFor = (key) => {
     if (key === "allindia") {
       return movie.territory
-        ? h(
-            "div",
-            { class: "perf-panel-body allindia-panel" },
-            allIndiaContent(movie.territory),
-          )
+        ? h("div", { class: "perf-panel-body allindia-panel" }, allIndiaContent(movie.territory))
         : h(
             "div",
             { class: "perf-panel-body empty" },
@@ -174,25 +161,13 @@ function performanceBreakdown(s, movie) {
     if (key === "language") {
       return langGrid
         ? h("div", { class: "perf-panel-body" }, langGrid)
-        : h(
-            "div",
-            { class: "perf-panel-body empty" },
-            "No language-wise breakdown available.",
-          );
+        : h("div", { class: "perf-panel-body empty" }, "No language-wise breakdown available.");
     }
     if (key === "format") {
-      return h(
-        "div",
-        { class: "perf-panel-body" },
-        formatGrid(movie.formatSummary),
-      );
+      return h("div", { class: "perf-panel-body" }, formatGrid(movie.formatSummary));
     }
     if (key === "city") {
-      return h(
-        "div",
-        { class: "perf-panel-body" },
-        citiesTable(cities, slug, tab, date),
-      );
+      return h("div", { class: "perf-panel-body" }, citiesTable(cities, slug, tab, date));
     }
     return h("div", { class: "perf-panel-body" }, stateGrid);
   };
@@ -205,9 +180,7 @@ function performanceBreakdown(s, movie) {
         type: "button",
         onclick: () => {
           activePerfTab = t;
-          tabButtons.forEach((btn) =>
-            btn.classList.toggle("active", btn.dataset.key === t.id),
-          );
+          tabButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.key === t.id));
           panel.replaceChildren(contentFor(t.id));
         },
         "data-key": t.id,

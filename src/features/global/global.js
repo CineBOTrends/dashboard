@@ -74,7 +74,8 @@ async function renderGlobal(m, date, sum) {
       { label: "Gross", value: usd(t.gross), accent: true },
       { label: "Tickets", value: usn(t.sold) },
       { label: "Shows", value: usn(t.shows) },
-      { label: "Locations", value: usn(t.theatres) },
+      { label: "Theatres", value: usn(t.theatres) },
+      { label: "Cities", value: usn(t.cities) },
       { label: "Occupancy", value: pct(t.occupancy) },
     ],
   };
@@ -114,6 +115,8 @@ async function renderGlobal(m, date, sum) {
         ...(cur.formats || []).map((f) => h("span", { class: "chip plain" }, f)),
       ),
     ),
+    // banner layout (same as the movie page): the summary strip lives in the hero
+    h("div", { class: "mh-kpis" }),
     tracked ? h("div", { class: "mh-updated" }, "Updated " + tracked) : null,
   );
 
@@ -166,6 +169,8 @@ async function renderGlobal(m, date, sum) {
     ),
   );
 
+  hero.querySelector(".mh-kpis").append(summaryPanel);
+
   mount(
     page(
       h(
@@ -174,7 +179,6 @@ async function renderGlobal(m, date, sum) {
         h("div", { class: "back-bar" }, crumb),
         hero,
         daybar,
-        summaryPanel,
         globalBreakdown(sum, tracked, {
           // manifest.json carries the exact (cache-busted) URL; the derived
           // path covers manifests published before report cards existed

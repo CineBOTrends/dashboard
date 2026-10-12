@@ -24,12 +24,12 @@
 /* button that sits on the coloured panel header */
 .bd-panel { position: relative; }
 .dl-btn.on-head {
-  position: absolute; top: 11px; right: 54px; z-index: 2;
-  background: rgba(23,19,11,.14); color: var(--bd-ink);
-  border-color: rgba(23,19,11,.28);
+  position: absolute; top: 12px; right: 54px; z-index: 2;
+  background: rgba(23,19,11,.55); color: #FFEFD0;
+  border-color: rgba(255,240,214,.28);
 }
 .dl-btn.on-head:hover:not(:disabled) {
-  background: var(--bd-ink); color: var(--bd-accent); border-color: var(--bd-ink);
+  background: var(--brand-soft); color: var(--brand); border-color: var(--brand-line);
 }
 .bd-panel.hist .dl-btn.on-head { right: 14px; }
 

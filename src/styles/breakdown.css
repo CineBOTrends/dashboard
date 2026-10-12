@@ -215,6 +215,23 @@ tr.terr-total-row { background: var(--brand-soft); }
 tr.terr-total-row td:first-child { border-left: 3px solid var(--brand); }
 tr.terr-total-row .terr-area { padding-left: 13px; }
 
+/* ---- clean, neutral report: no gold figures, no tinted bands, no accent bars ----
+   Same look as a plain territory table: white numbers, grey sub-rows, and a
+   subtle bold band only for the subtotal / total lines. */
+table.bo.allindia .num.gold { color: var(--ink); font-weight: 600; }
+table.bo.allindia tr.terr-sub-row .num.gold { color: var(--ink-2); font-weight: 400; }
+table.bo.allindia tr.clickable:hover { background: rgba(255,240,214,.04); }
+table.bo.allindia tbody tr.terr-total-row {
+  background: rgba(255,240,214,.06);
+  border-top: 1px solid var(--line-2);
+}
+table.bo.allindia tr.terr-total-row td { color: var(--ink); font-weight: 700; }
+table.bo.allindia tr.terr-total-row .num.gold { color: var(--ink); }
+table.bo.allindia tr.terr-total-row td:first-child { border-left: 0; }
+table.bo.allindia tr.terr-total-row .terr-area { padding-left: 0; }
+.allindia-kpis .kpi-card .l i { color: var(--muted); }
+.allindia-kpis .kpi-card .n.gold { color: var(--ink); }
+
 @media (max-width: 760px) {
   /* Only 4 lean columns — narrow enough to fit inside the card at full
      width instead of forcing a side-scroll. */
@@ -239,3 +256,11 @@ tr.terr-total-row .terr-area { padding-left: 13px; }
   table.bo.allindia thead th,
   table.bo.allindia tbody td { padding: 8px 4px; font-size: 11px; }
 }
+
+/* bottom grand total: the same neutral band, a touch stronger, closing the table */
+table.bo.allindia tbody tr.terr-grand-row {
+  background: rgba(255,240,214,.09);
+  border-top: 2px solid var(--line-2);
+}
+table.bo.allindia tr.terr-grand-row td { font-size: 1.02em; }
+.allindia-note { border-top: 0; padding-top: 14px; }

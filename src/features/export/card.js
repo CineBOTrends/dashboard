@@ -1,6 +1,6 @@
 import { h } from "../../core/dom.js";
 import { DL } from "../../core/exportState.js";
-import { fmtDate, inr, num } from "../../core/format.js";
+import { fmtDate, inr, num, pct } from "../../core/format.js";
 import { watermarkFooter } from "./assets.js";
 
 export function buildExportCard(section, sectionTitle, A) {
@@ -29,8 +29,23 @@ export function buildExportCard(section, sectionTitle, A) {
               { label: "Gross", value: inr(k.gross), accent: true },
               { label: "Tickets", value: num(k.sold) },
               { label: "Shows", value: num(k.shows) },
+              // the full day strip, so the summary download needs no second copy
+              ...(k.theatres != null
+                ? [
+                    { label: "Theatres", value: num(k.theatres) },
+                    { label: "Cities", value: num(k.cities) },
+                    { label: "Occupancy", value: pct(k.occupancy) },
+                    { label: "Fast-filling", value: num(k.fastfilling) },
+                    { label: "Housefull", value: num(k.housefull), accent: true },
+                  ]
+                : []),
             ]
           : [];
+
+  // Summary downloads (the Advance / Global / Day strip): the header already
+  // carries every one of those numbers, so don't repeat them underneath.
+  const summaryOnly =
+    clone.classList.contains("bd-panel") && !clone.classList.contains("hist") && stats.length > 0;
 
   const hero = h(
     "div",
@@ -66,7 +81,7 @@ export function buildExportCard(section, sectionTitle, A) {
       stats.length
         ? h(
             "div",
-            { class: "exp-stats" },
+            { class: "exp-stats" + (stats.length > 6 ? " many" : "") },
             ...stats.map((s) =>
               h(
                 "div",
@@ -108,7 +123,12 @@ export function buildExportCard(section, sectionTitle, A) {
       "div",
       { class: "exp-card" },
       hero,
-      h("div", { class: "exp-inner" }, h("div", { class: "exp-body" }, clone), watermarkFooter()),
+      h(
+        "div",
+        { class: "exp-inner" },
+        summaryOnly ? null : h("div", { class: "exp-body" }, clone),
+        watermarkFooter(),
+      ),
     ),
   );
 }

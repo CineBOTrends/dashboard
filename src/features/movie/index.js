@@ -230,6 +230,8 @@ function renderMovie(s) {
         mi("Formats", fmts.join(", ") || "—"),
       ),
     ),
+    // day KPI strip is placed here by renderTrackTab (banner layout)
+    h("div", { class: "mh-kpis" }),
     movie && movie.last_updated
       ? h("div", { class: "mh-updated" }, "Updated " + fmtUpdated(movie.last_updated))
       : null,

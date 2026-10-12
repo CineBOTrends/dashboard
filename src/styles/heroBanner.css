@@ -1,0 +1,88 @@
+/* ============================================================
+   Movie page hero v2 - "cinematic banner"
+   Clear backdrop, poster + facts on the left, and the day's KPI strip
+   (Gross / Tickets / Shows ...) INSIDE the hero so the numbers are above
+   the fold. The strip is the same .bd-panel the page always had (so its
+   Download button and PNG export keep working); it is just placed in
+   .mh-kpis and restyled here. Everything is scoped to .movie-hero, so the
+   exported PNG (which clones the panel outside the hero) is untouched.
+   ============================================================ */
+.movie-hero.has-bg {
+  grid-template-columns: 180px 1fr; gap: 6px 28px;
+  padding: 26px 26px 24px; min-height: 0;
+  border: 1px solid var(--line-2);
+}
+/* backdrop: sharp and visible, fading to the dark on the left and bottom */
+.movie-hero .mh-bg {
+  filter: none; transform: none; opacity: 1;
+  background-position: right center;
+}
+.movie-hero.has-bg::after {
+  background:
+    linear-gradient(180deg, transparent 55%, var(--bg) 100%),
+    linear-gradient(90deg, var(--bg) 0%, rgba(14,12,9,.93) 32%, rgba(14,12,9,.58) 62%, rgba(14,12,9,.12) 100%);
+}
+.movie-hero.has-bg .poster {
+  grid-row: 1 / span 2; align-self: start;
+  border-color: var(--brand-line);
+  box-shadow: 0 18px 44px -14px rgba(0,0,0,.85), 0 0 0 1px rgba(255,176,0,.18);
+}
+.movie-hero .mh-info { grid-column: 2; grid-row: 1; min-width: 0; }
+.movie-hero .mh-info h1 { font-size: clamp(30px, 4.4vw, 46px); margin: 2px 0 10px; }
+.movie-hero .chips { margin-bottom: 10px; }
+/* facts: one compact wrapping row instead of a wide, mostly empty grid */
+.movie-hero .meta-grid {
+  display: flex; flex-wrap: wrap; gap: 6px 30px; margin-top: 4px;
+}
+.movie-hero .meta-grid .mi { min-width: 0; }
+
+/* KPI strip slot */
+.movie-hero .mh-kpis { grid-column: 2; grid-row: 2; min-width: 0; margin-top: 8px; }
+.movie-hero .mh-kpis:empty { display: none; }
+.movie-hero:has(.mh-kpis .bd-panel) .mh-updated { display: none; }
+
+.movie-hero .bd-panel {
+  position: relative; background: none; border: 0; border-radius: 0; overflow: visible;
+}
+/* the old header becomes a small caption row; Download sits at its right */
+.movie-hero .bd-head {
+  background: none; box-shadow: none; border: 0; cursor: default; pointer-events: none;
+  /* one caption row: title on the left, Download pinned to the same row on the right */
+  min-height: 38px; padding: 0 48px 6px 0; gap: 8px; color: var(--brand);
+  font-size: 11px; letter-spacing: .16em; align-items: center;
+}
+.movie-hero .bd-head > i:first-child { font-size: 13px; color: var(--brand); }
+.movie-hero .bd-head .bd-chev { display: none; }
+/* icon-only, rounded-square Download button (no label) pinned to the caption row */
+.movie-hero .dl-btn.on-head {
+  top: 0; right: 0; width: 34px; height: 34px; padding: 0; gap: 0;
+  justify-content: center; border-radius: 10px; line-height: 1;
+  background: rgba(14,12,9,.7); color: #FFEFD0; border-color: rgba(255,240,214,.3);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.movie-hero .dl-btn.on-head .dl-label { display: none; }
+.movie-hero .dl-btn.on-head i { font-size: 16px; }
+.movie-hero .dl-btn.on-head:hover:not(:disabled) {
+  background: var(--brand-soft); color: var(--brand); border-color: var(--brand-line);
+}
+/* always open inside the hero, whatever the old collapse state was */
+.movie-hero .bd-panel.closed .bd-body,
+.movie-hero .bd-body { max-height: none; opacity: 1; padding: 0; }
+.movie-hero .bd-strip {
+  background: rgba(14,12,9,.64); border: 1px solid var(--brand-line);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  padding: 14px 16px; gap: 10px;
+}
+.movie-hero .bd-m .v { font-size: 19px; }
+.movie-hero .bd-updated { margin-top: 8px; font-size: 11px; }
+
+@media (max-width: 1080px) {
+  .movie-hero .bd-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .movie-hero.has-bg { grid-template-columns: 110px 1fr; gap: 14px 16px; padding: 18px 16px 18px; }
+  .movie-hero.has-bg .poster { grid-row: 1; }
+  .movie-hero .mh-kpis { grid-column: 1 / -1; grid-row: 2; margin-top: 4px; }
+  .movie-hero .bd-head { padding-right: 44px; }
+  .movie-hero .bd-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

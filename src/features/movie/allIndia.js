@@ -1,4 +1,3 @@
-import { kpiCard } from "../../components/kpi.js";
 import { frag, h, icon } from "../../core/dom.js";
 import { inr, num, pct } from "../../core/format.js";
 
@@ -18,9 +17,7 @@ export function allIndiaContent(data) {
   // behaviour: a bold subtotal row appended right after the last
   // territory (or already-built group) that belongs to them.
   const nestedGroups = groups.filter((g) => g.children && g.children.length);
-  const trailingGroups = groups.filter(
-    (g) => !(g.children && g.children.length),
-  );
+  const trailingGroups = groups.filter((g) => !(g.children && g.children.length));
 
   const anchorGroup = new Map(); // territory key -> nested group anchored there
   const hiddenKeys = new Set(); // territory keys folded in, never shown on their own
@@ -63,6 +60,7 @@ export function allIndiaContent(data) {
           "terr-row" +
           (opts.sub ? " terr-sub-row" : "") +
           (opts.total ? " terr-total-row" : "") +
+          (opts.grand ? " terr-grand-row" : "") +
           (opts.clickable ? " clickable" : ""),
         onclick: opts.onclick || null,
       },
@@ -72,17 +70,11 @@ export function allIndiaContent(data) {
         h(
           "span",
           { class: "terr-area" },
-          opts.expandIcon != null
-            ? icon(opts.expandIcon, "terr-caret")
-            : null,
+          opts.expandIcon != null ? icon(opts.expandIcon, "terr-caret") : null,
           label,
         ),
       ),
-      h(
-        "td",
-        { class: "num gold" + (opts.total ? " totcell" : "") },
-        inr(gross),
-      ),
+      h("td", { class: "num gold" + (opts.total ? " totcell" : "") }, inr(gross)),
       h("td", { class: "num" + (opts.total ? " totcell" : "") }, num(shows)),
       h("td", { class: "num" + (opts.total ? " totcell" : "") }, pct(occ)),
     );
@@ -94,8 +86,7 @@ export function allIndiaContent(data) {
       return areaRow(m ? m[1] : mv.movie, mv, { sub: true });
     });
 
-  const stateRows = (t) =>
-    (t.states || []).map((st) => areaRow(st.state, st, { sub: true }));
+  const stateRows = (t) => (t.states || []).map((st) => areaRow(st.state, st, { sub: true }));
 
   const buildRows = () => {
     const rows = [];
@@ -116,16 +107,10 @@ export function allIndiaContent(data) {
       rows.push(
         areaRow(t.label, t, {
           clickable: hasMovies,
-          expandIcon: hasMovies
-            ? expanded.has(t.key)
-              ? "angle-down"
-              : "angle-right"
-            : null,
+          expandIcon: hasMovies ? (expanded.has(t.key) ? "angle-down" : "angle-right") : null,
           onclick: hasMovies
             ? () => {
-                expanded.has(t.key)
-                  ? expanded.delete(t.key)
-                  : expanded.add(t.key);
+                expanded.has(t.key) ? expanded.delete(t.key) : expanded.add(t.key);
                 tbody.replaceChildren(...buildRows());
               }
             : null,
@@ -136,6 +121,18 @@ export function allIndiaContent(data) {
       const g = lastMemberGroup.get(t.key);
       if (g) rows.push(areaRow(g.label, g, { total: true }));
     });
+    // grand total, pinned at the bottom (replaces the four summary cards)
+    rows.push(
+      areaRow(
+        "Total",
+        {
+          gross: totals.gross,
+          shows: totals.shows,
+          occupancy: totals.occupancy,
+        },
+        { total: true, grand: true },
+      ),
+    );
     return rows;
   };
 
@@ -163,29 +160,9 @@ export function allIndiaContent(data) {
     ),
   );
 
+  // table first, the footnote under it (no summary cards)
   return frag(
-    h(
-      "div",
-      { class: "kpi-grid allindia-kpis" },
-      kpiCard(
-        "Total Gross",
-        inr(totals.gross),
-        (totals.territories || territories.length) + " territories",
-        "indian-rupee-sign",
-        true,
-      ),
-      kpiCard("Total Shows", num(totals.shows), null, "clapperboard-play"),
-      kpiCard("Occupancy", pct(totals.occupancy), "all-India", "chart-pie"),
-      kpiCard(
-        "Territories",
-        num(totals.territories || territories.length),
-        "tracked",
-        "globe",
-      ),
-    ),
-    groupNotes.length
-      ? h("div", { class: "allindia-note" }, groupNotes.join(" "))
-      : null,
     table,
+    groupNotes.length ? h("div", { class: "allindia-note" }, groupNotes.join(" ")) : null,
   );
 }

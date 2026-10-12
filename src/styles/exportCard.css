@@ -303,3 +303,7 @@ table.bo.cities td:nth-child(2) { width: 32%; }   /* give city the room back */
   letter-spacing: .18em; text-transform: uppercase; color: var(--brand);
 }
 .exp-stats-cap + .exp-stats { margin-top: 8px; }
+
+/* 7+ stat tiles (India day strip): a tidy 4-column grid instead of a ragged wrap */
+.exp-stats.many { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.exp-stats.many .exp-stat-v { font-size: 20px; }
