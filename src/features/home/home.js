@@ -1,6 +1,5 @@
 import { posterUrl } from "../../core/poster.js";
 import { mount, page, xIcon } from "../../components/chrome.js";
-import { movieCard } from "../../components/movieCard.js";
 import { fetchError, loading, stateMsg } from "../../components/states.js";
 import { X_URL } from "../../core/config.js";
 import { frag, h, icon } from "../../core/dom.js";
@@ -10,9 +9,11 @@ import { go } from "../../core/router.js";
 import { Data } from "../../core/store.js";
 
 import { heroValue, homeFeatureCarousel, social_kpi } from "./featureCarousel.js";
-import { globalSection, safeGlobal } from "./globalStrip.js";
-import { overseasSection, safeEditorial, safeOverseas } from "./overseas.js";
-import { comingSoonSection, safeComingSoon } from "../movie/comingSoon.js";
+import { safeGlobal } from "./globalStrip.js";
+import { hubSection } from "./hub.js";
+import { safeEditorial, safeOverseas } from "./overseas.js";
+import { safeComingSoon } from "../movie/comingSoon.js";
+import { posterSlugOf } from "../../core/poster.js";
 
 export const home = async function () {
   mount(page(h("div", { class: "wrap" }, loading())));
@@ -111,21 +112,29 @@ function renderHome(
 
   const topMovies = merged.slice(0, 5);
   const leadMovie = topMovies[0];
+  // numbers for the three home cards
+  const liveList = (daily && daily.movies) || [];
+  const liveCount = liveList.length;
+  const liveTop = liveList.slice().sort((a, b) => b.gross - a.gross)[0];
+  const advOnly = mergeFeeds(advFeeds, null, null).sort((a, b) => b.mv.gross - a.mv.gross);
+  const soonCount = (soonAll || []).filter(
+    (m) => !advOnly.some((e) => e.mv.slug === m.slug),
+  ).length;
+  const gList = (globalTracking && globalTracking.movies) || [];
+  const gTop = gList.slice().sort((a, b) => (b.cur.gross || 0) - (a.cur.gross || 0))[0];
   const latestNews = editorial.news[0] || {};
   const latestBoxOffice = editorial.boxoffice[0] || {};
   const latestReview = editorial.reviews[0] || {};
   const featureCards = [
     {
-      eyebrow: "Discover",
-      title: "All Movies",
-      summary:
-        merged.length + " titles across live tracking and advance booking, ready to explore.",
-      detail:
-        "Browse every title, filter by language or format, and open its complete performance report.",
-      metric: num(merged.length) + " tracked",
-      action: "Browse all movies",
-      path: "/movies",
-      image: leadMovie && posterUrl(leadMovie.mv.slug, "bg"),
+      eyebrow: "Follow live",
+      title: "Live Tracking",
+      summary: liveCount + " films tracked today, with collections, shows and occupancy.",
+      detail: "Open any running film for today's numbers and its full day-by-day history.",
+      metric: num(liveCount) + " live",
+      action: "Open live tracking",
+      path: "/live",
+      image: liveTop && posterUrl(liveTop.slug, "bg"),
     },
     {
       eyebrow: "Stay informed",
@@ -195,9 +204,9 @@ function renderHome(
               class: "btn",
               type: "button",
               onclick: () =>
-                document.getElementById("live")?.scrollIntoView({ behavior: "smooth" }),
+                document.getElementById("tracking")?.scrollIntoView({ behavior: "smooth" }),
             },
-            "Explore live tracking",
+            "Explore tracking",
             icon("arrow-right"),
           ),
           h(
@@ -205,9 +214,9 @@ function renderHome(
             {
               class: "btn ghost",
               type: "button",
-              onclick: () => go("/movies"),
+              onclick: () => go("/advance"),
             },
-            "Browse movies",
+            "Advance sales",
           ),
         ),
       ),
@@ -215,80 +224,44 @@ function renderHome(
     ),
   );
 
-  // ---- All Movies preview (top 5; full list on the dedicated page) ----
-  const grid = h(
-    "div",
-    { class: "movie-grid" },
-    ...topMovies.map((e) => movieCard(e.mv, e.mode, e.date, { advance: !e.live })),
-  );
-
-  const moviesSection = h(
-    "section",
-    { class: "section", id: "movies" },
-    h(
-      "div",
-      { class: "wrap" },
-      h(
-        "div",
-        { class: "section-head" },
-        h("div", null, h("h2", null, "All Movies")),
-        h(
-          "button",
-          {
-            class: "btn ghost viewall",
-            type: "button",
-            onclick: () => go("/movies"),
-          },
-          "View All Movies",
-          icon("arrow-right"),
-        ),
-      ),
-      grid,
-    ),
-  );
-
-  // ---- Live tracking strip ----
-  // LIVE = what is actually playing and being tracked today (daily feed only).
-  // Advance / pre-sale titles are deliberately NOT shown here.
-  const dayTop =
-    daily && daily.movies && daily.movies.length
-      ? daily.movies
-          .slice()
-          .sort((a, b) => b.gross - a.gross)
-          .slice(0, 8)
-      : [];
-  let liveSection = null;
-  if (dayTop.length) {
-    const updated = (daily && daily.last_updated) || fmtDate(dailyDate);
-    liveSection = h(
-      "section",
-      { class: "section", id: "live" },
-      h(
-        "div",
-        { class: "wrap" },
-        h(
-          "div",
-          { class: "section-head" },
-          h(
-            "div",
-            null,
-            h(
-              "div",
-              { class: "eyebrow" },
-              h("span", { class: "live-dot" }),
-              "Live Box Office Tracking",
-            ),
-          ),
-          h("div", { class: "meta" }, "Updated " + updated),
-        ),
-        h(
-          "div",
-          { class: "movie-grid" },
-          ...dayTop.map((mv) => movieCard(mv, "daily", dailyDate, { live: true })),
-        ),
-      ),
-    );
-  }
+  // ---- The three entry cards; each opens its own listing screen ----
+  const hub = hubSection([
+    {
+      title: "Live Tracking",
+      desc: "Daily box office for films running in cinemas, with each film's day-by-day history.",
+      path: "/live",
+      icon: "time-past",
+      live: true,
+      bg: liveTop && posterUrl(liveTop.slug, "bg"),
+      stats: [
+        { v: liveCount, l: "titles" },
+        { v: dailyDate ? fmtDate(dailyDate) : "-", l: "updated" },
+      ],
+      cta: "View live tracking",
+    },
+    {
+      title: "Advance Sales",
+      desc: "Pre-release booking numbers for upcoming films, opening day first.",
+      path: "/advance",
+      icon: "calendar",
+      bg: advOnly[0] && posterUrl(advOnly[0].mv.slug, "bg"),
+      stats: [
+        { v: advOnly.length, l: "on sale" },
+        { v: soonCount, l: "coming soon" },
+      ],
+      cta: "View advance sales",
+    },
+    {
+      title: "Overseas Tracking",
+      desc: "Global collections and shows for Indian films released abroad.",
+      path: "/overseas",
+      icon: "globe",
+      live: gList.length > 0,
+      bg: gTop && posterUrl(posterSlugOf(gTop), "bg"),
+      stats: [{ v: gList.length, l: "titles" }],
+      cta: "View overseas tracking",
+    },
+  ]);
 
   // social
   const social = h(
@@ -327,24 +300,5 @@ function renderHome(
     ),
   );
 
-  // Global Tracking (US feed) closes the page content, right after All
-  // Movies. globalSection() returns null when no manifest is published.
-  // Overseas sits directly below Live Box Office Tracking. overseasSection()
-  // returns null when there's no data, and frag() skips nulls, so the page is
-  // unchanged until the overseas collector starts publishing.
-  mount(
-    page(
-      frag(
-        hero,
-        liveSection,
-        overseasSection(overseas),
-        moviesSection,
-        // titles whose bookings haven't opened (data/coming_soon.json), unless
-        // they already have tracking data and show up above
-        comingSoonSection((soonAll || []).filter((m) => !merged.some((e) => e.mv.slug === m.slug))),
-        globalSection(globalTracking),
-        social,
-      ),
-    ),
-  );
+  mount(page(frag(hero, hub, social)));
 }

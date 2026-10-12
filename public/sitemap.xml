@@ -6,4 +6,19 @@
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
   </url>
+  <url>
+    <loc>https://cinebotrends.com/live</loc>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cinebotrends.com/advance</loc>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cinebotrends.com/overseas</loc>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>

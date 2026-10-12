@@ -169,13 +169,13 @@ function renderMovie(s) {
     h(
       "a",
       {
-        href: "/home",
+        href: tab === "advance" ? "/advance" : "/live",
         onclick: (e) => {
           e.preventDefault();
-          go("/home");
+          go(tab === "advance" ? "/advance" : "/live");
         },
       },
-      "Movies",
+      tab === "advance" ? "Advance Sales" : "Live Tracking",
     ),
     icon("angle-right"),
     h("a", { href: `/movie/${enc(slug)}` }, title),
@@ -247,13 +247,12 @@ function renderMovie(s) {
       },
       label,
     );
-  const tabs = h(
-    "div",
-    { class: "tabs" },
-    mkTab("advance", "Advance"),
-    mkTab("daily", "Today"),
-    mkTab("historical", "Historical"),
-  );
+  // Separate screens: a movie opened from Advance Sales shows the advance view
+  // only (no tab bar); one opened from Live Tracking has Today + Historical.
+  const tabs =
+    tab === "advance"
+      ? null
+      : h("div", { class: "tabs" }, mkTab("daily", "Today"), mkTab("historical", "Historical"));
 
   // filename + export-card context for section downloads
   const ctxLabel =

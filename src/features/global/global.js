@@ -16,6 +16,11 @@ import { fmtTracked, safeGlobal, usd, usn } from "../home/globalStrip.js";
 
 export const global = async function (p) {
   const slug = p[1];
+  // plain /global (no title) is the Overseas Tracking list
+  if (!slug) {
+    const { overseasList } = await import("../listing/listing.js");
+    return overseasList();
+  }
   const reqDate = p.slice(2).find((t) => /^\d{8}$/.test(t)) || null;
   mount(page(h("div", { class: "wrap" }, loading())));
   try {
@@ -85,7 +90,7 @@ async function renderGlobal(m, date, sum) {
     { class: "crumb" },
     h("a", { href: "/home" }, "Home"),
     icon("angle-right"),
-    h("a", { href: "/home#global" }, "Global Tracking"),
+    h("a", { href: "/overseas" }, "Overseas Tracking"),
     icon("angle-right"),
     h("a", { href: path(date) }, title),
   );

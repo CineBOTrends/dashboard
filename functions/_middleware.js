@@ -13,6 +13,9 @@ const KNOWN_ROUTES = new Set([
   "",
   "home",
   "movies",
+  "live",
+  "advance",
+  "overseas",
   "movie",
   "news",
   "reviews",
@@ -106,7 +109,22 @@ const DATA_FILES = {
 };
 
 const SECTION_DEFAULTS = {
-  movies: ["All Movies — CineBOTrends", "Browse every movie currently tracked on CineBOTrends."],
+  movies: [
+    "Live Box Office Tracking — CineBOTrends",
+    "Daily box office tracking for films running in cinemas.",
+  ],
+  live: [
+    "Live Box Office Tracking — CineBOTrends",
+    "Daily box office tracking for films running in cinemas, with day-by-day history.",
+  ],
+  advance: [
+    "Advance Sales Tracking — CineBOTrends",
+    "Advance booking numbers for upcoming films: gross, tickets, shows and occupancy.",
+  ],
+  overseas: [
+    "Overseas Tracking — CineBOTrends",
+    "Global box office tracking for Indian films released abroad.",
+  ],
   boxoffice: [
     "Box Office Updates — CineBOTrends",
     "Live and historical Indian box office collection updates.",

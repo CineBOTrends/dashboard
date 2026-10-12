@@ -7,22 +7,23 @@ import { parts, setRenderer } from "./router.js";
 export const ROUTES = {
   "": () => import("../features/home/home.js").then((m) => m.home),
   home: () => import("../features/home/home.js").then((m) => m.home),
-  movies: () => import("../features/movies/allMovies.js").then((m) => m.movies),
+  // three separate listing screens, opened from the home cards
+  live: () => import("../features/listing/listing.js").then((m) => m.live),
+  advance: () => import("../features/listing/listing.js").then((m) => m.advanceList),
+  overseas: () => import("../features/listing/listing.js").then((m) => m.overseasList),
+  // old All Movies link -> Live Tracking
+  movies: () => import("../features/listing/listing.js").then((m) => m.live),
   movie: () => import("../features/movie/index.js").then((m) => m.movie),
-  multiplex: () =>
-    import("../features/movie/multiplex.js").then((m) => m.multiplex),
+  multiplex: () => import("../features/movie/multiplex.js").then((m) => m.multiplex),
   global: () => import("../features/global/global.js").then((m) => m.global),
   news: () => import("../features/editorial/editorial.js").then((m) => m.news),
-  reviews: () =>
-    import("../features/editorial/editorial.js").then((m) => m.reviews),
-  boxoffice: () =>
-    import("../features/editorial/editorial.js").then((m) => m.boxoffice),
+  reviews: () => import("../features/editorial/editorial.js").then((m) => m.reviews),
+  boxoffice: () => import("../features/editorial/editorial.js").then((m) => m.boxoffice),
   about: () => import("../features/static/about.js").then((m) => m.about),
   contact: () => import("../features/static/contact.js").then((m) => m.contact),
 };
 
-const notFound = () =>
-  import("../features/static/notFound.js").then((m) => m.notFound);
+const notFound = () => import("../features/static/notFound.js").then((m) => m.notFound);
 
 let token = 0;
 export async function render() {

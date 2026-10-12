@@ -215,22 +215,22 @@ tr.terr-total-row { background: var(--brand-soft); }
 tr.terr-total-row td:first-child { border-left: 3px solid var(--brand); }
 tr.terr-total-row .terr-area { padding-left: 13px; }
 
-/* ---- clean, neutral report: no gold figures, no tinted bands, no accent bars ----
-   Same look as a plain territory table: white numbers, grey sub-rows, and a
-   subtle bold band only for the subtotal / total lines. */
-table.bo.allindia .num.gold { color: var(--ink); font-weight: 600; }
-table.bo.allindia tr.terr-sub-row .num.gold { color: var(--ink-2); font-weight: 400; }
-table.bo.allindia tr.clickable:hover { background: rgba(255,240,214,.04); }
-table.bo.allindia tbody tr.terr-total-row {
-  background: rgba(255,240,214,.06);
-  border-top: 1px solid var(--line-2);
-}
-table.bo.allindia tr.terr-total-row td { color: var(--ink); font-weight: 700; }
-table.bo.allindia tr.terr-total-row .num.gold { color: var(--ink); }
-table.bo.allindia tr.terr-total-row td:first-child { border-left: 0; }
-table.bo.allindia tr.terr-total-row .terr-area { padding-left: 0; }
-.allindia-kpis .kpi-card .l i { color: var(--muted); }
-.allindia-kpis .kpi-card .n.gold { color: var(--ink); }
+/* ---- same look as the State Wise table ----
+   Plain rows, gold gross, grey headers. Only the closing "Total" row gets the
+   State Wise total-row style (.totcell, set in allIndia.js). Region rows
+   (Nizam, Karnataka Total, Kerala, ...) are ordinary rows; ONLY the sub-regions
+   (Hyderabad, Bengaluru City, ...) are dulled. */
+tr.terr-total-row { background: none; }
+tr.terr-total-row td:first-child { border-left: 0; }
+tr.terr-total-row .terr-area { padding-left: 0; }
+/* sub-regions (Hyderabad, Bengaluru City, ...): recessed, not highlighted - a
+   slightly DARKER background than the main rows plus softer text, so they read
+   as detail under their region. Background is on the <tr> so it is one uniform
+   band across the row. */
+table.bo.allindia tbody tr.terr-sub-row { background: rgba(0,0,0,.22); }
+table.bo.allindia tr.terr-sub-row td,
+table.bo.allindia tr.terr-sub-row .terr-area { color: var(--muted); font-weight: 400; }
+table.bo.allindia tr.terr-sub-row .num.gold { color: var(--muted); font-weight: 400; }
 
 @media (max-width: 760px) {
   /* Only 4 lean columns — narrow enough to fit inside the card at full
@@ -256,11 +256,4 @@ table.bo.allindia tr.terr-total-row .terr-area { padding-left: 0; }
   table.bo.allindia thead th,
   table.bo.allindia tbody td { padding: 8px 4px; font-size: 11px; }
 }
-
-/* bottom grand total: the same neutral band, a touch stronger, closing the table */
-table.bo.allindia tbody tr.terr-grand-row {
-  background: rgba(255,240,214,.09);
-  border-top: 2px solid var(--line-2);
-}
-table.bo.allindia tr.terr-grand-row td { font-size: 1.02em; }
 .allindia-note { border-top: 0; padding-top: 14px; }

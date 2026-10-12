@@ -66,7 +66,7 @@ export function allIndiaContent(data) {
       },
       h(
         "td",
-        { class: opts.total ? "totcell" : "" },
+        { class: opts.grand ? "totcell" : "city-nm" },
         h(
           "span",
           { class: "terr-area" },
@@ -74,9 +74,9 @@ export function allIndiaContent(data) {
           label,
         ),
       ),
-      h("td", { class: "num gold" + (opts.total ? " totcell" : "") }, inr(gross)),
-      h("td", { class: "num" + (opts.total ? " totcell" : "") }, num(shows)),
-      h("td", { class: "num" + (opts.total ? " totcell" : "") }, pct(occ)),
+      h("td", { class: "num gold" + (opts.grand ? " totcell" : "") }, inr(gross)),
+      h("td", { class: "num" + (opts.grand ? " totcell" : "") }, num(shows)),
+      h("td", { class: "num" + (opts.grand ? " totcell" : "") }, pct(occ)),
     );
   };
 
@@ -140,7 +140,7 @@ export function allIndiaContent(data) {
 
   const table = h(
     "div",
-    { class: "table-wrap" },
+    { class: "table-wrap statewise-table allindia-table" },
     h(
       "table",
       { class: "bo allindia" },

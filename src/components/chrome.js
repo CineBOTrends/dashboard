@@ -7,7 +7,9 @@ function header() {
     "nav",
     { class: "nav", id: "nav" },
     h("a", { href: "/home", onclick: closeNav }, "Home"),
-    h("a", { href: "/movies", onclick: closeNav }, "All Movies"),
+    h("a", { href: "/live", onclick: closeNav }, "Live Tracking"),
+    h("a", { href: "/advance", onclick: closeNav }, "Advance Sales"),
+    h("a", { href: "/overseas", onclick: closeNav }, "Overseas Tracking"),
     h("a", { href: "/boxoffice", onclick: closeNav }, "Box Office Updates"),
     h("a", { href: "/multiplex", onclick: closeNav }, "Multiplex"),
     h("a", { href: "/news", onclick: closeNav }, "Movie News"),
@@ -23,11 +25,7 @@ function header() {
       h(
         "div",
         { class: "brand-mark", onclick: () => go("/home") },
-        h(
-          "span",
-          { class: "dot" },
-          h("img", { src: "/assets/logo-mark.png", alt: "" }),
-        ),
+        h("span", { class: "dot" }, h("img", { src: "/assets/logo-mark.png", alt: "" })),
         h("span", { class: "name", html: "Cine<b>BOTrends</b>" }),
       ),
       nav,
@@ -44,9 +42,6 @@ function toggleNav() {
 }
 function closeNav() {
   document.getElementById("nav")?.classList.remove("open");
-}
-function jumpMovies(e) {
-  jumpTo(e, "movies");
 }
 function jumpTo(e, id) {
   if (location.pathname === "/" || location.pathname.startsWith("/home")) {
@@ -74,8 +69,7 @@ export function xIcon() {
 }
 
 function footer() {
-  const links = (arr) =>
-    arr.map((x) => h("a", { href: x[1] || "/home", onclick: x[2] }, x[0]));
+  const links = (arr) => arr.map((x) => h("a", { href: x[1] || "/home", onclick: x[2] }, x[0]));
   return h(
     "footer",
     { class: "site-footer" },
@@ -110,17 +104,9 @@ function footer() {
               },
               xIcon(),
             ),
-            h(
-              "a",
-              { href: "/home", "aria-label": "Instagram" },
-              icon("camera"),
-            ),
+            h("a", { href: "/home", "aria-label": "Instagram" }, icon("camera")),
             h("a", { href: "/home", "aria-label": "YouTube" }, icon("play")),
-            h(
-              "a",
-              { href: "/home", "aria-label": "Telegram" },
-              icon("paper-plane"),
-            ),
+            h("a", { href: "/home", "aria-label": "Telegram" }, icon("paper-plane")),
           ),
         ),
         h(
@@ -129,15 +115,9 @@ function footer() {
           h("h4", null, "Quick Links"),
           links([
             ["Home", "/home"],
-            [
-              "Movies",
-              "/home",
-              (e) => {
-                jumpMovies(e);
-              },
-            ],
-            ["Release Calendar", "/home"],
-            ["Box Office Tracker", "/home"],
+            ["Live Tracking", "/live"],
+            ["Advance Sales", "/advance"],
+            ["Overseas Tracking", "/overseas"],
             ["About", "/about"],
             ["Contact", "/contact"],
           ]),
@@ -156,11 +136,7 @@ function footer() {
           "div",
           null,
           h("h4", null, "Newsletter"),
-          h(
-            "p",
-            { class: "muted" },
-            "Stay updated with the latest box office trends.",
-          ),
+          h("p", { class: "muted" }, "Stay updated with the latest box office trends."),
           h(
             "div",
             { class: "news" },
@@ -178,11 +154,7 @@ function footer() {
               "Subscribe",
             ),
           ),
-          h(
-            "p",
-            { class: "muted", style: "font-size:12px" },
-            "No spam. Unsubscribe anytime.",
-          ),
+          h("p", { class: "muted", style: "font-size:12px" }, "No spam. Unsubscribe anytime."),
         ),
       ),
       h(
