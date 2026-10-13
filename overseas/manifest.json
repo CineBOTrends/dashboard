@@ -1,7 +1,7 @@
 {
  "currency": "USD",
  "country": "USA",
- "updated": "2026-10-13T10:47:52+00:00",
+ "updated": "2026-10-13T11:34:09+00:00",
  "movies": [
   {
    "slug": "jailer-2",
@@ -48,12 +48,12 @@
      "report": "/overseas/20261014/jailer-2-report.png?v=202610130936050000"
     },
     "20261015": {
-     "gross": 103311.3,
-     "admissions": 5026,
+     "gross": 102786.83,
+     "admissions": 5006,
      "shows": 617,
      "theatres": 244,
-     "cities": 219,
-     "occupancy": 6.89,
+     "cities": 218,
+     "occupancy": 6.91,
      "languages": [
       "Tamil",
       "Unknown",
@@ -62,24 +62,25 @@
      ],
      "formats": [
       "Standard",
+      "Sony Digital Cinema",
       "D-Box"
      ],
      "topTerritories": [
       {
        "territory": "TX",
-       "gross": 20944.88
+       "gross": 21186.1
       },
       {
        "territory": "CA",
-       "gross": 18754.45
+       "gross": 19069.1
       },
       {
        "territory": "NC",
-       "gross": 14587.87
+       "gross": 14609.32
       }
      ],
-     "trackedAt": "2026-10-13T05:25:41+00:00",
-     "report": "/overseas/20261015/jailer-2-report.png?v=202610130525410000"
+     "trackedAt": "2026-10-13T11:32:22+00:00",
+     "report": "/overseas/20261015/jailer-2-report.png?v=202610131132220000"
     },
     "20261016": {
      "gross": 94259.46,
