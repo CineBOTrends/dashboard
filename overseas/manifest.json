@@ -1,7 +1,7 @@
 {
  "currency": "USD",
  "country": "USA",
- "updated": "2026-10-13T10:00:39+00:00",
+ "updated": "2026-10-13T10:47:52+00:00",
  "movies": [
   {
    "slug": "jailer-2",
@@ -233,6 +233,61 @@
     "20261017"
    ],
    "latest": "20261017"
+  },
+  {
+   "slug": "ramayana--2026",
+   "title": "Ramayana (2026)",
+   "poster": {
+    "thumb": "/assets/posters/ramayana-thumb.jpg",
+    "bg": "/assets/posters/ramayana-bg.jpg",
+    "slug": "ramayana"
+   },
+   "entries": {
+    "20261104": {
+     "gross": 4258.65,
+     "admissions": 299,
+     "shows": 519,
+     "theatres": 188,
+     "cities": 167,
+     "occupancy": 0.41,
+     "languages": [
+      "Hindi",
+      "Telugu",
+      "English",
+      "Unknown",
+      "Tamil"
+     ],
+     "formats": [
+      "Standard",
+      "ScreenX",
+      "D-Box",
+      "RPX",
+      "4DX",
+      "IMAX"
+     ],
+     "topTerritories": [
+      {
+       "territory": "CA",
+       "gross": 1000.22
+      },
+      {
+       "territory": "TX",
+       "gross": 787.98
+      },
+      {
+       "territory": "NY",
+       "gross": 415.76
+      }
+     ],
+     "trackedAt": "2026-10-13T10:46:32+00:00",
+     "report": "/overseas/20261104/ramayana--2026-report.png?v=202610131046320000"
+    }
+   },
+   "posterSlug": "ramayana",
+   "dates": [
+    "20261104"
+   ],
+   "latest": "20261104"
   }
  ]
 }
