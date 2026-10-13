@@ -272,3 +272,32 @@ table.bo.allindia tr.terr-sub-row .num.gold { color: var(--muted); font-weight: 
   .perf-panel-body.perf-enter > *,
   .perf-panel-body.perf-enter tbody tr { animation: none; }
 }
+
+/* ---- City Wise: search box + paging ---- */
+.cities-tools { display: flex; justify-content: flex-end; padding: 0 0 12px; }
+.city-search { position: relative; display: block; width: min(320px, 100%); }
+.city-search i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--muted); pointer-events: none; }
+.city-search input {
+  width: 100%; height: 40px; padding: 0 14px 0 38px; border-radius: 12px;
+  border: 1px solid var(--line-2); background: var(--panel-2); color: var(--ink);
+  font: inherit; font-size: 14px; outline: none; -webkit-appearance: none; appearance: none;
+}
+.city-search input::placeholder { color: var(--muted); }
+.city-search input:focus { border-color: var(--brand-line); box-shadow: 0 0 0 3px var(--brand-soft); }
+.city-empty { padding: 28px 16px; text-align: center; color: var(--muted); }
+.pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 4px 4px; }
+.pager-info { font-size: 13px; color: var(--muted); }
+.pager-ctl { display: flex; align-items: center; gap: 12px; }
+.pager-page { font-size: 14px; color: var(--ink-2); white-space: nowrap; }
+.pager-btn {
+  display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border-radius: 10px;
+  border: 1px solid var(--line-2); background: var(--panel); color: var(--ink); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: border-color .15s, color .15s, opacity .15s;
+}
+.pager-btn:hover:not(:disabled) { border-color: var(--brand-line); color: var(--brand); }
+.pager-btn:disabled { opacity: .35; cursor: default; }
+@media (max-width: 560px) {
+  .cities-tools { justify-content: stretch; }
+  .city-search { width: 100%; }
+  .pager { flex-wrap: wrap; }
+}

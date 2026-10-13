@@ -1,57 +1,155 @@
 import { occMeter } from "./kpi.js";
-import { h } from "../core/dom.js";
+import { h, icon } from "../core/dom.js";
 import { FORMAT_ORDER } from "../core/feeds.js";
 import { inr, num } from "../core/format.js";
 import { enc, go } from "../core/router.js";
 
-export function citiesTable(cities, slug, tab, date, showState) {
-  const rows = cities.map((ct, i) =>
+// one city row; `rank` is its position in the FULL gross ranking
+function cityRow(ct, rank, slug, tab, date, showState) {
+  return h(
+    "tr",
+    {
+      class: "clickable",
+      onclick: () =>
+        go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(ct.state)}/city/${enc(ct.city)}`),
+    },
+    h("td", { class: "rank" + (rank <= 3 ? " top" : "") }, rank),
+    h(
+      "td",
+      null,
+      h("div", { class: "city-nm" }, ct.city),
+      // state sits under the city name, not in its own column
+      showState !== false ? h("div", { class: "sub" }, ct.state) : null,
+    ),
+    h("td", { class: "gross-cell gold" }, inr(ct.gross)),
+    h("td", { class: "num" }, num(ct.shows)),
+    h("td", { class: "occ-cell" }, occMeter(ct.occupancy)),
+    h("td", { class: "num" }, num(ct.sold)),
+  );
+}
+
+const citiesHead = () =>
+  h(
+    "thead",
+    null,
     h(
       "tr",
-      {
-        class: "clickable",
-        onclick: () =>
-          go(
-            `/movie/${enc(slug)}/${tab}/${date}/state/${enc(ct.state)}/city/${enc(ct.city)}`,
-          ),
-      },
-      h("td", { class: "rank" + (i < 3 ? " top" : "") }, i + 1),
-      h(
-        "td",
-        null,
-        h("div", { class: "city-nm" }, ct.city),
-        // state sits under the city name, not in its own column
-        showState !== false ? h("div", { class: "sub" }, ct.state) : null,
-      ),
-      h("td", { class: "gross-cell gold" }, inr(ct.gross)),
-      h("td", { class: "num" }, num(ct.shows)),
-      h("td", { class: "occ-cell" }, occMeter(ct.occupancy)),
-      h("td", { class: "num" }, num(ct.sold)),
+      null,
+      h("th", null, "#"),
+      h("th", null, "City"),
+      h("th", { class: "gross-cell" }, "Gross"),
+      h("th", { class: "num" }, "Shows"),
+      h("th", { class: "occ-cell" }, "Occupancy"),
+      h("th", { class: "num" }, "Sold"),
     ),
   );
+
+export function citiesTable(cities, slug, tab, date, showState) {
+  const rows = cities.map((ct, i) => cityRow(ct, i + 1, slug, tab, date, showState));
   return h(
     "div",
     { class: "table-wrap" },
-    h(
-      "table",
-      { class: "bo cities" },
-      h(
-        "thead",
-        null,
+    h("table", { class: "bo cities" }, citiesHead(), h("tbody", null, ...rows)),
+  );
+}
+
+/* City Wise panel: ALL cities (not just the top 20), with a search box and
+   25-per-page paging ("1-25 of 526 cities", "Page 1 of 22"). Ranks stay the
+   city's position in the full gross ranking, so searching "Hyderabad" still
+   shows it as #7. `onPage` runs after a page change (row animation). */
+export function citiesPanel(all, slug, tab, date, { pageSize = 25, onPage } = {}) {
+  const ranked = all.map((c, i) => ({ ...c, _rank: i + 1 }));
+  const st = { q: "", page: 1 };
+
+  const chevron = (d) =>
+    `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+  const prev = h("button", {
+    class: "pager-btn",
+    type: "button",
+    "aria-label": "Previous page",
+    html: chevron("M15 18l-6-6 6-6"),
+    onclick: () => go_(st.page - 1),
+  });
+  const next = h("button", {
+    class: "pager-btn",
+    type: "button",
+    "aria-label": "Next page",
+    html: chevron("M9 6l6 6-6 6"),
+    onclick: () => go_(st.page + 1),
+  });
+  const info = h("div", { class: "pager-info" });
+  const pageLbl = h("span", { class: "pager-page" });
+  const tbody = h("tbody", null);
+
+  const search = h("input", {
+    type: "search",
+    placeholder: "Search city or state",
+    "aria-label": "Search cities",
+    autocomplete: "off",
+    oninput: (e) => {
+      st.q = e.target.value;
+      st.page = 1;
+      paint(false);
+    },
+  });
+
+  const filtered = () => {
+    const q = st.q.trim().toLowerCase();
+    return q
+      ? ranked.filter(
+          (c) =>
+            c.city.toLowerCase().includes(q) ||
+            String(c.state || "")
+              .toLowerCase()
+              .includes(q),
+        )
+      : ranked;
+  };
+
+  function go_(p) {
+    const pages = Math.max(1, Math.ceil(filtered().length / pageSize));
+    st.page = Math.min(Math.max(1, p), pages);
+    paint(true);
+  }
+
+  function paint(animate) {
+    const list = filtered();
+    const pages = Math.max(1, Math.ceil(list.length / pageSize));
+    st.page = Math.min(st.page, pages);
+    const start = (st.page - 1) * pageSize;
+    const slice = list.slice(start, start + pageSize);
+    if (slice.length)
+      tbody.replaceChildren(...slice.map((ct) => cityRow(ct, ct._rank, slug, tab, date)));
+    else
+      tbody.replaceChildren(
         h(
           "tr",
           null,
-          h("th", null, "#"),
-          h("th", null, "City"),
-          h("th", { class: "gross-cell" }, "Gross"),
-          h("th", { class: "num" }, "Shows"),
-          h("th", { class: "occ-cell" }, "Occupancy"),
-          h("th", { class: "num" }, "Sold"),
+          h("td", { colspan: "6", class: "city-empty" }, "No cities match your search."),
         ),
-      ),
-      h("tbody", null, ...rows),
+      );
+    info.textContent = list.length
+      ? `${start + 1}\u2013${start + slice.length} of ${num(list.length)} cities`
+      : "0 cities";
+    pageLbl.textContent = `Page ${st.page} of ${pages}`;
+    prev.disabled = st.page <= 1;
+    next.disabled = st.page >= pages;
+    if (animate && onPage) onPage();
+  }
+
+  const root = h(
+    "div",
+    { class: "cities-panel" },
+    h(
+      "div",
+      { class: "cities-tools" },
+      h("label", { class: "city-search" }, icon("search"), search),
     ),
+    h("div", { class: "table-wrap" }, h("table", { class: "bo cities" }, citiesHead(), tbody)),
+    h("div", { class: "pager" }, info, h("div", { class: "pager-ctl" }, prev, pageLbl, next)),
   );
+  paint(false);
+  return root;
 }
 
 // Language-wise collections. The collector has always emitted
@@ -71,9 +169,7 @@ export function languageGrid(langs) {
     { gross: 0, sold: 0, seats: 0, shows: 0 },
   );
   const total = totals.gross;
-  const totalOccupancy = totals.seats
-    ? (totals.sold / totals.seats) * 100
-    : 0;
+  const totalOccupancy = totals.seats ? (totals.sold / totals.seats) * 100 : 0;
   const ordered = langs.slice().sort((a, b) => b.gross - a.gross);
 
   const rows = ordered.map((l) =>
@@ -85,11 +181,7 @@ export function languageGrid(langs) {
       h(
         "td",
         { class: "num" },
-        h(
-          "span",
-          { class: "share" },
-          total ? ((l.gross / total) * 100).toFixed(1) + "%" : "—",
-        ),
+        h("span", { class: "share" }, total ? ((l.gross / total) * 100).toFixed(1) + "%" : "—"),
       ),
       h("td", { class: "num" }, num(l.sold)),
       h("td", { class: "num" }, num(l.shows)),
@@ -146,17 +238,14 @@ export function formatGrid(fmts) {
     }),
     { gross: 0, sold: 0, seats: 0, shows: 0 },
   );
-  const totalOccupancy = totals.seats
-    ? (totals.sold / totals.seats) * 100
-    : 0;
+  const totalOccupancy = totals.seats ? (totals.sold / totals.seats) * 100 : 0;
   const ordered = fmts
     .slice()
     .sort(
       (a, b) =>
         FORMAT_ORDER.indexOf(a.format) +
         99 * (FORMAT_ORDER.indexOf(a.format) < 0) -
-        (FORMAT_ORDER.indexOf(b.format) +
-          99 * (FORMAT_ORDER.indexOf(b.format) < 0)),
+        (FORMAT_ORDER.indexOf(b.format) + 99 * (FORMAT_ORDER.indexOf(b.format) < 0)),
     );
   const rows = ordered.map((f) =>
     h(

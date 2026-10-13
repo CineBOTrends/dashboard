@@ -9,8 +9,12 @@ export function buildExportCard(section, sectionTitle, A) {
 
   const clone = section.cloneNode(true);
   clone.querySelectorAll(".dl-btn").forEach((b) => b.remove());
-  clone.querySelectorAll(".block-hd").forEach((b) => b.remove());
+  clone.querySelectorAll(".block-hd, .cities-tools, .pager").forEach((b) => b.remove());
   clone.classList.remove("closed");
+  // the page calls this block "Performance Breakdown"; in the image it carries the
+  // name of what was picked (All India Report, City Wise, State Wise, ...)
+  if (sectionTitle)
+    clone.querySelectorAll(".perf-title").forEach((t) => (t.textContent = sectionTitle));
 
   const sc = m.scope || null; // state / city drill-down
   const pills = [...(m.langs || []), m.runtime || "", ...(m.genres || []).slice(0, 2)]

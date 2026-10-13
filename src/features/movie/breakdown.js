@@ -1,7 +1,7 @@
 import { breakdownPanel, dayChips, flatCities } from "../../components/dateChips.js";
 import { dlBtn } from "../../components/dlBtn.js";
 import { stateMsg } from "../../components/states.js";
-import { citiesTable, formatGrid, languageGrid } from "../../components/tables.js";
+import { citiesPanel, citiesTable, formatGrid, languageGrid } from "../../components/tables.js";
 import { openingDay } from "../../core/dates.js";
 import { h, icon } from "../../core/dom.js";
 import { fmtDate, fmtUpdated, inr, num, pct } from "../../core/format.js";
@@ -68,7 +68,7 @@ export function renderTrackTab(body, s, movie) {
 
 function performanceBreakdown(s, movie) {
   const { slug, tab, date } = s;
-  const cities = flatCities(movie).slice(0, 20);
+  const cities = flatCities(movie); // every city: searchable + paged in the City Wise panel
   const stateTotals = movie.states.reduce(
     (sum, st) => ({
       gross: sum.gross + (st.gross || 0),
@@ -196,7 +196,7 @@ function performanceBreakdown(s, movie) {
       return h(
         "div",
         { class: "perf-panel-body" },
-        citiesTable(cities, slug, tab, date),
+        citiesPanel(cities, slug, tab, date, { onPage: () => animateIn() }),
       );
     }
     return h("div", { class: "perf-panel-body" }, stateGrid);
