@@ -1,7 +1,7 @@
 {
  "currency": "USD",
  "country": "USA",
- "updated": "2026-10-13T04:37:04+00:00",
+ "updated": "2026-10-13T06:06:17+00:00",
  "movies": [
   {
    "slug": "jailer-2",
@@ -46,13 +46,81 @@
      ],
      "trackedAt": "2026-10-13T04:35:27+00:00",
      "report": "/overseas/20261014/jailer-2-report.png?v=202610130435270000"
+    },
+    "20261015": {
+     "gross": 103311.3,
+     "admissions": 5026,
+     "shows": 617,
+     "theatres": 244,
+     "cities": 219,
+     "occupancy": 6.89,
+     "languages": [
+      "Tamil",
+      "Unknown",
+      "Telugu",
+      "Hindi"
+     ],
+     "formats": [
+      "Standard",
+      "D-Box"
+     ],
+     "topTerritories": [
+      {
+       "territory": "TX",
+       "gross": 20944.88
+      },
+      {
+       "territory": "CA",
+       "gross": 18754.45
+      },
+      {
+       "territory": "NC",
+       "gross": 14587.87
+      }
+     ],
+     "trackedAt": "2026-10-13T05:25:41+00:00",
+     "report": "/overseas/20261015/jailer-2-report.png?v=202610130525410000"
+    },
+    "20261016": {
+     "gross": 94259.46,
+     "admissions": 4580,
+     "shows": 534,
+     "theatres": 202,
+     "cities": 179,
+     "occupancy": 7.37,
+     "languages": [
+      "Tamil",
+      "Telugu",
+      "Hindi"
+     ],
+     "formats": [
+      "Standard"
+     ],
+     "topTerritories": [
+      {
+       "territory": "TX",
+       "gross": 25939.37
+      },
+      {
+       "territory": "CA",
+       "gross": 21112.96
+      },
+      {
+       "territory": "WA",
+       "gross": 9752.52
+      }
+     ],
+     "trackedAt": "2026-10-13T05:21:30+00:00",
+     "report": "/overseas/20261016/jailer-2-report.png?v=202610130521300000"
     }
    },
    "posterSlug": "jailer-2",
    "dates": [
-    "20261014"
+    "20261014",
+    "20261015",
+    "20261016"
    ],
-   "latest": "20261014"
+   "latest": "20261016"
   },
   {
    "slug": "ranabaali--2026",
@@ -94,13 +162,77 @@
      ],
      "trackedAt": "2026-10-13T04:32:34+00:00",
      "report": "/overseas/20261015/ranabaali--2026-report.png?v=202610130432340000"
+    },
+    "20261016": {
+     "gross": 18662.18,
+     "admissions": 1125,
+     "shows": 175,
+     "theatres": 98,
+     "cities": 94,
+     "occupancy": 6.23,
+     "languages": [
+      "Telugu",
+      "Unknown"
+     ],
+     "formats": [
+      "Standard"
+     ],
+     "topTerritories": [
+      {
+       "territory": "GA",
+       "gross": 4703.08
+      },
+      {
+       "territory": "NJ",
+       "gross": 3585.15
+      },
+      {
+       "territory": "TX",
+       "gross": 2329.61
+      }
+     ],
+     "trackedAt": "2026-10-13T05:20:31+00:00",
+     "report": "/overseas/20261016/ranabaali--2026-report.png?v=202610130520310000"
+    },
+    "20261017": {
+     "gross": 7335.37,
+     "admissions": 455,
+     "shows": 158,
+     "theatres": 88,
+     "cities": 85,
+     "occupancy": 2.69,
+     "languages": [
+      "Telugu",
+      "Unknown"
+     ],
+     "formats": [
+      "Standard"
+     ],
+     "topTerritories": [
+      {
+       "territory": "GA",
+       "gross": 3282.49
+      },
+      {
+       "territory": "NJ",
+       "gross": 910.4
+      },
+      {
+       "territory": "NC",
+       "gross": 608.75
+      }
+     ],
+     "trackedAt": "2026-10-13T06:03:34+00:00",
+     "report": "/overseas/20261017/ranabaali--2026-report.png?v=202610130603340000"
     }
    },
    "posterSlug": "ranabaali--2026",
    "dates": [
-    "20261015"
+    "20261015",
+    "20261016",
+    "20261017"
    ],
-   "latest": "20261015"
+   "latest": "20261017"
   }
  ]
 }
