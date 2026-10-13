@@ -1,7 +1,7 @@
 {
  "currency": "USD",
  "country": "USA",
- "updated": "2026-10-13T22:29:49+00:00",
+ "updated": "2026-10-13T22:38:34+00:00",
  "movies": [
   {
    "slug": "jailer-2",
@@ -248,12 +248,12 @@
    },
    "entries": {
     "20261104": {
-     "gross": 4258.65,
-     "admissions": 299,
-     "shows": 519,
-     "theatres": 188,
-     "cities": 167,
-     "occupancy": 0.41,
+     "gross": 5247.6,
+     "admissions": 361,
+     "shows": 752,
+     "theatres": 267,
+     "cities": 232,
+     "occupancy": 0.36,
      "languages": [
       "Hindi",
       "Telugu",
@@ -272,19 +272,19 @@
      "topTerritories": [
       {
        "territory": "CA",
-       "gross": 1000.22
+       "gross": 1054.72
       },
       {
        "territory": "TX",
-       "gross": 787.98
+       "gross": 956.06
       },
       {
-       "territory": "NY",
-       "gross": 415.76
+       "territory": "OH",
+       "gross": 535.98
       }
      ],
-     "trackedAt": "2026-10-13T10:46:32+00:00",
-     "report": "/overseas/20261104/ramayana--2026-report.png?v=202610131046320000"
+     "trackedAt": "2026-10-13T22:38:16+00:00",
+     "report": "/overseas/20261104/ramayana--2026-report.png?v=202610132238160000"
     }
    },
    "posterSlug": "ramayana",
