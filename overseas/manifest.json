@@ -1,7 +1,7 @@
 {
  "currency": "USD",
  "country": "USA",
- "updated": "2026-10-13T05:23:39+00:00",
+ "updated": "2026-10-13T05:27:51+00:00",
  "movies": [
   {
    "slug": "jailer-2",
@@ -47,6 +47,40 @@
      "trackedAt": "2026-10-13T04:35:27+00:00",
      "report": "/overseas/20261014/jailer-2-report.png?v=202610130435270000"
     },
+    "20261015": {
+     "gross": 103311.3,
+     "admissions": 5026,
+     "shows": 617,
+     "theatres": 244,
+     "cities": 219,
+     "occupancy": 6.89,
+     "languages": [
+      "Tamil",
+      "Unknown",
+      "Telugu",
+      "Hindi"
+     ],
+     "formats": [
+      "Standard",
+      "D-Box"
+     ],
+     "topTerritories": [
+      {
+       "territory": "TX",
+       "gross": 20944.88
+      },
+      {
+       "territory": "CA",
+       "gross": 18754.45
+      },
+      {
+       "territory": "NC",
+       "gross": 14587.87
+      }
+     ],
+     "trackedAt": "2026-10-13T05:25:41+00:00",
+     "report": "/overseas/20261015/jailer-2-report.png?v=202610130525410000"
+    },
     "20261016": {
      "gross": 94259.46,
      "admissions": 4580,
@@ -83,6 +117,7 @@
    "posterSlug": "jailer-2",
    "dates": [
     "20261014",
+    "20261015",
     "20261016"
    ],
    "latest": "20261016"
