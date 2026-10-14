@@ -90,7 +90,7 @@ function histTotals(hist) {
   return t;
 }
 
-function totalTrackedPanel(t) {
+function totalTrackedPanel(t, label = "Total Tracked") {
   if (!t.days)
     return stateMsg(
       "time-past",
@@ -103,7 +103,12 @@ function totalTrackedPanel(t) {
   const strip = h(
     "div",
     { class: "bd-strip" },
-    bdMetric("Total Gross", inr(t.gross), t.days + (t.days === 1 ? " day" : " days"), true),
+    bdMetric(
+      label === "Total Tracked" ? "Total Gross" : "Gross",
+      inr(t.gross),
+      t.days + (t.days === 1 ? " day" : " days"),
+      true,
+    ),
     bdMetric("Tickets", num(t.sold), t.seats ? num(t.seats) + " seats" : null),
     bdMetric("Shows", num(t.shows)),
     t.theatres ? bdMetric("Theatres", num(t.theatres), "peak") : null,
@@ -116,16 +121,12 @@ function totalTrackedPanel(t) {
   return h(
     "section",
     { class: "bd-panel hist" },
-    dlBtn("Total Tracked", "on-head"),
+    dlBtn(label, "on-head"),
     h(
       "div",
       { class: "bd-head static" },
       icon("chart-histogram"),
-      h(
-        "span",
-        { class: "bd-title" },
-        "Total Tracked · " + t.days + (t.days === 1 ? " Day" : " Days"),
-      ),
+      h("span", { class: "bd-title" }, label + " · " + t.days + (t.days === 1 ? " Day" : " Days")),
     ),
     h(
       "div",
@@ -190,6 +191,15 @@ function histCitiesTable(cities) {
   );
 }
 
+// Range filter: Latest / Opening weekend / Week 1 / Week 2 / All days
+const RANGES = [
+  ["latest", "Latest"],
+  ["weekend", "Opening weekend"],
+  ["week1", "Week 1"],
+  ["week2", "Week 2"],
+  ["all", "All days"],
+];
+
 export function renderHistorical(body, hist, title, movie) {
   if (!hist)
     return body.replaceChildren(
@@ -203,111 +213,53 @@ export function renderHistorical(body, hist, title, movie) {
   // pre-release dates as Premiere, instead of trusting the builder's
   // position-in-list numbering.
   hist = relabelHistDays(hist, movie);
-  const parts = [];
-  const t = histTotals(hist);
-  DL.meta = Object.assign({}, DL.meta, {
-    ctxLabel: "Historical · " + t.days + (t.days === 1 ? " Day" : " Days"),
-    date: null,
-    updated: hist.last_updated || (DL.meta && DL.meta.updated) || "",
-    kpi: t.days ? { gross: t.gross, sold: t.sold, shows: t.shows } : null,
-  });
 
-  if (hist.last_updated)
-    parts.push(h("div", { class: "updated" }, icon("time-past"), "Updated " + hist.last_updated));
-
-  // India gross headline in the hero: the newest day's running total
-  // (days[].indiaGross when the builder writes it, else the sum of every day)
-  {
-    const days = hist.days.slice().sort((a, b) => dYMD(a).localeCompare(dYMD(b)));
-    const lastDay = days[days.length - 1];
-    if (lastDay) {
-      const total =
-        lastDay.indiaGross != null
-          ? +lastDay.indiaGross
-          : days.reduce((a, d) => a + (+d.gross || 0), 0);
-      setIndiaGross(total, {
-        day: lastDay.premiere ? "Premiere" : "Day " + (lastDay.day || days.length),
-        running: !isDone(lastDay),
-      });
-    } else setIndiaGross(null);
-  }
-
-  // Cumulative total across every CLOSED day of daily tracking
-  parts.push(totalTrackedPanel(t));
-
-  // Table 1 — day-wise. TOTAL pinned at the bottom, newest day first,
-  // day-over-day change on gross, live day flagged.
   const asc = hist.days.slice().sort((a, b) => dYMD(a).localeCompare(dYMD(b)));
   const prevGross = new Map();
   asc.forEach((d, i) => {
     if (i) prevGross.set(dYMD(d), +asc[i - 1].gross || 0);
   });
 
-  const dayRows = [];
-  asc
-    .slice()
-    .reverse()
-    .forEach((d) =>
-      dayRows.push([
-        isDone(d) ? histDayTag(d) : frag(histDayTag(d), h("span", { class: "livetag" }, "LIVE")),
-        fmtDate(d.date),
-        dow(d.date),
-        inr(d.gross),
-        changeCell(+d.gross || 0, prevGross.get(dYMD(d))),
-        num(d.sold),
-        num(d.shows),
-        occMeter(d.occupancy),
-      ]),
+  // India gross (running total up to that day): the file's indiaGross (old
+  // name cumulativeGross); older files without either get a running sum.
+  let run = 0;
+  const cum = new Map();
+  asc.forEach((d) => {
+    run += +d.gross || 0;
+    cum.set(
+      dYMD(d),
+      d.indiaGross != null ? +d.indiaGross : d.cumulativeGross != null ? +d.cumulativeGross : run,
     );
+  });
 
-  // TOTAL pinned at the bottom
-  if (t.days)
-    dayRows.push([
-      tc("TOTAL"),
-      tc(t.days + (t.days === 1 ? " day" : " days")),
-      tc("—"),
-      tc(inr(t.gross)),
-      tc("—"),
-      tc(num(t.sold)),
-      tc(num(t.shows)),
-      tc(pct(t.occupancy)),
-    ]);
-
-  parts.push(
-    block(
-      "Day-wise Performance",
-      t.days + " day(s) counted" + (t.live ? " · " + histDayTag(t.live) + " still running" : ""),
-      simpleTable(
-        ["Day", "Date", "Weekday", "Gross", "Change", "Tickets", "Shows", "Occupancy"],
-        dayRows,
-        [0, 0, 0, 1, 1, 1, 1, 2],
-      ),
-    ),
-  );
-
-  // Run shape: gross per day as bars, right under the day-wise table
-  if (asc.length) {
-    const shape = asc.map((d, i) => ({
-      label: d.premiere ? "P" : "D" + (d.day || i + 1),
-      gross: +d.gross || 0,
-      live: !isDone(d),
-    }));
-    parts.push(block("Run Shape", "Gross by day", runShape(shape)));
+  // Opening weekend: release day up to the first Sunday (Thu release = 4 days,
+  // Fri = 3, Sat = 2, Sun = 1); a Mon-Wed release counts its first 3 days.
+  const d1 = asc.find((d) => !d.premiere && d.day === 1);
+  let wkLen = 3;
+  if (d1) {
+    const wd = ymdToDate(dYMD(d1)).getDay(); // 0 = Sunday
+    const len = ((7 - wd) % 7) + 1;
+    wkLen = len <= 4 ? len : 3;
   }
+  const real = (d) => !d.premiere && d.day >= 1;
+  const closed = asc.filter(isDone);
+  const pick = {
+    // newest closed day (today's live day only if nothing has closed yet)
+    latest: () => (closed.length ? closed.slice(-1) : asc.slice(-1)),
+    weekend: () => asc.filter((d) => real(d) && d.day <= wkLen),
+    week1: () => asc.filter((d) => real(d) && d.day <= 7),
+    week2: () => asc.filter((d) => real(d) && d.day >= 8 && d.day <= 14),
+    all: () => asc,
+  };
+  let range = "all";
 
-  // Tables 2-4 are cumulative across closed days once the builder has run;
-  // on older history files (or before any day closes) they are a single-day snapshot.
+  // blocks that always describe the whole run (cumulative / snapshot)
+  const tAll = histTotals(hist);
   const scope = hist.cumulative
-    ? "Cumulative across " + t.days + (t.days === 1 ? " day" : " days")
-    : "Live snapshot" + (t.live ? " · " + histDayTag(t.live) + " in progress" : "");
-
-  // Table 2 — city-wise (same shape as Top 20 Cities: state under the city name)
-  parts.push(
+    ? "Cumulative across " + tAll.days + (tAll.days === 1 ? " day" : " days")
+    : "Live snapshot" + (tAll.live ? " · " + histDayTag(tAll.live) + " in progress" : "");
+  const staticBlocks = [
     block("City-wise Performance", scope + " · top cities by gross", histCitiesTable(hist.cities)),
-  );
-
-  // Table 3 — state-wise
-  parts.push(
     block(
       "State-wise Performance",
       scope + " · all states",
@@ -324,10 +276,6 @@ export function renderHistorical(body, hist, title, movie) {
         [0, 1, 1, 1, 1, 2],
       ),
     ),
-  );
-
-  // Table 4 — format-wise
-  parts.push(
     block(
       "Format-wise Performance",
       scope + " · by presentation format",
@@ -343,9 +291,140 @@ export function renderHistorical(body, hist, title, movie) {
         [0, 1, 1, 1, 2],
       ),
     ),
+  ];
+
+  const bar = h(
+    "div",
+    { class: "range-seg", role: "tablist", "aria-label": "Range" },
+    ...RANGES.map(([k, label]) =>
+      h(
+        "button",
+        {
+          type: "button",
+          class: "range-pill" + (k === range ? " active" : ""),
+          "data-k": k,
+          disabled: pick[k]().length === 0,
+          onclick: () => {
+            range = k;
+            paint();
+          },
+        },
+        label,
+      ),
+    ),
   );
 
-  body.replaceChildren(...parts);
+  function paint() {
+    bar
+      .querySelectorAll(".range-pill")
+      .forEach((b) => b.classList.toggle("active", b.dataset.k === range));
+    const label = RANGES.find(([k]) => k === range)[1];
+    const sel = pick[range]();
+    const t = histTotals({ days: sel });
+
+    DL.meta = Object.assign({}, DL.meta, {
+      ctxLabel:
+        "Historical · " +
+        (range === "all" ? "" : label + " · ") +
+        t.days +
+        (t.days === 1 ? " Day" : " Days"),
+      date: null,
+      updated: hist.last_updated || (DL.meta && DL.meta.updated) || "",
+      kpi: t.days ? { gross: t.gross, sold: t.sold, shows: t.shows } : null,
+    });
+
+    // hero headline: India gross at the LAST day of the chosen range
+    const last = sel[sel.length - 1];
+    if (last)
+      setIndiaGross(cum.get(dYMD(last)), {
+        day: last.premiere ? "Premiere" : "Day " + (last.day || asc.length),
+        running: !isDone(last),
+      });
+    else setIndiaGross(null);
+
+    const parts = [];
+    if (hist.last_updated)
+      parts.push(h("div", { class: "updated" }, icon("time-past"), "Updated " + hist.last_updated));
+    parts.push(bar);
+
+    if (!sel.length) {
+      parts.push(
+        stateMsg(
+          "time-past",
+          "No days in this range yet",
+          "Pick another range to see tracked days.",
+        ),
+      );
+    } else {
+      // Cumulative (or range) total across the CLOSED days in the range
+      parts.push(totalTrackedPanel(t, range === "all" ? "Total Tracked" : label));
+
+      // Day-wise: TOTAL pinned at the bottom, newest day first, day-over-day
+      // change on gross (against the day before, even across the range edge)
+      const dayRows = [];
+      sel
+        .slice()
+        .reverse()
+        .forEach((d) =>
+          dayRows.push([
+            isDone(d)
+              ? histDayTag(d)
+              : frag(histDayTag(d), h("span", { class: "livetag" }, "LIVE")),
+            fmtDate(d.date),
+            dow(d.date),
+            inr(d.gross),
+            changeCell(+d.gross || 0, prevGross.get(dYMD(d))),
+            num(d.sold),
+            num(d.shows),
+            occMeter(d.occupancy),
+          ]),
+        );
+      if (t.days)
+        dayRows.push([
+          tc("TOTAL"),
+          tc(t.days + (t.days === 1 ? " day" : " days")),
+          tc("—"),
+          tc(inr(t.gross)),
+          tc("—"),
+          tc(num(t.sold)),
+          tc(num(t.shows)),
+          tc(pct(t.occupancy)),
+        ]);
+      parts.push(
+        block(
+          "Day-wise Performance",
+          t.days +
+            " day(s) counted" +
+            (t.live ? " · " + histDayTag(t.live) + " still running" : ""),
+          simpleTable(
+            ["Day", "Date", "Weekday", "Gross", "Change", "Tickets", "Shows", "Occupancy"],
+            dayRows,
+            [0, 0, 0, 1, 1, 1, 1, 2],
+          ),
+        ),
+      );
+
+      // Run shape: gross per day as bars, right under the day-wise table
+      parts.push(
+        block(
+          "Run Shape",
+          "Gross by day",
+          runShape(
+            sel.map((d, i) => ({
+              label: d.premiere ? "P" : "D" + (d.day || i + 1),
+              gross: +d.gross || 0,
+              live: !isDone(d),
+            })),
+          ),
+        ),
+      );
+    }
+
+    parts.push(...staticBlocks);
+    body.replaceChildren(...parts);
+  }
+
+  paint();
 }
 
 // align: 0=left, 1=right-num, 2=plain(node)
