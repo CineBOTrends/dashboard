@@ -86,3 +86,14 @@
   .movie-hero .bd-head { padding-right: 44px; }
   .movie-hero .bd-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* India gross headline (live tracking): big running total + caption, as in the mock */
+.movie-hero .mh-india { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; margin: 14px 0 2px; }
+.movie-hero .mh-india:empty { display: none; }
+.mh-india .mi-v {
+  font-family: var(--mono); font-size: clamp(34px, 5vw, 52px); font-weight: 700; line-height: 1;
+  letter-spacing: -.04em; color: var(--brand);
+}
+.mh-india .mi-v small { margin-left: 6px; font-size: .42em; letter-spacing: 0; color: var(--ink-2); }
+.mh-india .mi-l { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.mh-india .mi-l em { font-style: normal; color: var(--brand); }

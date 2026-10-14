@@ -31,6 +31,10 @@ export function buildExportCard(section, sectionTitle, A) {
         : k.gross != null
           ? [
               { label: "Gross", value: inr(k.gross), accent: true },
+              // live tracking: the running India total up to this day
+              ...(k.indiaGross != null
+                ? [{ label: "India Gross", value: inr(k.indiaGross), accent: true }]
+                : []),
               { label: "Tickets", value: num(k.sold) },
               { label: "Shows", value: num(k.shows) },
               // the full day strip, so the summary download needs no second copy

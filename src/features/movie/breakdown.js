@@ -1,8 +1,9 @@
 import { breakdownPanel, dayChips, flatCities } from "../../components/dateChips.js";
 import { dlBtn } from "../../components/dlBtn.js";
+import { setIndiaGross } from "../../components/indiaGross.js";
 import { stateMsg } from "../../components/states.js";
 import { citiesPanel, citiesTable, formatGrid, languageGrid } from "../../components/tables.js";
-import { openingDay } from "../../core/dates.js";
+import { dayNumber, isPremiereDate, openingDay } from "../../core/dates.js";
 import { h, icon } from "../../core/dom.js";
 import { fmtDate, fmtUpdated, inr, num, pct } from "../../core/format.js";
 import { enc, go } from "../../core/router.js";
@@ -13,6 +14,16 @@ import { cityDetails, stateDetails } from "./drilldowns.js";
 export function renderTrackTab(body, s, movie) {
   const { tab, date, dates, stateName, cityName, staleDate } = s;
   const parts = [];
+
+  // Live tracking: headline the running India gross up to this day
+  // (kpi.indiaGross; older builds only have kpi.gross)
+  if (tab === "daily" && movie && movie.kpi) {
+    const last = [...dates].sort().pop();
+    setIndiaGross(movie.kpi.indiaGross != null ? movie.kpi.indiaGross : movie.kpi.gross, {
+      day: isPremiereDate(movie, date) ? "Premiere" : "Day " + dayNumber(date, dates, movie),
+      running: date === last,
+    });
+  } else setIndiaGross(null);
 
   // showing an older day because the newest one has no data for this movie yet
   if (staleDate && !stateName)
@@ -79,9 +90,7 @@ function performanceBreakdown(s, movie) {
     }),
     { gross: 0, sold: 0, shows: 0, theatres: 0, seats: 0 },
   );
-  const stateOccupancy = stateTotals.seats
-    ? (stateTotals.sold / stateTotals.seats) * 100
-    : 0;
+  const stateOccupancy = stateTotals.seats ? (stateTotals.sold / stateTotals.seats) * 100 : 0;
   const stateGrid = h(
     "div",
     { class: "table-wrap statewise-table" },
@@ -94,14 +103,7 @@ function performanceBreakdown(s, movie) {
         h(
           "tr",
           null,
-          ...[
-            "State",
-            "Gross",
-            "Tickets",
-            "Shows",
-            "Theatres",
-            "Occupancy",
-          ].map((label, index) =>
+          ...["State", "Gross", "Tickets", "Shows", "Theatres", "Occupancy"].map((label, index) =>
             h("th", { class: index ? "num" : null }, label),
           ),
         ),
@@ -115,15 +117,10 @@ function performanceBreakdown(s, movie) {
             {
               class: "clickable",
               tabindex: "0",
-              onclick: () =>
-                go(
-                  `/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`,
-                ),
+              onclick: () => go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`),
               onkeydown: (e) => {
                 if (e.key === "Enter")
-                  go(
-                    `/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`,
-                  );
+                  go(`/movie/${enc(slug)}/${tab}/${date}/state/${enc(st.state)}`);
               },
             },
             h("td", { class: "city-nm" }, st.state),
@@ -161,11 +158,7 @@ function performanceBreakdown(s, movie) {
   const contentFor = (key) => {
     if (key === "allindia") {
       return movie.territory
-        ? h(
-            "div",
-            { class: "perf-panel-body allindia-panel" },
-            allIndiaContent(movie.territory),
-          )
+        ? h("div", { class: "perf-panel-body allindia-panel" }, allIndiaContent(movie.territory))
         : h(
             "div",
             { class: "perf-panel-body empty" },
@@ -179,18 +172,10 @@ function performanceBreakdown(s, movie) {
     if (key === "language") {
       return langGrid
         ? h("div", { class: "perf-panel-body" }, langGrid)
-        : h(
-            "div",
-            { class: "perf-panel-body empty" },
-            "No language-wise breakdown available.",
-          );
+        : h("div", { class: "perf-panel-body empty" }, "No language-wise breakdown available.");
     }
     if (key === "format") {
-      return h(
-        "div",
-        { class: "perf-panel-body" },
-        formatGrid(movie.formatSummary),
-      );
+      return h("div", { class: "perf-panel-body" }, formatGrid(movie.formatSummary));
     }
     if (key === "city") {
       return h(
@@ -210,9 +195,7 @@ function performanceBreakdown(s, movie) {
         type: "button",
         onclick: () => {
           activePerfTab = t;
-          tabButtons.forEach((btn) =>
-            btn.classList.toggle("active", btn.dataset.key === t.id),
-          );
+          tabButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.key === t.id));
           // new table fades in and its rows cascade in one after another
           panel.replaceChildren(contentFor(t.id));
           animateIn();

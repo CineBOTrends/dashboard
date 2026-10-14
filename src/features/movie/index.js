@@ -178,7 +178,18 @@ function renderMovie(s) {
       tab === "advance" ? "Advance Sales" : "Live Tracking",
     ),
     icon("angle-right"),
-    h("a", { href: `/movie/${enc(slug)}` }, title),
+    // back to THIS movie in the SAME tab and on the SAME date; a bare
+    // /movie/<slug> link opens the default (Today / Live Tracking) tab instead
+    h(
+      "a",
+      {
+        href:
+          tab === "historical" || !date
+            ? `/movie/${enc(slug)}/${tab}`
+            : `/movie/${enc(slug)}/${tab}/${date}`,
+      },
+      title,
+    ),
     stateName &&
       frag(
         icon("angle-right"),
@@ -230,6 +241,8 @@ function renderMovie(s) {
         mi("Formats", fmts.join(", ") || "—"),
       ),
     ),
+    // India gross headline (live tracking) is filled in by the tab renderers
+    h("div", { class: "mh-india" }),
     // day KPI strip is placed here by renderTrackTab (banner layout)
     h("div", { class: "mh-kpis" }),
     movie && movie.last_updated
