@@ -6,7 +6,7 @@ import { inr } from "../core/format.js";
    (not %), so the PNG export renders the same on every browser. */
 const MAX_H = 150;
 
-export function runShape(days) {
+export function runShape(days, unit = "day") {
   const max = Math.max(1, ...days.map((d) => +d.gross || 0));
   const cols = days.map((d, i) => {
     const g = +d.gross || 0;
@@ -27,6 +27,10 @@ export function runShape(days) {
     "div",
     { class: "run-shape" },
     h("div", { class: "rs-bars" }, ...cols),
-    h("div", { class: "rs-cap" }, `Run shape · all ${days.length} ${days.length === 1 ? "day" : "days"}`),
+    h(
+      "div",
+      { class: "rs-cap" },
+      `Run shape · all ${days.length} ${unit}${days.length === 1 ? "" : "s"}`,
+    ),
   );
 }

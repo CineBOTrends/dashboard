@@ -1,9 +1,17 @@
 import { breakdownPanel, dayChips, flatCities } from "../../components/dateChips.js";
+import { block } from "../../components/block.js";
 import { dlBtn } from "../../components/dlBtn.js";
 import { setIndiaGross } from "../../components/indiaGross.js";
+import { runShape } from "../../components/runShape.js";
 import { stateMsg } from "../../components/states.js";
 import { citiesPanel, citiesTable, formatGrid, languageGrid } from "../../components/tables.js";
-import { dayNumber, isPremiereDate, openingDay } from "../../core/dates.js";
+import {
+  dayNumber,
+  isOpeningDate,
+  isPremiereDate,
+  openingDay,
+  ymdShort,
+} from "../../core/dates.js";
 import { h, icon } from "../../core/dom.js";
 import { fmtDate, fmtUpdated, inr, num, pct } from "../../core/format.js";
 import { enc, go } from "../../core/router.js";
@@ -12,7 +20,7 @@ import { cityDetails, stateDetails } from "./drilldowns.js";
 
 /* ---- Advance / Daily tab ---- */
 export function renderTrackTab(body, s, movie) {
-  const { tab, date, dates, stateName, cityName, staleDate } = s;
+  const { tab, date, dates, stateName, cityName, staleDate, hist } = s;
   const parts = [];
 
   // Live tracking: headline the running India gross up to this day
@@ -22,6 +30,13 @@ export function renderTrackTab(body, s, movie) {
     setIndiaGross(movie.kpi.indiaGross != null ? movie.kpi.indiaGross : movie.kpi.gross, {
       day: isPremiereDate(movie, date) ? "Premiere" : "Day " + dayNumber(date, dates, movie),
       running: date === last,
+    });
+  } else if (tab === "advance" && movie && movie.kpi) {
+    // Advance: the running total of the advance snapshots up to this release
+    // date (kpi.indiaGross). It is booking value, not box office - say so.
+    setIndiaGross(movie.kpi.indiaGross != null ? movie.kpi.indiaGross : movie.kpi.gross, {
+      label: "India advance gross",
+      day: isOpeningDate(movie, date) ? "Opening day" : "up to " + ymdShort(date),
     });
   } else setIndiaGross(null);
 
@@ -73,6 +88,30 @@ export function renderTrackTab(body, s, movie) {
   else parts.push(panel);
 
   parts.push(performanceBreakdown(s, movie));
+
+  // Advance: gross per release date as bars (data/advance/history/<slug>.json,
+  // days[].gross), after the breakdown, same look as the Historical run shape
+  if (tab === "advance" && hist && Array.isArray(hist.days) && hist.days.length) {
+    const days = hist.days
+      .map((d) => ({ ymd: String(d.date || d.ymd || "").replace(/-/g, ""), gross: +d.gross || 0 }))
+      .filter((d) => /^\d{8}$/.test(d.ymd))
+      .sort((a, b) => a.ymd.localeCompare(b.ymd));
+    if (days.length)
+      parts.push(
+        block(
+          "Run Shape",
+          "Advance gross by release date",
+          runShape(
+            days.map((d) => ({
+              label: ymdShort(d.ymd),
+              gross: d.gross,
+              live: false,
+            })),
+            "release date",
+          ),
+        ),
+      );
+  }
 
   body.replaceChildren(...parts);
 }

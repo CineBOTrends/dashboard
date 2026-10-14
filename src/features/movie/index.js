@@ -129,6 +129,14 @@ export const movie = async function (p) {
       }
       // flag it so the UI can say "today isn't in yet, showing <date>"
       if (movie && date !== wanted) staleDate = wanted;
+      // Advance view: the per-release-date history feeds the run-shape bars
+      if (movie && tab === "advance") {
+        try {
+          hist = await Data.history("advance", slug);
+        } catch (e) {
+          hist = null;
+        }
+      }
     } else {
       try {
         movie = await Data.movie(hasAdv ? "advance" : "daily", metaDate, slug);
@@ -295,6 +303,8 @@ function renderMovie(s) {
     poster: { thumb: posterUrl(slug, "thumb"), bg: posterUrl(slug, "bg") },
     updated: movie && movie.last_updated ? fmtUpdated(movie.last_updated) : "",
     kpi: movie && movie.kpi ? movie.kpi : null,
+    // label of the running-total tile in downloads (advance totals are not box office)
+    indiaLabel: tab === "advance" ? "India Adv. Gross" : "India Gross",
   };
   // Drill-down (state / city): the export card must describe THAT area (name +
   // its own totals), not the whole movie.

@@ -4,7 +4,7 @@ import { inr } from "../core/format.js";
 /* "India Gross" headline in the movie hero: the running total up to the day on
    screen (kpi.indiaGross, data/<mode>/<date>/m/<slug>.json). Filled by the tab
    renderers (the hero is built before them); a missing value clears it. */
-export function setIndiaGross(value, { day, running } = {}) {
+export function setIndiaGross(value, { label = "India gross", day, running } = {}) {
   const el = document.querySelector(".movie-hero .mh-india");
   if (!el) return;
   if (value == null || value === "" || !isFinite(+value)) {
@@ -20,7 +20,7 @@ export function setIndiaGross(value, { day, running } = {}) {
     h(
       "span",
       { class: "mi-l" },
-      "India gross",
+      label,
       day ? " · " : "",
       day ? h("em", null, day) : null,
       running ? " running" : "",

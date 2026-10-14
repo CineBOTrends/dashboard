@@ -304,8 +304,8 @@ table.bo.allindia tr.terr-sub-row .num.gold { color: var(--muted); font-weight: 
 
 /* ---- Run shape: gross per day as bars ---- */
 .run-shape { padding: 18px 8px 6px; }
-.rs-bars { display: flex; align-items: flex-end; gap: clamp(8px, 2vw, 18px); }
-.rs-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: stretch; }
+.rs-bars { display: flex; align-items: flex-end; justify-content: flex-start; gap: clamp(8px, 2vw, 18px); }
+.rs-col { flex: 1 1 0; min-width: 0; max-width: 96px; display: flex; flex-direction: column; align-items: stretch; }
 .rs-val { margin-bottom: 6px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rs-well { display: flex; align-items: flex-end; }
 .rs-bar {
