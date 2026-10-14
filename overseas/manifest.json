@@ -1,7 +1,7 @@
 {
  "currency": "USD",
  "country": "USA",
- "updated": "2026-10-14T19:22:55+00:00",
+ "updated": "2026-10-14T19:28:42+00:00",
  "movies": [
   {
    "slug": "jailer-2",
@@ -136,12 +136,12 @@
    },
    "entries": {
     "20261015": {
-     "gross": 146579.05,
-     "admissions": 8219,
-     "shows": 502,
+     "gross": 150297.36,
+     "admissions": 8428,
+     "shows": 506,
      "theatres": 281,
      "cities": 241,
-     "occupancy": 17.62,
+     "occupancy": 17.86,
      "languages": [
       "Telugu",
       "Unknown"
@@ -153,19 +153,19 @@
      "topTerritories": [
       {
        "territory": "TX",
-       "gross": 44970.78
+       "gross": 46114.76
       },
       {
        "territory": "NC",
-       "gross": 15867.62
+       "gross": 16449.06
       },
       {
        "territory": "CA",
-       "gross": 10308.31
+       "gross": 10356.79
       }
      ],
-     "trackedAt": "2026-10-14T17:49:22+00:00",
-     "report": "/overseas/20261015/ranabaali--2026-report.png?v=202610141749220000"
+     "trackedAt": "2026-10-14T19:28:15+00:00",
+     "report": "/overseas/20261015/ranabaali--2026-report.png?v=202610141928150000"
     },
     "20261016": {
      "gross": 31969.5,
