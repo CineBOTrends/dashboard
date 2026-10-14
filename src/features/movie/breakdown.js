@@ -2,6 +2,7 @@ import { breakdownPanel, dayChips, flatCities } from "../../components/dateChips
 import { block } from "../../components/block.js";
 import { dlBtn } from "../../components/dlBtn.js";
 import { setIndiaGross } from "../../components/indiaGross.js";
+import { milestones } from "../../components/milestones.js";
 import { runShape } from "../../components/runShape.js";
 import { stateMsg } from "../../components/states.js";
 import { citiesPanel, citiesTable, formatGrid, languageGrid } from "../../components/tables.js";
@@ -86,6 +87,13 @@ export function renderTrackTab(body, s, movie) {
   const slot = document.querySelector(".movie-hero .mh-kpis");
   if (slot) slot.replaceChildren(panel);
   else parts.push(panel);
+
+  // Live tracking: India gross milestones (0 / 5 / 10 / 25 / 50 / 100 / 150 Cr)
+  // sit right above the Performance Breakdown
+  if (tab === "daily" && movie.kpi) {
+    const ms = milestones(movie.kpi.indiaGross != null ? movie.kpi.indiaGross : movie.kpi.gross);
+    if (ms) parts.push(ms);
+  }
 
   parts.push(performanceBreakdown(s, movie));
 
