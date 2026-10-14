@@ -1,0 +1,1 @@
+{"mode":"daily","date":"20261015","date_iso":"2026-10-15","totals":{"territories":1,"gross":184600.0,"shows":3,"occupancy":56.73},"territories":[{"key":"ceded","label":"Ceded","gross":184600.0,"shows":3,"sold":898,"occupancy":56.73}],"groups":[{"key":"aptg-total","label":"APTG Total","gross":184600.0,"shows":3,"sold":898,"occupancy":56.73,"members":["ceded"]}]}
