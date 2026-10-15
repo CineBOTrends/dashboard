@@ -100,49 +100,111 @@ function totalTrackedPanel(t, label = "Total Tracked") {
         : "Totals appear once the first tracked day finishes.",
     );
 
-  const strip = h(
+  const single = t.days === 1;
+  const hfShare = t.shows ? (t.housefull / t.shows) * 100 : 0;
+  const occ = Math.max(0, Math.min(100, t.occupancy || 0));
+  const C = 2 * Math.PI * 46; // ring circumference (r = 46)
+
+  // Audience-facing-a-screen glyph (housefull). Inline SVG so it inherits the
+  // tile colour and survives the PNG export (no icon-font dependency).
+  const cinemaIcon = () => {
+    const w = h("span", { class: "hs-svg" });
+    w.innerHTML =
+      '<svg viewBox="2 2 17.8 17" aria-hidden="true">' +
+      '<path d="M5.2 12.4V4.6A1.5 1.5 0 0 1 6.7 3.1h9.9a1.5 1.5 0 0 1 1.5 1.5v7.8"/>' +
+      '<path d="M9.9 5.7v3.2l2.6-1.6z"/>' +
+      '<circle cx="5.3" cy="13.2" r="1.35"/><circle cx="10.9" cy="13.2" r="1.35"/><circle cx="16.5" cy="13.2" r="1.35"/>' +
+      '<circle cx="8.1" cy="11.7" r="1.35"/><circle cx="13.7" cy="11.7" r="1.35"/>' +
+      '<path d="M3.1 18.4v-2.1a1.6 1.6 0 0 1 1.6-1.6h1.2a1.6 1.6 0 0 1 1.6 1.6v2.1z"/>' +
+      '<path d="M8.7 18.4v-2.1a1.6 1.6 0 0 1 1.6-1.6h1.2a1.6 1.6 0 0 1 1.6 1.6v2.1z"/>' +
+      '<path d="M14.3 18.4v-2.1a1.6 1.6 0 0 1 1.6-1.6h1.2a1.6 1.6 0 0 1 1.6 1.6v2.1z"/>' +
+      "</svg>";
+    return w;
+  };
+  const tile = (ic, label, value, sub, hot) =>
+    h(
+      "div",
+      { class: "hs-tile" + (hot ? " hot" : "") },
+      h("span", { class: "hs-ic" }, typeof ic === "string" ? icon(ic) : ic),
+      h(
+        "div",
+        { class: "hs-tx" },
+        h("div", { class: "hs-v" }, value),
+        h("div", { class: "hs-l" }, label),
+        sub ? h("div", { class: "hs-s" }, sub) : null,
+      ),
+    );
+
+  const ring = h("div", { class: "hs-ring" });
+  ring.innerHTML =
+    '<svg viewBox="-12.4 -12.4 134.8 134.8" aria-hidden="true">' +
+    '<circle class="hs-ring-bg" cx="55" cy="55" r="46"/>' +
+    '<circle class="hs-ring-glow" cx="55" cy="55" r="46" stroke-dasharray="' +
+    ((occ / 100) * C).toFixed(1) +
+    " " +
+    C.toFixed(1) +
+    '" transform="rotate(-90 55 55)"/>' +
+    '<circle class="hs-ring-fg" cx="55" cy="55" r="46" stroke-dasharray="' +
+    ((occ / 100) * C).toFixed(1) +
+    " " +
+    C.toFixed(1) +
+    '" transform="rotate(-90 55 55)"/></svg>' +
+    '<div class="hs-ring-c"><b>' +
+    pct(t.occupancy) +
+    "</b><span>OCCUPANCY</span></div>";
+
+  const tiles = h(
     "div",
-    { class: "bd-strip" },
-    bdMetric(
-      label === "Total Tracked" ? "Total Gross" : "Gross",
-      inr(t.gross),
-      t.days + (t.days === 1 ? " day" : " days"),
-      true,
-    ),
-    bdMetric("Tickets", num(t.sold), t.seats ? num(t.seats) + " seats" : null),
-    bdMetric("Shows", num(t.shows)),
-    t.theatres ? bdMetric("Theatres", num(t.theatres), "peak") : null,
-    t.cities ? bdMetric("Cities", num(t.cities), "peak") : null,
-    bdMetric("Occupancy", pct(t.occupancy), t.seats ? "weighted" : "day avg"),
-    t.best ? bdMetric("Best Day", histDayTag(t.best), fmtDate(t.best.date)) : null,
-    t.housefull ? bdMetric("Housefull", num(t.housefull), "shows", true) : null,
+    { class: "hs-tiles" },
+    tile("ticket", "Tickets", num(t.sold), t.seats ? "of " + num(t.seats) + " seats" : null),
+    tile("clapperboard-play", "Shows", num(t.shows)),
+    t.theatres ? tile("building", "Theatres", num(t.theatres), "peak") : null,
+    t.cities ? tile("city", "Cities", num(t.cities), "peak") : null,
+    t.best ? tile("calendar", "Best Day", histDayTag(t.best), fmtDate(t.best.date)) : null,
+    t.housefull
+      ? tile(cinemaIcon(), "Housefull", num(t.housefull), hfShare.toFixed(1) + "% of shows", true)
+      : null,
   );
 
   return h(
     "section",
-    { class: "bd-panel hist" },
+    { class: "bd-panel hist hs" },
     dlBtn(label, "on-head"),
     h(
       "div",
-      { class: "bd-head static" },
-      icon("chart-histogram"),
-      h("span", { class: "bd-title" }, label + " · " + t.days + (t.days === 1 ? " Day" : " Days")),
+      { class: "hs-top" },
+      h("span", { class: "hs-pill" }, icon("chart-histogram"), label.toUpperCase()),
+      h(
+        "span",
+        { class: "hs-range" },
+        t.days +
+          (single ? " day" : " days") +
+          (single && t.best ? " · " + fmtDate(t.best.date) : ""),
+      ),
     ),
     h(
       "div",
-      { class: "bd-body" },
-      strip,
-      t.live
-        ? h(
-            "div",
-            { class: "bd-updated" },
-            histDayTag(t.live) +
-              " (" +
-              fmtDate(t.live.date) +
-              ") is still running — excluded until it closes.",
-          )
-        : null,
+      { class: "hs-main" },
+      h(
+        "div",
+        { class: "hs-hero" },
+        h("div", { class: "hs-hero-l" }, label === "Total Tracked" ? "Total Gross" : "Gross"),
+        h("div", { class: "hs-hero-v" }, inr(t.gross)),
+        h("div", { class: "hs-hero-s" }, num(t.sold) + " tickets · " + num(t.shows) + " shows"),
+      ),
+      ring,
+      tiles,
     ),
+    t.live
+      ? h(
+          "div",
+          { class: "bd-updated hs-live" },
+          histDayTag(t.live) +
+            " (" +
+            fmtDate(t.live.date) +
+            ") is still running — excluded until it closes.",
+        )
+      : null,
   );
 }
 

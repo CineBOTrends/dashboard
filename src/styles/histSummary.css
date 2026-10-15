@@ -1,0 +1,83 @@
+/* ============================================================
+   Historical summary card — hero gross + occupancy ring + stat tiles
+   ============================================================ */
+.bd-panel.hs {
+  padding: 20px 22px 18px;
+  background:
+    radial-gradient(520px 260px at 0% 0%, rgba(255,176,0,.16), transparent 70%),
+    radial-gradient(420px 220px at 100% 100%, rgba(255,122,26,.08), transparent 70%),
+    var(--panel);
+  border-color: var(--brand-line);
+}
+.hs-top { display: flex; align-items: center; gap: 12px; padding-right: 130px; margin-bottom: 18px; }
+.hs-pill {
+  display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px 5px 10px;
+  border-radius: 999px; background: var(--brand); color: #17130B;
+  font-weight: 800; font-size: 11px; letter-spacing: .14em;
+}
+.hs-pill i { font-size: 12px; }
+.hs-range { font-family: var(--mono); font-size: 12px; color: var(--ink-2); letter-spacing: .04em; }
+.bd-panel.hs .dl-btn.on-head { top: 16px; right: 18px; }
+
+.hs-main {
+  display: grid; grid-template-columns: minmax(230px, 1.05fr) auto minmax(0, 2.2fr);
+  gap: 26px; align-items: center;
+}
+.hs-hero-l { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-2); }
+.hs-hero-v {
+  margin: 4px 0 6px; font-family: var(--mono); font-weight: 800; letter-spacing: -2px;
+  font-size: clamp(40px, 5.2vw, 60px); line-height: 1.02;
+  background: linear-gradient(180deg, #FFD36B 0%, var(--brand) 55%, #E08A00 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 22px rgba(255,176,0,.25));
+}
+.hs-hero-s { font-size: 12.5px; color: var(--muted); }
+
+.hs-ring { position: relative; width: 124px; height: 124px; }
+/* svg is larger than the ring box so the glow has room and is never clipped */
+.hs-ring svg { position: absolute; inset: -14px; width: calc(100% + 28px); height: calc(100% + 28px); display: block; overflow: visible; }
+.hs-ring circle { fill: none; stroke-width: 9; }
+.hs-ring-bg { stroke: rgba(255,240,214,.09); }
+.hs-ring-fg { stroke: var(--brand); stroke-linecap: round; }
+/* filter-free glow (wider, faint arc) so PNG export never clips it */
+.hs-ring-glow { stroke: var(--brand); stroke-linecap: round; stroke-width: 18px; opacity: .16; }
+.hs-ring-c { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.hs-ring-c b { font-family: var(--mono); font-size: 21px; font-weight: 800; color: var(--ink); letter-spacing: -.5px; }
+.hs-ring-c span { margin-top: 2px; font-size: 8.5px; letter-spacing: .14em; color: var(--muted); }
+
+.hs-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.hs-tile {
+  display: flex; align-items: center; gap: 11px; min-width: 0; padding: 12px 13px;
+  background: rgba(255,240,214,.035); border: 1px solid var(--line); border-radius: 12px;
+}
+.hs-tile.hot { background: var(--brand-soft); border-color: var(--brand-line); }
+.hs-ic {
+  flex: 0 0 auto; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px;
+  background: rgba(255,240,214,.07); color: var(--ink-2); font-size: 15px;
+}
+.hs-svg { display: grid; place-items: center; }
+.hs-svg svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; }
+.hs-tile.hot .hs-ic { background: var(--brand); color: #17130B; }
+.hs-tx { min-width: 0; }
+.hs-v { font-family: var(--mono); font-weight: 700; font-size: 17px; letter-spacing: -.4px; color: var(--ink); white-space: nowrap; }
+.hs-tile.hot .hs-v { color: var(--brand); }
+.hs-l { margin-top: 1px; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.hs-s { font-size: 10.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hs-live { margin-top: 14px; }
+
+@media (max-width: 1000px) {
+  .hs-main { grid-template-columns: 1fr auto; gap: 18px 20px; }
+  .hs-tiles { grid-column: 1 / -1; }
+}
+@media (max-width: 560px) {
+  .bd-panel.hs { padding: 16px 14px; }
+  .hs-top { padding-right: 52px; margin-bottom: 14px; }
+  .hs-range { display: none; }
+  .bd-panel.hs .dl-btn.on-head { top: 12px; right: 12px; }
+  .hs-main { grid-template-columns: 1fr; justify-items: start; }
+  .hs-ring { width: 104px; height: 104px; position: absolute; right: 14px; top: 62px; }
+  .hs-hero { padding-right: 112px; }
+  .hs-hero-v { font-size: 38px; letter-spacing: -1.5px; }
+  .hs-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; margin-top: 18px; }
+  .hs-s { white-space: normal; }
+}
