@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-16 00:12",
+  "generated": "2026-10-16 01:08",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -48,6 +48,10 @@
   "movieDates": {
     "daily": {
       "jailer-2": [
+        "20261015",
+        "20261016"
+      ],
+      "ranabaali": [
         "20261015"
       ]
     },

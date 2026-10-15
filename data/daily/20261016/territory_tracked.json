@@ -1,1 +1,1 @@
-{"mode":"daily","date":"20261016","date_iso":"2026-10-16","totals":{"territories":0,"gross":0.0,"shows":0,"occupancy":0.0},"territories":[],"groups":[]}
+{"mode":"daily","date":"20261016","date_iso":"2026-10-16","totals":{"territories":1,"gross":139920.0,"shows":6,"occupancy":44.01},"territories":[{"key":"kerala","label":"Kerala","gross":139920.0,"shows":6,"sold":595,"occupancy":44.01}],"groups":[]}
