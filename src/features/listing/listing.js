@@ -7,8 +7,10 @@ import {
   ctx,
   latest,
   loadAdvanceFeeds,
+  loadLive,
   mergeFeeds,
 } from "../../core/feeds.js";
+import { ymdDow, ymdShort } from "../../core/dates.js";
 import { fmtDate } from "../../core/format.js";
 import { Data } from "../../core/store.js";
 import { cap } from "../home/featureCarousel.js";
@@ -55,17 +57,51 @@ async function liveScreen() {
       "No live tracking yet",
       "Daily tracking appears here as soon as a film is running.",
     );
-  const dailyDate = latest(c.dayDates);
-  const daily = await Data.national("daily", dailyDate);
-  const items = ((daily && daily.movies) || []).map((mv) => ({
+  // today's run + films whose live tracking finished and are waiting for the
+  // next daily run (they stay, tagged "Completed", until it picks them up)
+  const { date: dailyDate, prevDate, daily, today, carried } = await loadLive(c);
+  // Date-wise: every live card carries its date and day number (release day =
+  // Day 1), e.g. "Day 2 · Sat, 17 Oct"; a finished day that is waiting for the
+  // next run reads "Completed · Day 1 · 16 Oct".
+  const perFilm = (c.m && c.m.movieDates && c.m.movieDates.daily) || {};
+  const dayNo = (slug, date) => {
+    const list = (perFilm[slug] || c.dayDates || []).slice().sort();
+    const i = list.indexOf(date);
+    return i >= 0 ? i + 1 : 1;
+  };
+  const toItem = (mv, date, done) => ({
     title: mv.title,
     langs: mv.languages || [],
     fmts: mv.formats || [],
     gross: mv.gross || 0,
     occ: mv.occupancy || 0,
     shows: mv.shows || 0,
-    card: () => movieCard(mv, "daily", dailyDate, { live: true }),
-  }));
+    card: () => {
+      const el = movieCard(mv, "daily", date, { live: true });
+      const body = el.querySelector(".body");
+      const day = "Day " + dayNo(mv.slug, date);
+      if (body)
+        body.prepend(
+          h(
+            "div",
+            { class: done ? "done-note" : "day-note" },
+            done
+              ? "Completed \u00b7 " + day + " \u00b7 " + ymdShort(date)
+              : day +
+                  " \u00b7 " +
+                  ymdDow(date).charAt(0) +
+                  ymdDow(date).slice(1, 3).toLowerCase() +
+                  ", " +
+                  ymdShort(date),
+          ),
+        );
+      return el;
+    },
+  });
+  const items = [
+    ...today.map((mv) => toItem(mv, dailyDate, false)),
+    ...carried.map((mv) => toItem(mv, prevDate, true)),
+  ];
   render({
     title: "Live Tracking",
     eyebrow: "Nationwide · Live",
@@ -272,9 +308,7 @@ function render(o) {
         h(
           "div",
           { class: "meta" },
-          (o.updated ? "Updated " + o.updated + " · " : "") +
-            items.length +
-            " titles",
+          (o.updated ? "Updated " + o.updated + " · " : "") + items.length + " titles",
         ),
       ),
       filters,

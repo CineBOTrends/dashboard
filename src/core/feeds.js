@@ -72,3 +72,22 @@ export function mergeFeeds(advFeeds, daily, dailyDate) {
 /* ============================================================
    HOME
    ============================================================ */
+
+/** Live Tracking titles. The newest daily date's films, PLUS films tracked on the
+ *  previous daily date that the newest run has not reached yet: once a film's
+ *  live tracking is complete it stays listed (as "completed") until the next
+ *  daily run picks it up, instead of vanishing when a new day's feed starts
+ *  out empty or partial. Returns { date, prevDate, daily, today, carried }. */
+export async function loadLive(c) {
+  const dates = [...(c.dayDates || [])].sort();
+  const date = dates.length ? dates[dates.length - 1] : null;
+  const prevDate = dates.length > 1 ? dates[dates.length - 2] : null;
+  const [daily, prev] = await Promise.all([
+    date ? Data.national("daily", date).catch(() => null) : null,
+    prevDate ? Data.national("daily", prevDate).catch(() => null) : null,
+  ]);
+  const today = (daily && daily.movies) || [];
+  const have = new Set(today.map((m) => m.slug));
+  const carried = ((prev && prev.movies) || []).filter((m) => !have.has(m.slug));
+  return { date, prevDate, daily, today, carried };
+}

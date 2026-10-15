@@ -3,7 +3,7 @@ import { mount, page, xIcon } from "../../components/chrome.js";
 import { fetchError, loading, stateMsg } from "../../components/states.js";
 import { X_URL } from "../../core/config.js";
 import { frag, h, icon } from "../../core/dom.js";
-import { ctx, latest, loadAdvanceFeeds, mergeFeeds } from "../../core/feeds.js";
+import { ctx, latest, loadAdvanceFeeds, loadLive, mergeFeeds } from "../../core/feeds.js";
 import { fmtDate, num } from "../../core/format.js";
 import { go } from "../../core/router.js";
 import { Data } from "../../core/store.js";
@@ -52,6 +52,13 @@ export const home = async function () {
         daily = null;
       }
     }
+    // films whose live tracking is complete but not yet in today's run
+    let liveCarried = [];
+    try {
+      liveCarried = (await loadLive(c)).carried;
+    } catch (e) {
+      liveCarried = [];
+    }
     // advance data (new releases on pre-sale) â€” ALL dates, since films open
     // on different days and each date holds a different set of movies
     const advFeeds = await loadAdvanceFeeds(c);
@@ -80,6 +87,7 @@ export const home = async function () {
       { news, boxoffice, reviews },
       globalTracking,
       await safeComingSoon([]),
+      liveCarried,
     );
   } catch (e) {
     console.error(e);
@@ -101,6 +109,7 @@ function renderHome(
   editorial,
   globalTracking,
   soonAll,
+  liveCarried,
 ) {
   // Advance batch minus anything now live in daily, plus the live titles â€”
   // daily cards win. Sorted by gross.
@@ -113,7 +122,7 @@ function renderHome(
   const topMovies = merged.slice(0, 5);
   const leadMovie = topMovies[0];
   // numbers for the three home cards
-  const liveList = (daily && daily.movies) || [];
+  const liveList = [...((daily && daily.movies) || []), ...(liveCarried || [])];
   const liveCount = liveList.length;
   const liveTop = liveList.slice().sort((a, b) => b.gross - a.gross)[0];
   const advOnly = mergeFeeds(advFeeds, null, null).sort((a, b) => b.mv.gross - a.mv.gross);
