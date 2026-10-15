@@ -17,10 +17,32 @@ export function buildExportCard(section, sectionTitle, A) {
     clone.querySelectorAll(".perf-title").forEach((t) => (t.textContent = sectionTitle));
 
   const sc = m.scope || null; // state / city drill-down
-  const pills = [...(m.langs || []), m.runtime || "", ...(m.genres || []).slice(0, 2)]
-    .filter((x) => x && !/^unknown$/i.test(String(x).trim()))
-    .map((t) => ({ t }));
-  if (sc) pills.unshift({ t: sc.name, accent: true });
+  const langs = (m.langs || []).filter((x) => x && !/^unknown$/i.test(String(x).trim()));
+  const fmts = m.formats || [];
+  // chips: (area) + languages (original first, gold) + formats - like the page hero
+  const langChip =
+    langs.length > 2 ? langs.slice(0, 2).join(", ") + ", +" + (langs.length - 2) : langs.join(", ");
+  const chips = [
+    ...(sc ? [{ t: sc.name, accent: true }] : []),
+    ...(langChip ? [{ t: langChip }] : []),
+    ...(fmts.length ? [{ t: fmts.join(", ").toUpperCase() }] : []),
+  ];
+  const facts = [
+    ["Genre", (m.genres || []).join(", ")],
+    ["Runtime", m.runtime],
+    ["Certification", m.certification],
+  ].filter(([, v]) => v);
+
+  // the same "India gross" headline the page shows (set by setIndiaGross)
+  const ig = !sc && m.india && m.india.value != null ? m.india : null;
+  let igAmount = "";
+  let igUnit = "";
+  if (ig) {
+    const txt = inr(ig.value);
+    const i = txt.lastIndexOf(" ");
+    igAmount = i > 0 ? txt.slice(0, i) : txt;
+    igUnit = i > 0 ? txt.slice(i + 1) : "";
+  }
 
   // stat tiles: explicit stats (global, in $) or the rupee KPI of a movie
   const stats =
@@ -31,20 +53,33 @@ export function buildExportCard(section, sectionTitle, A) {
         : k.gross != null
           ? [
               { label: "Gross", value: inr(k.gross), accent: true },
-              // live tracking: the running India total up to this day
-              ...(k.indiaGross != null
+              // no separate tile when the headline above already shows it
+              ...(k.indiaGross != null && !ig
                 ? [{ label: m.indiaLabel || "India Gross", value: inr(k.indiaGross), accent: true }]
                 : []),
-              { label: "Tickets", value: num(k.sold) },
+              {
+                label: "Tickets",
+                value: num(k.sold),
+                sub: k.seats ? num(k.seats) + " seats" : "",
+              },
               { label: "Shows", value: num(k.shows) },
               // the full day strip, so the summary download needs no second copy
               ...(k.theatres != null
                 ? [
                     { label: "Theatres", value: num(k.theatres) },
-                    { label: "Cities", value: num(k.cities) },
-                    { label: "Occupancy", value: pct(k.occupancy) },
-                    { label: "Fast-filling", value: num(k.fastfilling) },
-                    { label: "Housefull", value: num(k.housefull), accent: true },
+                    {
+                      label: "Cities",
+                      value: num(k.cities),
+                      sub: k.states ? num(k.states) + " states" : "",
+                    },
+                    { label: "Occupancy", value: pct(k.occupancy), sub: "weighted avg" },
+                    { label: "Fast-filling", value: num(k.fastfilling), sub: "50-98%" },
+                    {
+                      label: "Housefull",
+                      value: num(k.housefull),
+                      accent: true,
+                      sub: "\u2265 98%",
+                    },
                   ]
                 : []),
             ]
@@ -74,17 +109,45 @@ export function buildExportCard(section, sectionTitle, A) {
         h("div", { class: "exp-mode" }, m.ctxLabel || ""),
       ),
       h("h1", { class: "exp-movie" }, m.title || ""),
-      pills.length
+      chips.length
         ? h(
             "div",
             { class: "exp-pills" },
-            ...pills.map((p) =>
+            ...chips.map((p) =>
               h("span", { class: "exp-pill" + (p.accent ? " accent" : "") }, p.t),
             ),
           )
         : null,
-      h("h2", { class: "exp-headline" }, (m.ctxLabel || "") + " breakdown"),
-      h("div", { class: "exp-section" }, sc ? sc.name + "  ›  " + sectionTitle : sectionTitle),
+      facts.length
+        ? h(
+            "div",
+            { class: "exp-facts" },
+            ...facts.map(([l, v]) =>
+              h("div", { class: "exp-fact" }, h("span", null, l), h("b", null, v)),
+            ),
+          )
+        : null,
+      ig
+        ? h(
+            "div",
+            { class: "exp-india" },
+            h("b", { class: "mi-v" }, igAmount, igUnit ? h("small", null, igUnit) : null),
+            h(
+              "span",
+              { class: "mi-l" },
+              ig.label,
+              ig.day ? " \u00b7 " : "",
+              ig.day ? h("em", null, ig.day) : null,
+              ig.running ? " running" : "",
+            ),
+          )
+        : null,
+      h(
+        "div",
+        { class: "exp-caption" },
+        (sc ? sc.name + "  \u203a  " : "") +
+          [m.ctxLabel, sectionTitle].filter(Boolean).join("  \u00b7  "),
+      ),
       sc && stats.length ? h("div", { class: "exp-stats-cap" }, sc.name + " · total") : null,
       stats.length
         ? h(
@@ -96,6 +159,7 @@ export function buildExportCard(section, sectionTitle, A) {
                 { class: "exp-stat" + (s.accent ? " accent" : "") },
                 h("span", { class: "exp-stat-l" }, s.label),
                 h("b", { class: "exp-stat-v" }, s.value),
+                s.sub ? h("span", { class: "exp-stat-s" }, s.sub) : null,
               ),
             ),
           )
@@ -129,7 +193,7 @@ export function buildExportCard(section, sectionTitle, A) {
     { class: "exp-frame" },
     h(
       "div",
-      { class: "exp-card" },
+      { class: "exp-card" + (summaryOnly ? " summary" : "") },
       hero,
       h(
         "div",

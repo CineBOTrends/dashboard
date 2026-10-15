@@ -37,7 +37,11 @@ export function renderTrackTab(body, s, movie) {
     // date (kpi.indiaGross). It is booking value, not box office - say so.
     setIndiaGross(movie.kpi.indiaGross != null ? movie.kpi.indiaGross : movie.kpi.gross, {
       label: "India advance gross",
-      day: isOpeningDate(movie, date) ? "Opening day" : "up to " + ymdShort(date),
+      // how many advance days are in the running total
+      day: (() => {
+        const n = dates.filter((d) => d <= date).length || 1;
+        return n + (n === 1 ? " day" : " days");
+      })(),
     });
   } else setIndiaGross(null);
 

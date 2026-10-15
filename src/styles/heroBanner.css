@@ -101,3 +101,25 @@
 @media (max-width: 720px) {
   .movie-hero .mh-india { grid-column: 1 / -1; grid-row: 2; margin: 2px 0 0; }
 }
+/* ---- hero v6: compact chips, India gross card, Live tracking link ---- */
+.movie-hero .chips .chip { padding: 4px 11px; font-size: 11px; }
+.movie-hero .chips .fmt-chip { text-transform: uppercase; letter-spacing: .03em; }
+.movie-hero .mh-india {
+  justify-self: start; align-items: baseline;
+  padding: 14px 24px; border: 1px solid rgba(255,176,0,.32); border-radius: 14px;
+  background: rgba(14,12,9,.6);
+}
+.movie-hero .mh-india:empty { display: none; padding: 0; border: 0; }
+.movie-hero .mh-live {
+  position: absolute; top: 16px; right: 18px; z-index: 4;
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+  border-radius: 999px; border: 1px solid var(--brand-line);
+  background: rgba(14,12,9,.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  color: var(--brand); font-size: 13px; font-weight: 700; text-decoration: none;
+  transition: background .15s ease, border-color .15s ease;
+}
+.movie-hero .mh-live:hover { background: var(--brand-soft); border-color: var(--brand); }
+.movie-hero .mh-live .live-dot { margin: 0; }
+@media (max-width: 720px) {
+  .movie-hero .mh-live { top: 12px; right: 12px; padding: 6px 11px; font-size: 12px; }
+}

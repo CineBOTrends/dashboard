@@ -307,3 +307,45 @@ table.bo.cities td:nth-child(2) { width: 32%; }   /* give city the room back */
 /* 7+ stat tiles (India day strip): a tidy 4-column grid instead of a ragged wrap */
 .exp-stats.many { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .exp-stats.many .exp-stat-v { font-size: 20px; }
+/* ---------- hero v5: the same design as the page hero ---------- */
+.exp-hero { min-height: 0; }
+.exp-hero-r { flex: 0 0 380px; }
+.exp-hero-l { justify-content: flex-start; padding: 28px 34px 26px 6px; }
+.exp-pills { margin-top: 12px; }
+.exp-facts { display: flex; flex-wrap: wrap; gap: 8px 30px; margin-top: 14px; }
+.exp-fact { min-width: 0; }
+.exp-fact span { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.exp-fact b { display: block; margin-top: 3px; font-size: 16px; font-weight: 500; color: var(--ink); }
+.exp-india { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; margin-top: 18px; }
+.exp-india .mi-v { font-family: var(--mono); font-size: 46px; font-weight: 700; line-height: 1; letter-spacing: -.04em; color: var(--brand); }
+.exp-india .mi-v small { margin-left: 6px; font-size: .42em; letter-spacing: 0; color: var(--ink-2); }
+.exp-india .mi-l { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.exp-india .mi-l em { font-style: normal; color: var(--brand); }
+.exp-caption {
+  margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--brand);
+}
+.exp-stat-s { font-size: 11px; color: var(--muted); }
+.exp-hero .exp-stats { margin-top: 12px; }
+.exp-hero .exp-meta { text-align: right; padding-top: 12px; }
+/* summary-only downloads: the hero is the whole card - no empty band under it */
+.exp-card.summary .exp-inner { padding: 0 28px 4px; }
+.exp-card.summary .exp-wm { margin-top: 18px; padding-top: 16px; padding-bottom: 12px; }
+
+/* hero v6: India gross as a bordered card, compact chips */
+.exp-india {
+  align-self: flex-start; padding: 14px 26px; border: 1px solid rgba(255,176,0,.32);
+  border-radius: 14px; background: rgba(14,12,9,.6);
+}
+.exp-pill { padding: 4px 12px; font-size: 11px; }
+
+/* India gross card: fixed width + no wrapping. Its width used to come from the
+   live layout (fit-content), but the PNG is drawn with the real web fonts, whose
+   caption is wider - so the caption wrapped out of the box onto the next line
+   and ran into the row below. A fixed width and one line can't disagree. */
+.exp-india {
+  display: flex; flex-wrap: nowrap; align-items: baseline; gap: 14px;
+  width: 600px; max-width: 100%; box-sizing: border-box;
+}
+.exp-india .mi-v, .exp-india .mi-l { flex: 0 0 auto; white-space: nowrap; }
+.exp-caption { white-space: nowrap; }

@@ -200,12 +200,12 @@ async function bakeStub(card) {
     // The rest of the stub stays transparent so the backdrop shows through.
     // FIXED-size 3:4 card, vertically centred: the hero can be any height and
     // the poster stays the same size (it used to stretch with the hero).
-    const CARD_W = 270; // bigger poster: fills most of the 300px stub (3:4)
-    const CARD_H = 340;
+    const CARD_W = 356; // fills most of the 380px stub (3:4), top-aligned like the page hero
+    const CARD_H = 475;
     const pw = Math.min(CARD_W, w - 24);
-    const ph = Math.min(Math.round((pw * CARD_H) / CARD_W), h - 24);
+    const ph = Math.min(Math.round((pw * CARD_H) / CARD_W), h - 56);
     const px = PAD + Math.round((w - pw) / 2) + (PERF ? 4 : 0);
-    const py = Math.round((h - ph) / 2);
+    const py = 28;
     const rr = (x, y, ww, hh, r) => {
       ctx.beginPath();
       ctx.moveTo(x + r, y);

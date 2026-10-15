@@ -145,7 +145,11 @@ export const movie = async function (p) {
       }
     }
 
+    // newest day this film has live (daily) tracking for - feeds the
+    // "Live tracking" link on its Advance page
+    const liveDate = mineDay && mineDay.length ? [...mineDay].sort().pop() : null;
     renderMovie({
+      liveDate,
       c,
       slug,
       tab,
@@ -164,8 +168,21 @@ export const movie = async function (p) {
   }
 };
 
+// Every language the film is tracked in (dataset meta only lists the original
+// one), biggest gross first: Tamil, Telugu, Hindi, Kannada.
+function langsByGross(meta, movie) {
+  const all = [
+    ...new Set([...((meta && meta.languages) || []), ...((movie && movie.languages) || [])]),
+  ];
+  const idx = new Map(all.map((l, i) => [l, i]));
+  const gross = new Map(
+    ((movie && movie.languageSummary) || []).map((x) => [x.language, +x.gross || 0]),
+  );
+  return all.sort((a, b) => (gross.get(b) || 0) - (gross.get(a) || 0) || idx.get(a) - idx.get(b));
+}
+
 function renderMovie(s) {
-  const { c, slug, tab, mode, date, dates, stateName, cityName, movie, hist } = s;
+  const { c, slug, tab, mode, date, dates, stateName, cityName, movie, hist, liveDate } = s;
   const title = (movie && movie.title) || (hist && hist.title) || slug;
 
   // breadcrumb
@@ -215,8 +232,10 @@ function renderMovie(s) {
   // movie hero
   const meta = (movie && movie.meta) || {};
   const poster = posterEl(title, slug);
-  const langs =
-    (meta.languages && meta.languages.length ? meta.languages : movie && movie.languages) || [];
+  // The dataset meta lists only the original language (Hindi); the tracked data
+  // has every language the film is on sale in (Hindi, Kannada, Tamil, Telugu).
+  // Original language first, then the rest.
+  const langs = langsByGross(meta, movie);
   const fmts = (movie && movie.formats) || [];
   const genres = meta.genres || [];
   const hero = h(
@@ -235,8 +254,19 @@ function renderMovie(s) {
       h(
         "div",
         { class: "chips" },
-        ...langs.map((l) => h("span", { class: "chip" }, l)),
-        ...fmts.map((f) => h("span", { class: "chip plain" }, f)),
+        // compact: "Tamil, Telugu, +2" and one chip for all formats
+        langs.length
+          ? h(
+              "span",
+              { class: "chip", title: langs.join(", ") },
+              langs.length > 2
+                ? langs.slice(0, 2).join(", ") + ", +" + (langs.length - 2)
+                : langs.join(", "),
+            )
+          : null,
+        fmts.length
+          ? h("span", { class: "chip plain fmt-chip", title: fmts.join(", ") }, fmts.join(", "))
+          : null,
         meta.likes ? h("span", { class: "chip solid" }, icon("heart"), " " + meta.likes) : null,
       ),
       h(
@@ -245,10 +275,22 @@ function renderMovie(s) {
         mi("Genre", genres.length ? genres.join(", ") : "Not in dataset", !genres.length),
         mi("Runtime", meta.runTime || "Not in dataset", !meta.runTime),
         mi("Certification", meta.certification || "Not in dataset", !meta.certification),
-        mi("Languages", langs.join(", ") || "—"),
-        mi("Formats", fmts.join(", ") || "—"),
       ),
     ),
+    // Advance page -> the same film's Live Tracking page (only once it has daily data)
+    tab === "advance" && liveDate
+      ? h(
+          "a",
+          {
+            class: "mh-live",
+            href: `/movie/${enc(slug)}/daily/${liveDate}`,
+            title: "Open live tracking for " + title,
+          },
+          h("span", { class: "live-dot" }),
+          "Live tracking",
+          icon("arrow-right"),
+        )
+      : null,
     // India gross headline (live tracking) is filled in by the tab renderers
     h("div", { class: "mh-india" }),
     // day KPI strip is placed here by renderTrackTab (banner layout)
@@ -295,9 +337,9 @@ function renderMovie(s) {
     title,
     ctxLabel,
     date,
-    langs:
-      (dmeta.languages && dmeta.languages.length ? dmeta.languages : movie && movie.languages) ||
-      [],
+    langs: langsByGross(dmeta, movie),
+    formats: (movie && movie.formats) || [],
+    certification: dmeta.certification || "",
     genres: dmeta.genres || [],
     runtime: dmeta.runTime || dmeta.runtime || "",
     poster: { thumb: posterUrl(slug, "thumb"), bg: posterUrl(slug, "bg") },
