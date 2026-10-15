@@ -3,16 +3,10 @@ import { block } from "../../components/block.js";
 import { dlBtn } from "../../components/dlBtn.js";
 import { setIndiaGross } from "../../components/indiaGross.js";
 import { milestones } from "../../components/milestones.js";
-import { runShape } from "../../components/runShape.js";
+import { runShapeBlock } from "../../components/runShape.js";
 import { stateMsg } from "../../components/states.js";
 import { citiesPanel, citiesTable, formatGrid, languageGrid } from "../../components/tables.js";
-import {
-  dayNumber,
-  isOpeningDate,
-  isPremiereDate,
-  openingDay,
-  ymdShort,
-} from "../../core/dates.js";
+import { dayNumber, isOpeningDate, isPremiereDate, openingDay } from "../../core/dates.js";
 import { h, icon } from "../../core/dom.js";
 import { fmtDate, fmtUpdated, inr, num, pct } from "../../core/format.js";
 import { enc, go } from "../../core/router.js";
@@ -101,28 +95,12 @@ export function renderTrackTab(body, s, movie) {
 
   parts.push(performanceBreakdown(s, movie));
 
-  // Advance: gross per release date as bars (data/advance/history/<slug>.json,
-  // days[].gross), after the breakdown, same look as the Historical run shape
-  if (tab === "advance" && hist && Array.isArray(hist.days) && hist.days.length) {
-    const days = hist.days
-      .map((d) => ({ ymd: String(d.date || d.ymd || "").replace(/-/g, ""), gross: +d.gross || 0 }))
-      .filter((d) => /^\d{8}$/.test(d.ymd))
-      .sort((a, b) => a.ymd.localeCompare(b.ymd));
-    if (days.length)
-      parts.push(
-        block(
-          "Run Shape",
-          "Advance gross by release date",
-          runShape(
-            days.map((d) => ({
-              label: ymdShort(d.ymd),
-              gross: d.gross,
-              live: false,
-            })),
-            "release date",
-          ),
-        ),
-      );
+  // Run shape, kept separate per tab:
+  //  Advance -> gross per release date (data/advance/history/<slug>.json)
+  //  Daily   -> gross per day up to the viewed day (data/daily/history/<slug>.json)
+  if (hist && (tab === "advance" || tab === "daily")) {
+    const rs = runShapeBlock(tab, hist, { upTo: date });
+    if (rs) parts.push(rs);
   }
 
   body.replaceChildren(...parts);

@@ -407,8 +407,8 @@ export function renderHistorical(body, hist, title, movie) {
       // Run shape: gross per day as bars, right under the day-wise table
       parts.push(
         block(
-          "Run Shape",
-          "Gross by day",
+          "Historical Run Shape",
+          "Gross by day, full run",
           runShape(
             sel.map((d, i) => ({
               label: d.premiere ? "P" : "D" + (d.day || i + 1),

@@ -129,10 +129,23 @@ export const movie = async function (p) {
       }
       // flag it so the UI can say "today isn't in yet, showing <date>"
       if (movie && date !== wanted) staleDate = wanted;
-      // Advance view: the per-release-date history feeds the run-shape bars
+      // Advance view: one bar per advance (release) date, read from that
+      // date's own advance feed (kpi.gross). The advance history file can
+      // hold a single day only, so it is just the fallback.
       if (movie && tab === "advance") {
+        hist = await advanceByDate(slug, dates);
+        if (!hist) {
+          try {
+            hist = await Data.history("advance", slug);
+          } catch (e) {
+            hist = null;
+          }
+        }
+      }
+      // Daily view: per-day gross from the DAILY history feed
+      if (movie && tab === "daily") {
         try {
-          hist = await Data.history("advance", slug);
+          hist = await Data.history("daily", slug);
         } catch (e) {
           hist = null;
         }
@@ -167,6 +180,24 @@ export const movie = async function (p) {
     mount(fetchError(e));
   }
 };
+
+// Advance run shape data: { days: [{ date, gross }] }, one entry per advance
+// date this film has, each from data/advance/<date>/.../<slug> (kpi.gross).
+async function advanceByDate(slug, dates) {
+  const rows = await Promise.all(
+    dates.map(async (d) => {
+      try {
+        const mv = await Data.movie("advance", d, slug);
+        const k = mv && mv.kpi;
+        return k ? { date: d, gross: +k.gross || 0 } : null;
+      } catch (e) {
+        return null;
+      }
+    }),
+  );
+  const days = rows.filter(Boolean);
+  return days.length ? { days } : null;
+}
 
 // Every language the film is tracked in (dataset meta only lists the original
 // one), biggest gross first: Tamil, Telugu, Hindi, Kannada.
