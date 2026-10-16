@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-17 00:07",
+  "generated": "2026-10-17 00:59",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -51,7 +51,8 @@
     "daily": {
       "jailer-2": [
         "20261015",
-        "20261016"
+        "20261016",
+        "20261017"
       ],
       "ranabaali": [
         "20261016"
