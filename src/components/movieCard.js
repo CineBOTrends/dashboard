@@ -45,6 +45,7 @@ export function posterEl(title, slug) {
 
 export function movieCard(mv, mode, date, opts) {
   opts = opts || {};
+  const gross = opts.advance && mv.indiaGross != null ? mv.indiaGross : mv.gross;
   const poster = posterEl(mv.title, mv.slug);
   poster.append(
     h(
@@ -100,12 +101,20 @@ export function movieCard(mv, mode, date, opts) {
             mv.runTime ? h("span", { class: "rt" }, mv.runTime) : null,
           )
         : null,
-      mv.gross != null
+      gross != null
         ? h(
             "div",
             { class: "card-gross" },
-            h("span", { class: "cg-label" }, mode === "daily" ? "Today's Gross" : "Gross"),
-            h("span", { class: "cg-val" }, inr(mv.gross || 0)),
+            h(
+              "span",
+              { class: "cg-label" },
+              opts.advance
+                ? "Cumulative Advance Gross"
+                : mode === "daily"
+                  ? "Today's Gross"
+                  : "Gross",
+            ),
+            h("span", { class: "cg-val" }, inr(gross || 0)),
           )
         : null,
       mv.eventCode ? h("div", { class: "evcode" }, icon("ticket"), mv.eventCode) : null,

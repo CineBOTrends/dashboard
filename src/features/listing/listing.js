@@ -130,7 +130,7 @@ async function advanceScreen() {
       title: e.mv.title,
       langs: e.mv.languages || [],
       fmts: e.mv.formats || [],
-      gross: e.mv.gross || 0,
+      gross: e.mv.indiaGross ?? e.mv.gross ?? 0,
       occ: e.mv.occupancy || 0,
       shows: e.mv.shows || 0,
       card: () => movieCard(e.mv, "advance", e.date, { advance: true }),

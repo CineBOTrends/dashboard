@@ -95,7 +95,8 @@ function renderAllMovies(c, advFeeds, daily, dailyDate, global, soon) {
           ? b.mv.occupancy - a.mv.occupancy
           : key === "shows"
             ? b.mv.shows - a.mv.shows
-            : b.mv.gross - a.mv.gross,
+            : (b.mode === "advance" ? (b.mv.indiaGross ?? b.mv.gross) : b.mv.gross) -
+              (a.mode === "advance" ? (a.mv.indiaGross ?? a.mv.gross) : a.mv.gross),
       );
     // coming soon follows the tracked titles; hidden by language/format filters
     // (it has neither) but searchable by title
