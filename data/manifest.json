@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-17 06:05",
+  "generated": "2026-10-17 07:05",
   "timezone": "Asia/Kolkata",
   "modes": {
     "advance": {
@@ -55,7 +55,8 @@
         "20261017"
       ],
       "ranabaali": [
-        "20261016"
+        "20261016",
+        "20261017"
       ]
     },
     "advance": {
